@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Case.cs" />
     <Compile Include="DBRepresentation.cs" />
+    <Compile Include="DecisionRepresentation.cs" />
     <Compile Include="Procedure.cs" />
     <Compile Include="Stub.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
