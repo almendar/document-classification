@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BagOfWordsClassificator.cs" />
     <Compile Include="Case.cs" />
     <Compile Include="DBRepresentation.cs" />
     <Compile Include="DecisionRepresentation.cs" />
@@ -48,6 +49,7 @@
     <Compile Include="Stub.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextExtraction.cs" />
+    <Compile Include="VectorOperations.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="amodDataSet.xsc">

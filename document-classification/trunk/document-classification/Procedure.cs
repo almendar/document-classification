@@ -11,6 +11,12 @@ namespace document_classification
     class Procedure : Dictionary<string, double>
     {
 
+
+        public Procedure(int procedureId)
+        {
+            this.procedureId = procedureId;
+        }
+
         /// <summary>
         /// This procedure id from DB
         /// </summary>
@@ -52,7 +58,7 @@ namespace document_classification
             }
         }
 
-        public void addCases(AllCases allCases)
+        public void addCase(AllCases allCases)
         {
             foreach (Case singleCase in allCases.Values)
             {
