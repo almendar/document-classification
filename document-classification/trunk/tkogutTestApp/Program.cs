@@ -11,19 +11,11 @@ namespace tkogutTestApp
     {
         static void Main(string[] args)
         {
-            char[] splitChars = new char[] {
-                ' ',
-                ',',
-                '.',
-                '\n'};
+          
+            String sampleText = "   Babka jaga, poszła do domu. Zrobła \"kotelty\" i w sumie to bezsensu. !!!";
+            String[] tokens = TextExtraction.GetTextTokens(sampleText);
 
-
-            String text = ".aklsadkla fclaksc a;vcas;c.a';.cvac as c as c as ckasckla slkc aslkc aslkc     asc.";
-            text = text.Trim();
-
-            String [] literals = text.Split(splitChars,StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (String s in literals)r
+            foreach (String s in tokens)
             {
                 Console.Out.WriteLine("#"+s+"#");
 
