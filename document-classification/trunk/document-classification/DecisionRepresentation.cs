@@ -4,12 +4,18 @@ using System.Text;
 
 namespace document_classification
 {
-    class DecisionRepresentationPeople
+    class DecisionRepresentationPeople : Dictionary<string, double>
     {
+        private int procedureId;
+        private int phaseId;
+        private int nextPhaseId;
     }
 
 
-    class DecisionRepresentationPhase
+    class DecisionRepresentationPhase :  Dictionary<string, double>
     {
+        private int procedureId;
+        private int personId;
+        private int nextPersonId;
     }
 }
