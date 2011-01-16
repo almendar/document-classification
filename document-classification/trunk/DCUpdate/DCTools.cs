@@ -6,6 +6,7 @@ namespace document_classification
 {
     class DCTools
     {
+        /*
         public void save()
         {
             DBRepresentation dBRepresentation = DBRepresentation.Instance;
@@ -18,5 +19,6 @@ namespace document_classification
         {
             return 0;
         }
+        */
     }
 }

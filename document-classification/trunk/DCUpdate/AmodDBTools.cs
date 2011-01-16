@@ -6,13 +6,10 @@ using System.Configuration;
 using System.Web;
 using System.Data.Common;
 using System.Data.SqlClient;
-using System.Math;
-using document_classification.Case;
-using document_classification.AllCases;
 
 namespace document_classification
 {
-    public sealed class AmodDBTools
+    public class AmodDBTools
     {
         static readonly AmodDBTools instance = new AmodDBTools();
 
@@ -95,7 +92,7 @@ namespace document_classification
                 if (!data.ContainsKey((int)rdr["ftsCaseId"]))
                     data.Add((int)rdr["ftsCaseId"], extractDocument((string)rdr["ftsText"]));
                 else
-                    extractDocument((string)rdr["ftsText"], data[(int)rdr["ftsCaseId"]];
+                    extractDocument((string)rdr["ftsText"], data[(int)rdr["ftsCaseId"]]);
                 lastRecord = rdr["ftsModified"].ToString();
             }
             return data;
@@ -108,12 +105,6 @@ namespace document_classification
                                where caseProcedurId =" + caseId.ToString() +
                                   ";";
             return (int)executeQuery(checkProcedureQuery)[0];
-        }
-        public void update(DBRepresentation dBRepresentation)
-        {
-            connect();
-            DbDataReader rdr = getNewData("");
-            disconnect();
         }
         public void update()
         {
@@ -287,7 +278,7 @@ namespace document_classification
             logD = Math.Log10(D);
         }
     }
-    private class IDFData
+    public class IDFData
     {
         private double idf;
         private double logdf;
