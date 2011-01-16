@@ -45,13 +45,16 @@ namespace document_classification
     /// </summary>
     class AllCases : Dictionary<int, Case>
     {
-        private static AllCases instance = null;
+      
+        
+        static readonly AllCases instance = new AllCases();
+        static AllCases()
+        {
+        }
         public static AllCases Instance
         {
             get
             {
-                if (instance == null)
-                    instance = new AllCases();
                 return instance;
             }
         }
