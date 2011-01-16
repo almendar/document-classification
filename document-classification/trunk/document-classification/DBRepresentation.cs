@@ -14,14 +14,6 @@ namespace document_classification
                 return instance;
             }
         }
-        public string lastRecordDate
-        {
-            get
-            {
-                return lastRecordDate;
-            }
-            set;
-        }
         private DBRepresentation() : base()
         {
         }

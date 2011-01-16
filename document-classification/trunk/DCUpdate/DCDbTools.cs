@@ -5,13 +5,18 @@ using MySql.Data.MySqlClient;
 
 namespace document_classification
 {
-    class DCDbTools
+    public class DCDbTools
     {
         private MySqlConnection conn;
-
-        public DBRepresentation getDBRepresentation() { return null; }
-        public AllCases getAllCases() { return null; }
-        private void connect();
-        private void disconnect();
+/*
+        public DBRepresentation getDBRepresentation() 
+        { 
+            return null; 
+        }
+        public AllCases getAllCases() 
+        { 
+            return null; 
+        }
+        */
     }
 }

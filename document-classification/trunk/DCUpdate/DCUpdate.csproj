@@ -58,7 +58,6 @@
     </Compile>
     <Compile Include="AmodDBTools.cs" />
     <Compile Include="DCDbTools.cs" />
-    <Compile Include="DCSettings.cs" />
     <Compile Include="DCTools.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

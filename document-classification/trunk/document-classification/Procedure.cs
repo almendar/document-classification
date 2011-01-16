@@ -10,8 +10,6 @@ namespace document_classification
     /// </summary>
     class Procedure : Dictionary<string, double>
     {
-
-
         public Procedure(int procedureId)
         {
             this.procedureId = procedureId;
@@ -21,12 +19,6 @@ namespace document_classification
         /// This procedure id from DB
         /// </summary>
         private readonly int procedureId;
-
-        public Procedure(int procedureId)
-        {
-            this.procedureId = procedureId;
-        }
-
 
         public int ProcedureId
         {
@@ -69,7 +61,6 @@ namespace document_classification
                 }
             }
         }
-
     }
 
     /// <summary>
@@ -78,5 +69,28 @@ namespace document_classification
     /// </summary>
     class AllProcedures : Dictionary<int, Procedure>
     {
+        private static readonly AllProcedures instance = new AllProcedures();
+        public static AllProcedures Instance
+        {
+            get
+            {
+                return instance;
+            }
+        }
+        private AllProcedures()
+        {
+        }
+        private void rebuild(AllCases allCases)
+        {
+            this.Clear();
+            foreach (Case tempCase in allCases.Values)
+            {
+                if (!this.ContainsKey(tempCase.ProcedureId))
+                {
+                    Add(tempCase.ProcedureId, new Procedure(tempCase.ProcedureId));
+                }
+                this[tempCase.ProcedureId].addCase(tempCase);
+            }
+        }
     }
 }
