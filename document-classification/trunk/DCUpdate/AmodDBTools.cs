@@ -121,6 +121,7 @@ namespace document_classification
             Dictionary<int, Dictionary<string, int> > data = createDictionaryFromReader(rdr);
             
             // splitting data and updating AllCases structure
+            List<string> newWords = new List<string>();
             Dictionary<int, Dictionary<string, int>> newCases = new Dictionary<int, Dictionary<string, int>>();
             Dictionary<int, Dictionary<string, int>> oldCasesNewWords = new Dictionary<int, Dictionary<string, int>>();
             Dictionary<int, Dictionary<string, int>> oldCasesOldWords = new Dictionary<int, Dictionary<string, int>>();
@@ -142,6 +143,9 @@ namespace document_classification
                             oldCasesNewWords[caseId].Add(word, data[caseId][word]);
                             CasesTF.Instance[caseId].Add(word, oldCasesNewWords[caseId][word]);
                             AllCases.Instance[caseId].Add(word, 0);
+                            if (!newWords.Contains(word))
+                                newWords.Add(word);
+
                         }
                     }
                 }
@@ -157,14 +161,14 @@ namespace document_classification
             updateDBRepresentation(newCases);
             updateDBRepresentation(oldCasesNewWords);
 
-            // recalculating IDF
-            IDFcalculaction.Instance.setNumberOfCases(AllCases.Instance.getNumberOfCasesInDB() + newCases.Count);
-            IDFcalculaction.Instance.calculateIDF();
 
             // recalculate TF-IDF
             // if new cases appeared recalculate all 
             if (newCases.Count != 0)
             {
+                // recalculating IDF
+                IDFcalculaction.Instance.setNumberOfCases(AllCases.Instance.getNumberOfCasesInDB() + newCases.Count);
+                IDFcalculaction.Instance.calculateIDF();
                 foreach (Case tempCase in AllCases.Instance.Values)
                 {
                     foreach (string word in tempCase.Keys)
@@ -185,11 +189,15 @@ namespace document_classification
                 }
 
                 // for new words - recalculate all words that appeared in all cases
-                foreach (int caseId in oldCasesNewWords.Keys)
+                foreach (string word in newWords)
                 {
-                    foreach (string word in oldCasesNewWords[caseId].Keys)
+                    IDFcalculaction.Instance.calculateIDF(word);
+                    foreach (int caseId in AllCases.Instance.Keys)
                     {
-                        
+                        if (AllCases.Instance[caseId].ContainsKey(word))
+                        {
+                            AllCases.Instance[caseId][word] = calculateTFIDF(caseId, word);
+                        }
                     }
                 }
             }
