@@ -4,15 +4,13 @@ using System.Text;
 
 namespace document_classification
 {
-    class DBRepresentation : Dictionary<string, int>
+    public class DBRepresentation : Dictionary<string, int>
     {
-        private static DBRepresentation instance = null;
+        static readonly DBRepresentation instance = new DBRepresentation();
         public static DBRepresentation Instance
         {
             get
             {
-                if(instance == null)
-                    instance = new DBRepresentation();
                 return instance;
             }
         }

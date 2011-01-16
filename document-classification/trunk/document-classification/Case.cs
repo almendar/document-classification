@@ -43,10 +43,8 @@ namespace document_classification
     /// Represents all cases that can be found in the DB
     /// Keys are id of the case in the DB.
     /// </summary>
-    class AllCases : Dictionary<int, Case>
+    public class AllCases : Dictionary<int, Case>
     {
-      
-        
         static readonly AllCases instance = new AllCases();
         static AllCases()
         {
