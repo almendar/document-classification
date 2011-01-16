@@ -9,7 +9,20 @@ namespace document_classification
     /// </summary>
     class BagOfWordsTextClassifier
     {
-
+        #region Singleton stuff
+        static readonly BagOfWordsTextClassifier instance = new BagOfWordsTextClassifier();
+        public static BagOfWordsTextClassifier Instance
+        {
+            get
+            {
+                return instance;
+            }
+        }
+        static BagOfWordsTextClassifier()
+        {
+        }
+        #endregion
+        
         #region fields
         private int NumberOfCases;
         private DBRepresentation allWords = null;
@@ -18,29 +31,45 @@ namespace document_classification
         private AllDecisionsPhase PhaseDecisionData = null;
         private AllDecisionsPeople PeopleDecisionData = null;
 
+        /// <summary>
+        /// Maximum percentage of cases in which word can appear to be take into consideration
+        /// </summary>
         private const double MaximumFrequency = 0.9;
+
+        /// <summary>
+        /// How many words are being used in computation
+        /// </summary>
+        private int NumberOfMeaningfulWords;
+
+        /// <summary>
+        /// Number of procedures read from database
+        /// </summary>
+        private int numberOfProcedures;
 
         /// <summary>
         /// Threashold above which words are not taken into consideration.
         /// When wors appears in more documents that trheashold stand for
         /// word is being omited
         /// </summary>
-        private int wordThreashold = int.MaxValue;
+        private int wordThreshold = int.MaxValue;
 
         /// <summary>
         /// Maps word to column number.
-        /// Take into consideration that not evey word is present because of the threashold of the TFIDF.
+        /// Take into consideration that not evey word is present because of the threashold.
+        /// Only words that appeare in less than <see cref="MaximumFrequency"/> percentage of documents
+        /// will be taken into consideration
         /// </summary>
         private Dictionary<String, int> MapWordToColumn = null;
 
         //**********************************************************************//
         /// <summary>
-        /// Rows of this matrix represents procedures, columns are words.
+        /// Rows of this matrix represents procedures, columns are words <see cref="MapWordToColumn"/>.
         /// Values of this matrix are TFIDF of words in procedures.
         /// </summary>
         private double[][] ProcedureMatrix  = null;
+        
         /// <summary>
-        /// Table maps row of the <see cref="ProcedureMatrix"/>procedure matrix</see> to correspondent procedure id 
+        /// Table maps row of the <see cref="ProcedureMatrix"/> to correspondent procedure id 
         /// in the database.
         /// </summary>
         private int[] MapRowToProcedureId = null;
@@ -55,26 +84,26 @@ namespace document_classification
         private double[,,,] PeopleMatrix     = null;
         private int[,,] MapRowColumnToNextPersonId = null;
 
-        static readonly BagOfWordsTextClassifier instance = new BagOfWordsTextClassifier();
+
+        
 #endregion
         
-        static BagOfWordsTextClassifier()
-        {
-        }
 
         BagOfWordsTextClassifier()
         {
             ReadDataBase();
+            ComputeStatisticParams();
+            FetchMeaningfulWords();
             CreateDataMatrices();
         }
 
-        public static BagOfWordsTextClassifier Instance
+        private void ComputeStatisticParams()
         {
-            get
-            {
-                return instance;
-            }
+            this.numberOfProcedures = ProceduresSet.Keys.Count;
+            this.NumberOfMeaningfulWords = MapWordToColumn.Keys.Count; //vector length
         }
+
+
 
         private void CreateDataMatrices()
         {
@@ -94,7 +123,6 @@ namespace document_classification
         }
 
 
-
         /// <summary>
         /// Based on text tries to find right procedures for given text.
         /// Now returns only the best procedure ID.
@@ -107,10 +135,12 @@ namespace document_classification
             double[] textVector = CreateVectorFromText(textTokens);
             int bestProcedureIndice = int.MinValue;
             double bestSimilarity = double.PositiveInfinity;
-            for (int i = 0; i < ProcedureMatrix.Length; i++)
+            for (int i = 0; i < numberOfProcedures; i++)
             {
                 double [] checkedVector = ProcedureMatrix[i];
-                double similarity = 1 - VectorOperations.VectorsConsine(checkedVector, textVector);
+                //Cosine is 1 when 0 degree angel is between vectors
+                //so similarity will be 0 when vectors will have the same sense
+                double similarity = (1 - VectorOperations.VectorsConsine(checkedVector, textVector));
                 if (similarity < bestSimilarity)
                 {
                     bestSimilarity = similarity;
@@ -122,9 +152,26 @@ namespace document_classification
             return ret;
           }
 
+        public int[] NextStagePrediciton(string text)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public int[] NextPersonPrediction(string text)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Takes table of strings and count frequency of words in vector
+        /// that are listed in <see cref="MapWordToColumn"/>
+        /// </summary>
+        /// <param name="textTokens">Tokens from text</param>
+        /// <returns>Vector with document TF of words</returns>
         private double[] CreateVectorFromText(string[] textTokens)
         {
-            double [] vectorRep = new double[MapWordToColumn.Keys.Count];
+            double [] vectorRep = new double[NumberOfMeaningfulWords];
             foreach (String word in textTokens)
             {
                 if (!MapWordToColumn.ContainsKey(word))
@@ -136,27 +183,21 @@ namespace document_classification
             return vectorRep;
         }
 
-        public int[] NextPersonPrediction(string text)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int[] NextStagePrediciton(string text)
-        {
-            throw new NotImplementedException();
-        }
 
 
 
+        /// <summary>
+        /// Builds the <see cref="ProcedureMatrix"/> out of <see cref="ProceduresSet"/> for words
+        /// that are listed in <see cref="MapWordToColumn"/>
+        /// </summary>
         private void ProcedureMatrixBuild()
         {
-            int numberOfProcedures = ProceduresSet.Keys.Count;
-            int nrOfMeaningfulWords = MapWordToColumn.Keys.Count;//vector length
+
             //int nrOfProcedures = ProceduresSet.Keys.Count;
             ProcedureMatrix = new double[numberOfProcedures][];
             for (int h = 0; h < numberOfProcedures; h++)
             {
-                ProcedureMatrix[h] = new double[nrOfMeaningfulWords];
+                ProcedureMatrix[h] = new double[NumberOfMeaningfulWords];
             }
             int procedurIndex = 0;
             foreach (KeyValuePair<int, Procedure> kvp in ProceduresSet)
@@ -164,21 +205,23 @@ namespace document_classification
                 int procedurId = kvp.Key;
                 Procedure currentProcedure = kvp.Value;
                 MapRowToProcedureId[procedurIndex] = procedurId;
-                foreach (KeyValuePair<string, double> procedHashMap in currentProcedure)
+                foreach (KeyValuePair<string, double> textStatistic in currentProcedure)
                 {
-                    string word = procedHashMap.Key;
-                    double TFIDF = procedHashMap.Value;
+                    string word = textStatistic.Key;
+                    double TFIDF = textStatistic.Value;
+                    
+                    //Means word is not meaningful, and is not take into consideration.
                     if (!MapWordToColumn.ContainsKey(word))
                     {
                         continue;
                     }
                     else
                     {
-                        int wordIndex = MapWordToColumn[word];
+                        int wordIndex = MapWordToColumn[word]; //Find what is this word place in vector
                         ProcedureMatrix[procedurIndex][wordIndex] = TFIDF;
                     }
                 }
-                ++procedurIndex; //step to next procedure
+                ++procedurIndex; //increment procedure indice
             }
 
             
@@ -187,8 +230,7 @@ namespace document_classification
         private void NextPhaseMatrixBuild()
         {
             int nrOfDecisions = PhaseDecisionData.GetNrOfDecisions();
-            int nrOfWordsInVector = MapWordToColumn.Keys.Count;
-            PhaseMatrix = new double[nrOfDecisions, nrOfWordsInVector];
+            PhaseMatrix = new double[nrOfDecisions, NumberOfMeaningfulWords];
             MapRowToNextPhaseId = new int[nrOfDecisions];
             int indexer = 0;
             foreach (int procId in PhaseDecisionData.Keys)
@@ -230,24 +272,29 @@ namespace document_classification
 
         private void NextPersonMatrixBuild()
         {
+            throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Finds all words that frequency in documents is less than threashold
+        /// Finds all words that frequency in <see cref="CasesSet"/> is less than threashold
         /// </summary>
         private void FetchMeaningfulWords()
         {
-            int numberOfProcedures = ProceduresSet.Keys.Count;
-            this.wordThreashold = (int) Math.Floor((numberOfProcedures * MaximumFrequency));
+            this.wordThreshold = (int) Math.Floor((NumberOfCases * MaximumFrequency));
             int vectorIndice = 0;
             foreach(KeyValuePair<string, int> kvp in allWords)
             {
                 int documentFrequency = kvp.Value;
                 string word = kvp.Key;
-                if (documentFrequency > wordThreashold)
+                if (documentFrequency > wordThreshold)
+                {
                     continue;
-                MapWordToColumn.Add(word, vectorIndice);
-                vectorIndice += 1;
+                }
+                else
+                {
+                    MapWordToColumn[word] = vectorIndice;
+                    vectorIndice += 1;
+                }
             }
         }
         
