@@ -126,11 +126,11 @@ namespace document_classification
             Dictionary<int, Dictionary<string, int>> oldCasesOldWords = new Dictionary<int, Dictionary<string, int>>();
             foreach (int caseId in data.Keys)
             {
-                if(CassesTF.Instance.ContainsKey(caseId))
+                if(CasesTF.Instance.ContainsKey(caseId))
                 {
                     foreach(string word in data[caseId].Keys)
                     {
-                        if(CassesTF.Instance[caseId].ContainsKey(word))
+                        if(CasesTF.Instance[caseId].ContainsKey(word))
                             oldCasesOldWords.Add(caseId, data[caseId]);
                         else
                             oldCasesNewWords.Add(caseId, data[caseId]);
@@ -145,8 +145,34 @@ namespace document_classification
             updateDBRepresentation(oldCasesNewWords);
 
             // recalculating IDF
-            IDFcalculaction.Instance.calcuateIDF(
+            IDFcalculaction.Instance.setNumberOfCases(AllCases.Instance.getNumberOfCasesInDB() + newCases.Count);
+            IDFcalculaction.Instance.calculateIDF();
+
+            // update case TF
+            CasesTF.Instance.Add(newCases);
+            foreach (int caseId in oldCasesNewWords.Keys)
+            {
+                foreach(string word in oldCasesNewWords[caseId].Keys)
+                {
+                    CasesTF.Instance[caseId].Add(word, oldCasesNewWords[caseId][word]);
+                }
+            }
+            foreach (int caseId in oldCasesNewWords.Keys)
+            {
+                foreach(string word in oldCasesNewWords[caseId].Keys)
+                {
+                    CasesTF.Instance[caseId][word] += oldCasesNewWords[caseId][word];
+                }
+            }
+
+
             // update AllCasses
+
+            // new Cases - correct all parameteres
+            if(newCases.Count != 0)
+            {
+                
+            }
         }
         private void updateDBRepresentation(Dictionary<int, Dictionary<string, int> > data)
         {
@@ -168,17 +194,24 @@ namespace document_classification
             }
         }
     }
-    public class CassesTF : Dictionary<int, Dictionary<string, int>
+    public class CasesTF : Dictionary<int, Dictionary<string, int> >
     {
-        static readonly CassesTF instance = new CassesTF();
-        private CassesTF()
+        static readonly CasesTF instance = new CasesTF();
+        private CasesTF()
         {
         }
-        public static CassesTF Instance
+        public static CasesTF Instance
         {
             get
             {
                 return instance;
+            }
+        }
+        public void Add(Dictionary<int, Dictionary<string, int> > data)
+        {
+            foreach(int caseId in data.Keys)
+            {
+                Add(caseId, data[caseId]);
             }
         }
     }
@@ -201,7 +234,7 @@ namespace document_classification
         {
             this[word].LogDF = Math.Log10(newDf);    
         }
-        public void calculateIDF(int D)
+        public void calculateIDF()
         {
             this.D = D;
             logD = Math.Log10(D);
@@ -211,9 +244,15 @@ namespace document_classification
                 data.calculateIDF(logD);
             }
         }
-        public double calcuateIDF(string word)
+        public double calculateIDF(string word)
         {
             return this[word].calculateIDF(logD);
+        }
+    
+        public void setNumberOfCases(int D)
+        {
+            this.D = D;
+            logD = Math.Log10(D);
         }
     }
     private class IDFData
