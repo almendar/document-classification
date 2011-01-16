@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-using document_classification;
+
 
 
 namespace tkogutTestApp
@@ -11,20 +11,27 @@ namespace tkogutTestApp
     {
         static void Main(string[] args)
         {
-          
-            String sampleText = "   Babka jaga, poszła do domu. Zrobła \"kotelty\" i w sumie to bezsensu. !!!";
-            String[] tokens = TextExtraction.GetTextTokens(sampleText);
+            Dictionary<int, Dictionary<int, List<int>>> a = new Dictionary<int, Dictionary<int, List<int>>>();
+            a[1] = new Dictionary<int, List<int>>();
+            a[1][2] = new List<int>();
 
-            foreach (String s in tokens)
+            Console.Out.WriteLine(a[1][2].Count);
+
+
+            double[] b = new double[50];
+
+            for (int i = 0; i < b.Length; i++)
             {
-                Console.Out.WriteLine("#"+s+"#");
-
+                Console.Out.WriteLine(b[i]);
             }
 
-            Console.ReadKey
-                ();
+            int k = (int)Math.Floor((34 * 0.9d));
+            Console.Out.WriteLine(k);
+            Console.In.ReadLine();
+
+
+
         }
-
-
     }
+
 }

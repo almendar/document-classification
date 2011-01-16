@@ -74,7 +74,7 @@ namespace document_classification
 
     /// <summary>
     /// Represent all known procedures in the DB.
-    /// Keys are id's of the procedures stored in the DB.
+    /// Keys are IDs of the procedures stored in the DB.
     /// </summary>
     class AllProcedures : Dictionary<int, Procedure>
     {
