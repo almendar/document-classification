@@ -66,6 +66,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>amodDataSet.xsd</DependentUpon>
     </Compile>
+    <Compile Include="BagOfWordsClassificator.cs" />
     <Compile Include="Case.cs" />
     <Compile Include="AmodDBTools.cs" />
     <Compile Include="DBRepresentation.cs" />
@@ -79,8 +80,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Stub.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TextExtraction.cs" />
+    <Compile Include="VectorOperations.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="amodDataSet.xsc">
