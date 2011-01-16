@@ -61,7 +61,6 @@
     <Compile Include="DCSettings.cs" />
     <Compile Include="DCTools.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
