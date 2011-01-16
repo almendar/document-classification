@@ -57,15 +57,11 @@
       <DependentUpon>amodDataSet.xsd</DependentUpon>
     </Compile>
     <Compile Include="AmodDBTools.cs" />
-    <Compile Include="Case.cs" />
     <Compile Include="DCDbTools.cs" />
     <Compile Include="DCSettings.cs" />
     <Compile Include="DCTools.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="DBRepresentation.cs" />
-    <Compile Include="DecisionRepresentation.cs" />
-    <Compile Include="Procedure.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -89,6 +85,12 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\document-classification\document-classification.csproj">
+      <Project>{2050C229-9002-46FE-BD6D-9EB9ADE8475D}</Project>
+      <Name>document-classification</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
