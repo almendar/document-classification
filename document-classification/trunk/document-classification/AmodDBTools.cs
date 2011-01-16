@@ -70,11 +70,13 @@ namespace document_classification
                                  order by ftsModified;";
             return executeQuery(ftsQuery);
         }
+
         private DbDataReader executeQuery(String query)
         {
             DbCommand cmd = new MySqlCommand(query, conn);
             return(cmd.ExecuteReader());
         }
+
         private DbDataReader getNewData(String lastRecordDate)
         {
             string ftsQueryNewData = @"select *
@@ -83,6 +85,7 @@ namespace document_classification
                                 order by ftsModified;";
             return executeQuery(ftsQueryNewData);
         }
+
         public Dictionary<int, Dictionary<string, int> > createDictionaryFromReader(DbDataReader rdr)
         {
             Dictionary<int, Dictionary<string, int>> data = new Dictionary<int, Dictionary<string, int>>();
@@ -95,6 +98,11 @@ namespace document_classification
             }
             return data;
         }
+        private void disconnect()
+        {
+            conn.Close();
+        }
+
         public int checkProcedure(int caseId)
         {
             string checkProcedureQuery = @"select *
@@ -103,61 +111,12 @@ namespace document_classification
                                  ";";
             return (int)executeQuery(checkProcedureQuery)[0];
         }
+
         public void update(DBRepresentation dBRepresentation)
         {
             connect();
             DbDataReader rdr = getNewData("");
             disconnect();
-        }
-    }
-    public class IDFcalculaction : Dictionary<string, IDFData>
-    {
-        private int D;
-        private double logD;
-        public static IDFcalculaction instance = null;
-        public static IDFcalculaction Instance
-        {
-            get
-            {
-                if (instance == null)
-                    instance = new IDFcalculaction();
-                return instance;
-            }
-        }
-        private IDFcalculaction()
-        {
-        }
-        public double calculateIDF(string word)
-        {
-            return 0;
-        }
-        public double dfChanged(string word)
-        {
-            return 0;
-        }
-        public void calculateIDF()
-        {
-        }
-        public double calcuateIDF(string word)
-        {
-            return 0;
-        }
-    }
-    private class IDFData
-    {
-        private double idf;
-        private double logdf;
-        public IDFData()
-        {
-        }
-
-        public double IDF
-        {
-            get
-            {
-                return idf;
-            }
-            set;
         }
     }
 } 
