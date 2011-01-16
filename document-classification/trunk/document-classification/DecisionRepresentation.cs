@@ -4,8 +4,8 @@ using System.Text;
 
 namespace document_classification
 {
-    class DecisionRepresentationPeople : Dictionary<string, double>
-    {
+   public class DecisionRepresentationPeople : Dictionary<string, double>
+   {
         private int procedureId;
         private int phaseId;
         private int nextPhaseId;
@@ -15,9 +15,9 @@ namespace document_classification
     /// ProcedurID,PersonId,nextPersonId
     /// </summary>
 
-    class AllDecisionsPeople : Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationPeople>>>
+    public class AllDecisionsPeople : Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationPeople>>>
     {
-        public int getNrOfDecisions()
+        public int GetNrOfDecisions()
         {
             int nrRet = 0;
             foreach (int i in this.Keys)

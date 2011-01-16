@@ -6,6 +6,8 @@ namespace document_classification
 {
     class DCSettings
     {
-        //public static readonly string connectionString = new string("Server=localhost;Database=amod;Uid=root;Pwd=password;");
+
+        public  const string connectionString = "Server=localhost;Database=amod;Uid=root;Pwd=password;";
+
     }
 }
