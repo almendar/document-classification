@@ -157,7 +157,21 @@ namespace document_classification
             {
                 return idf;
             }
-            set;
+            set
+            {
+                idf = value;
+            }
+        }
+        public double LogDF
+        {
+            get
+            {
+                return logdf;
+            }
+            set
+            {
+                logdf = value;
+            }
         }
     }
 } 

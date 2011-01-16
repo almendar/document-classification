@@ -67,11 +67,8 @@
       <DependentUpon>amodDataSet.xsd</DependentUpon>
     </Compile>
     <Compile Include="Case.cs" />
-    <Compile Include="AmodDBTools.cs" />
     <Compile Include="DBRepresentation.cs" />
-    <Compile Include="DCDbTools.cs" />
     <Compile Include="DCSettings.cs" />
-    <Compile Include="DCTools.cs" />
     <Compile Include="DecisionRepresentation.cs" />
     <Compile Include="Procedure.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

@@ -27,9 +27,5 @@ namespace document_classification
         private DBRepresentation() : base()
         {
         }
-        public void update()
-        {
-            AmodDBTools.Instance.update(this);
-        }
     }
 }
