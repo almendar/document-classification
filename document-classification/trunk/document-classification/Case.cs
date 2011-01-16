@@ -8,7 +8,7 @@ namespace document_classification
     /// Represens a case in the flow.
     /// Assign to all words that case contains TF-IDF measure
     /// </summary>
-    class Case : Dictionary<String, double>
+    public class Case : Dictionary<String, double>
     {   
         /// <summary>
         /// Procedure id to which this Case is associated to.
