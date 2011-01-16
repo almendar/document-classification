@@ -8,12 +8,8 @@ namespace document_classification
     /// Represent a procedure.
     /// Procedure assigns to words TF-IDF measure sumed over all associated Cases with this procedure.
     /// </summary>
-    class Procedure : Dictionary<string, double>
+    public class Procedure : Dictionary<string, double>
     {
-        public Procedure(int procedureId)
-        {
-            this.procedureId = procedureId;
-        }
 
         /// <summary>
         /// This procedure id from DB
@@ -27,6 +23,11 @@ namespace document_classification
                 return procedureId;
             }
 
+        }
+
+        public Procedure(int procedureId)
+        {
+            this.procedureId = procedureId;
         }
 
         /// <summary>
@@ -67,7 +68,7 @@ namespace document_classification
     /// Represent all known procedures in the DB.
     /// Keys are IDs of the procedures stored in the DB.
     /// </summary>
-    class AllProcedures : Dictionary<int, Procedure>
+    public class AllProcedures : Dictionary<int, Procedure>
     {
         private static readonly AllProcedures instance = new AllProcedures();
         public static AllProcedures Instance

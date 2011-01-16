@@ -75,6 +75,7 @@ namespace document_classification
         private int[] MapRowToProcedureId = null;
         
 
+        //TODO
         //**********************************************************************//
         private double[,] PhaseMatrix = null;
         private Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToRowsSet = null;
@@ -147,7 +148,7 @@ namespace document_classification
                     bestProcedureIndice = i;
                 }
             }
-            int bestProcedureId = MapRowToProcedureId[i];
+            int bestProcedureId = MapRowToProcedureId[bestProcedureIndice];
             int[] ret = new int[] { bestProcedureId };
             return ret;
           }
