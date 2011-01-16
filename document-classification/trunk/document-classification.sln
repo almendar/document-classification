@@ -5,11 +5,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "document-classification", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tkogutTestApp", "tkogutTestApp\tkogutTestApp.csproj", "{B0941E58-90F1-48AA-9D0B-3F7B26E1B43E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DCUpdate", "DCUpdate\DCUpdate.csproj", "{528A55D8-1B98-4841-98E6-2122680C1AE1}"
+EndProject
 Global
-	GlobalSection(SubversionScc) = preSolution
-		Svn-Managed = True
-		Manager = AnkhSVN - Subversion Support for Visual Studio
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -39,8 +37,22 @@ Global
 		{B0941E58-90F1-48AA-9D0B-3F7B26E1B43E}.Release|Mixed Platforms.Build.0 = Release|x86
 		{B0941E58-90F1-48AA-9D0B-3F7B26E1B43E}.Release|x86.ActiveCfg = Release|x86
 		{B0941E58-90F1-48AA-9D0B-3F7B26E1B43E}.Release|x86.Build.0 = Release|x86
+		{528A55D8-1B98-4841-98E6-2122680C1AE1}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{528A55D8-1B98-4841-98E6-2122680C1AE1}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{528A55D8-1B98-4841-98E6-2122680C1AE1}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{528A55D8-1B98-4841-98E6-2122680C1AE1}.Debug|x86.ActiveCfg = Debug|x86
+		{528A55D8-1B98-4841-98E6-2122680C1AE1}.Debug|x86.Build.0 = Debug|x86
+		{528A55D8-1B98-4841-98E6-2122680C1AE1}.Release|Any CPU.ActiveCfg = Release|x86
+		{528A55D8-1B98-4841-98E6-2122680C1AE1}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{528A55D8-1B98-4841-98E6-2122680C1AE1}.Release|Mixed Platforms.Build.0 = Release|x86
+		{528A55D8-1B98-4841-98E6-2122680C1AE1}.Release|x86.ActiveCfg = Release|x86
+		{528A55D8-1B98-4841-98E6-2122680C1AE1}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
 	EndGlobalSection
 EndGlobal
