@@ -60,7 +60,8 @@ namespace document_classification
         private AllCases()
         {
         }
-        int getNumberOfCasesInDB()
+
+        public int getNumberOfCasesInDB()
         {
             return this.Keys.Count;
         }
