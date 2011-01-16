@@ -11,13 +11,14 @@ namespace document_classification
     {
 
         #region fields
-        private int                          NumberOfCases;
-        private DBRepresentation             allWords = null;
-        private AllCases                     CasesSet = null;
-        private AllProcedures                ProceduresSet = null;
-        private DecisionRepresentationPhase  PhaseDecisionData = null;
-        private DecisionRepresentationPeople PeopleDecisionData = null;
-        
+        private int NumberOfCases;
+        private DBRepresentation allWords = null;
+        private AllCases CasesSet = null;
+        private AllProcedures ProceduresSet = null;
+        private AllDecisionsPhase PhaseDecisionData = null;
+        private AllDecisionsPeople PeopleDecisionData = null;
+
+        private const double MaximumFrequency = 0.9;
 
         /// <summary>
         /// Threashold above which words are not taken into consideration.
@@ -37,16 +38,18 @@ namespace document_classification
         /// Rows of this matrix represents procedures, columns are words.
         /// Values of this matrix are TFIDF of words in procedures.
         /// </summary>
-        private double[,] ProcedureMatrix  = null;
+        private double[][] ProcedureMatrix  = null;
         /// <summary>
         /// Table maps row of the <see cref="ProcedureMatrix"/>procedure matrix</see> to correspondent procedure id 
         /// in the database.
         /// </summary>
         private int[] MapRowToProcedureId = null;
+        
 
         //**********************************************************************//
-        private double[,,,] PhaseMatrix      = null;
-        private int[,,] MapRowColumnToNextPhaseId = null;
+        private double[,] PhaseMatrix = null;
+        private Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToRowsSet = null;
+        private int [] MapRowToNextPhaseId = null;
 
         //**********************************************************************//
         private double[,,,] PeopleMatrix     = null;
@@ -54,7 +57,7 @@ namespace document_classification
 
         static readonly BagOfWordsTextClassifier instance = new BagOfWordsTextClassifier();
 #endregion
-
+        
         static BagOfWordsTextClassifier()
         {
         }
@@ -65,17 +68,6 @@ namespace document_classification
             CreateDataMatrices();
         }
 
-        private void CreateDataMatrices()
-        {
-            throw new NotImplementedException();
-        }
-
-        private void ReadDataBase()
-        {
-            throw new NotImplementedException();
-        }
-
-
         public static BagOfWordsTextClassifier Instance
         {
             get
@@ -84,14 +76,64 @@ namespace document_classification
             }
         }
 
+        private void CreateDataMatrices()
+        {
+            ProcedureMatrixBuild();
+            
+            //Not ready yet
+            //NextPhaseMatrixBuild();
+            //NextPersonMatrixBuild();
+        }
+
         /// <summary>
-        /// Based on text trys to find righ procedures for text
+        /// Reads serialized objects from database that will be base for building matrices
         /// </summary>
-        /// <param name="text">Text of document</param>
-        /// <returns>Procedures ids table</returns>
-        public int[] ProcedureRecognition(string text)
+        private void ReadDataBase()
         {
             throw new NotImplementedException();
+        }
+
+
+
+        /// <summary>
+        /// Based on text tries to find right procedures for given text.
+        /// Now returns only the best procedure ID.
+        /// </summary>
+        /// <param name="text">Text of document</param>
+        /// <returns>Procedures IDs table</returns>
+        public int[] ProcedureRecognition(string text)
+        {
+            String [] textTokens = TextExtraction.GetTextTokens(text);
+            double[] textVector = CreateVectorFromText(textTokens);
+            int bestProcedureIndice = int.MinValue;
+            double bestSimilarity = double.PositiveInfinity;
+            for (int i = 0; i < ProcedureMatrix.Length; i++)
+            {
+                double [] checkedVector = ProcedureMatrix[i];
+                double similarity = 1 - VectorOperations.VectorsConsine(checkedVector, textVector);
+                if (similarity < bestSimilarity)
+                {
+                    bestSimilarity = similarity;
+                    bestProcedureIndice = i;
+                }
+            }
+            int bestProcedureId = MapRowToProcedureId[i];
+            int[] ret = new int[] { bestProcedureId };
+            return ret;
+          }
+
+        private double[] CreateVectorFromText(string[] textTokens)
+        {
+            double [] vectorRep = new double[MapWordToColumn.Keys.Count];
+            foreach (String word in textTokens)
+            {
+                if (!MapWordToColumn.ContainsKey(word))
+                    continue;
+
+                int indice = MapWordToColumn[word];
+                vectorRep[indice] += 1.0d;
+            }
+            return vectorRep;
         }
 
         public int[] NextPersonPrediction(string text)
@@ -110,8 +152,12 @@ namespace document_classification
         {
             int numberOfProcedures = ProceduresSet.Keys.Count;
             int nrOfMeaningfulWords = MapWordToColumn.Keys.Count;//vector length
-            int nrOfProcedures = ProceduresSet.Keys.Count;
-            ProcedureMatrix = new double[numberOfProcedures, nrOfMeaningfulWords];
+            //int nrOfProcedures = ProceduresSet.Keys.Count;
+            ProcedureMatrix = new double[numberOfProcedures][];
+            for (int h = 0; h < numberOfProcedures; h++)
+            {
+                ProcedureMatrix[h] = new double[nrOfMeaningfulWords];
+            }
             int procedurIndex = 0;
             foreach (KeyValuePair<int, Procedure> kvp in ProceduresSet)
             {
@@ -129,7 +175,7 @@ namespace document_classification
                     else
                     {
                         int wordIndex = MapWordToColumn[word];
-                        ProcedureMatrix[procedurIndex,wordIndex] = TFIDF;
+                        ProcedureMatrix[procedurIndex][wordIndex] = TFIDF;
                     }
                 }
                 ++procedurIndex; //step to next procedure
@@ -140,6 +186,46 @@ namespace document_classification
 
         private void NextPhaseMatrixBuild()
         {
+            int nrOfDecisions = PhaseDecisionData.GetNrOfDecisions();
+            int nrOfWordsInVector = MapWordToColumn.Keys.Count;
+            PhaseMatrix = new double[nrOfDecisions, nrOfWordsInVector];
+            MapRowToNextPhaseId = new int[nrOfDecisions];
+            int indexer = 0;
+            foreach (int procId in PhaseDecisionData.Keys)
+            {
+                MapProcIdPhasIdToRowsSet[procId] = new Dictionary<int, List<int>>();
+                foreach (int phaseId in PhaseDecisionData[procId].Keys)
+                {
+                    MapProcIdPhasIdToRowsSet[procId][phaseId] = new List<int>();
+                    foreach (int nextPhasId in PhaseDecisionData[procId][phaseId].Keys)
+                    {
+                        Dictionary<string, double> textRepresentation = PhaseDecisionData[procId][phaseId][nextPhasId];
+                        foreach (KeyValuePair<string, double> kvp in textRepresentation)
+                        {
+
+                            if (!MapWordToColumn.ContainsKey(kvp.Key))
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                String word = kvp.Key;
+                                double TFIDF = kvp.Value;
+                                int indice = MapWordToColumn[word];
+                                PhaseMatrix[indexer,indice]= TFIDF;
+
+                                //wstaw wektor do tablicy
+                                //dodaj do listy, gdzie są takie przejścia
+                                //zwiększ indeks bo dalej trzeba szukać
+                            }
+                        }
+                        
+                        MapProcIdPhasIdToRowsSet[procId][phaseId].Add(indexer);
+                        MapRowToNextPhaseId[indexer] = nextPhasId;
+                        indexer += 1;
+                    }
+                }
+            }
         }
 
         private void NextPersonMatrixBuild()
@@ -152,18 +238,16 @@ namespace document_classification
         private void FetchMeaningfulWords()
         {
             int numberOfProcedures = ProceduresSet.Keys.Count;
-            this.wordThreashold = (numberOfProcedures * 9) / 10;
+            this.wordThreashold = (int) Math.Floor((numberOfProcedures * MaximumFrequency));
             int vectorIndice = 0;
             foreach(KeyValuePair<string, int> kvp in allWords)
             {
                 int documentFrequency = kvp.Value;
                 string word = kvp.Key;
-                if (documentFrequency <= wordThreashold)
-                {
-                    MapWordToColumn.Add(word, vectorIndice);
-                    ++vectorIndice;
-                }
-
+                if (documentFrequency > wordThreashold)
+                    continue;
+                MapWordToColumn.Add(word, vectorIndice);
+                vectorIndice += 1;
             }
         }
         
