@@ -80,7 +80,7 @@ namespace document_classification
         {
             string ftsQueryNewData = @"select *
                                 from amod.ftsearchdata
-                                where ftsModified > \''2010-11-00 12:00:00\''
+                                where ftsModified > '2010-11-00 12:00:00'
                                 order by ftsModified;";
             return executeQuery(ftsQueryNewData);
         }
@@ -100,16 +100,31 @@ namespace document_classification
         /** return procedure Id for particular case */
         public int getProcedureId(int caseId)
         {
-            string checkProcedureQuery = @"select *
+            string checkProcedureQuery = @"select caseProcedureId
                                from amod.casedefinition
-                               where caseProcedurId =" + caseId.ToString() +
+                               where caseId =" + caseId.ToString() +
                                   ";";
-            return (int)executeQuery(checkProcedureQuery)[0];
+            DbDataReader rdr = executeQuery(checkProcedureQuery);
+            /*
+            if(!rdr.Read())
+            {
+                //@TODO exception;
+            }
+            */
+            int result = 0;
+            if (rdr.Read())
+            {
+                result = (int)(rdr[0]);
+            }
+            rdr.Close();
+            return result;
         }
         public void update()
         {
+            connect();
             DbDataReader rdr = getNewData(lastUpdate);
             Dictionary<int, Dictionary<string, int> > data = createDictionaryFromReader(rdr);
+            rdr.Close();
             
             // splitting data and updating AllCases structure
             List<string> newWords = new List<string>();
@@ -143,8 +158,12 @@ namespace document_classification
                 else
                 {
                     AllCases.Instance.Add(caseId, new Case(getProcedureId(caseId), caseId));
+                    foreach (string word in data[caseId].Keys)
+                    {
+                        AllCases.Instance[caseId].Add(word, 0);
+                    }
                     newCases.Add(caseId, data[caseId]);
-                    CasesTF.Instance.Add(newCases);
+                    CasesTF.Instance.Add(caseId, data[caseId]);
                 }
             }
 
@@ -162,7 +181,8 @@ namespace document_classification
                 IDFcalculaction.Instance.calculateIDF();
                 foreach (Case tempCase in AllCases.Instance.Values)
                 {
-                    foreach (string word in tempCase.Keys)
+                    List<string> tempList = new List<string>(tempCase.Keys);
+                    foreach(string word in tempList)
                     {
                         tempCase[word] = calculateTFIDF(tempCase.CaseId, word);
                     }
@@ -192,6 +212,7 @@ namespace document_classification
                     }
                 }
             }
+            disconnect();
         }
         private void updateDBRepresentation(Dictionary<int, Dictionary<string, int> > data)
         {
