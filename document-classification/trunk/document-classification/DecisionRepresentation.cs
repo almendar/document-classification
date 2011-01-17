@@ -4,6 +4,7 @@ using System.Text;
 
 namespace document_classification
 {
+    [Serializable]
    public class DecisionRepresentationPeople : Dictionary<string, double>
    {
         private int procedureId;
@@ -15,6 +16,7 @@ namespace document_classification
     /// ProcedurID,PersonId,nextPersonId
     /// </summary>
 
+    [Serializable]
     public class AllDecisionsPeople : Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationPeople>>>
     {
         public int GetNrOfDecisions()
@@ -33,6 +35,7 @@ namespace document_classification
     /// <summary>
     /// ProcedurID,PersonId,nextStageId
     /// </summary>
+    [Serializable]
     public class AllDecisionsPhase : Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationPhase>>> 
     {
         public int GetNrOfDecisions()
@@ -48,6 +51,7 @@ namespace document_classification
         }
     }
 
+    [Serializable]
     public class DecisionRepresentationPhase :  Dictionary<string, double>
     {
         private int procedureId;

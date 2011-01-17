@@ -80,7 +80,7 @@ namespace document_classification
         {
             string ftsQueryNewData = @"select *
                                 from amod.ftsearchdata
-                                where ftsModified > '2010-11-00 12:00:00'
+                                where ftsModified > '2010-11-13 11:26:25'
                                 order by ftsModified;";
             return executeQuery(ftsQueryNewData);
         }
@@ -122,6 +122,7 @@ namespace document_classification
         public void update()
         {
             connect();
+            lastUpdate = "2010-12-13 11:26:25";
             DbDataReader rdr = getNewData(lastUpdate);
             Dictionary<int, Dictionary<string, int> > data = createDictionaryFromReader(rdr);
             rdr.Close();
@@ -148,7 +149,7 @@ namespace document_classification
                         {
                             oldCasesNewWords[caseId].Add(word, data[caseId][word]);
                             CasesTF.Instance[caseId].Add(word, oldCasesNewWords[caseId][word]);
-                            AllCases.Instance[caseId].Add(word, 0);
+                            Data.Instance.AllCases[caseId].Add(word, 0);
                             if (!newWords.Contains(word))
                                 newWords.Add(word);
 
@@ -157,10 +158,10 @@ namespace document_classification
                 }
                 else
                 {
-                    AllCases.Instance.Add(caseId, new Case(getProcedureId(caseId), caseId));
+                    Data.Instance.AllCases.Add(caseId, new Case(getProcedureId(caseId), caseId));
                     foreach (string word in data[caseId].Keys)
                     {
-                        AllCases.Instance[caseId].Add(word, 0);
+                        Data.Instance.AllCases[caseId].Add(word, 0);
                     }
                     newCases.Add(caseId, data[caseId]);
                     CasesTF.Instance.Add(caseId, data[caseId]);
@@ -177,9 +178,9 @@ namespace document_classification
             if (newCases.Count != 0)
             {
                 // recalculating IDF
-                IDFcalculaction.Instance.setNumberOfCases(AllCases.Instance.getNumberOfCasesInDB() + newCases.Count);
+                IDFcalculaction.Instance.setNumberOfCases(Data.Instance.AllCases.getNumberOfCasesInDB() + newCases.Count);
                 IDFcalculaction.Instance.calculateIDF();
-                foreach (Case tempCase in AllCases.Instance.Values)
+                foreach (Case tempCase in Data.Instance.AllCases.Values)
                 {
                     List<string> tempList = new List<string>(tempCase.Keys);
                     foreach(string word in tempList)
@@ -195,7 +196,7 @@ namespace document_classification
                 {
                     foreach (string word in oldCasesOldWords[caseId].Keys)
                     {
-                        AllCases.Instance[caseId][word] += IDFcalculaction.Instance[word].IDF;    
+                        Data.Instance.AllCases[caseId][word] += IDFcalculaction.Instance[word].IDF;    
                     }
                 }
 
@@ -203,11 +204,11 @@ namespace document_classification
                 foreach (string word in newWords)
                 {
                     IDFcalculaction.Instance.calculateIDF(word);
-                    foreach (int caseId in AllCases.Instance.Keys)
+                    foreach (int caseId in Data.Instance.AllCases.Keys)
                     {
-                        if (AllCases.Instance[caseId].ContainsKey(word))
+                        if (Data.Instance.AllCases[caseId].ContainsKey(word))
                         {
-                            AllCases.Instance[caseId][word] = calculateTFIDF(caseId, word);
+                            Data.Instance.AllCases[caseId][word] = calculateTFIDF(caseId, word);
                         }
                     }
                 }
@@ -220,14 +221,14 @@ namespace document_classification
             {
                 foreach(string word in tempCase.Keys)
                 {
-                    if(DBRepresentation.Instance.ContainsKey(word))
+                    if(Data.Instance.DBRepresentation.ContainsKey(word))
                     {
-                        DBRepresentation.Instance[word]++;
-                        IDFcalculaction.Instance.dfChanged(word, DBRepresentation.Instance[word]);
+                        Data.Instance.DBRepresentation[word]++;
+                        IDFcalculaction.Instance.dfChanged(word, Data.Instance.DBRepresentation[word]);
                     }
                     else
                     {
-                        DBRepresentation.Instance.Add(word, 1);
+                        Data.Instance.DBRepresentation.Add(word, 1);
                         IDFcalculaction.Instance.Add(word, new IDFData(1));
                     }
                 }
@@ -280,7 +281,6 @@ namespace document_classification
         }
         public void calculateIDF()
         {
-            this.D = D;
             logD = Math.Log10(D);
 
             foreach (IDFData data in this.Values)

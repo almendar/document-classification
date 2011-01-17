@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace document_classification
 {
-    public class DBRepresentation : Dictionary<string, int>
+    [Serializable]
+    public class DBRepresentation : Dictionary<string, int>, ISerializable
     {
-        static readonly DBRepresentation instance = new DBRepresentation();
-        public static DBRepresentation Instance
+        public DBRepresentation() : base()
         {
-            get
-            {
-                return instance;
-            }
         }
-        private DBRepresentation() : base()
+        public DBRepresentation(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

@@ -70,14 +70,6 @@ namespace document_classification
     /// </summary>
     public class AllProcedures : Dictionary<int, Procedure>
     {
-        private static readonly AllProcedures instance = new AllProcedures();
-        public static AllProcedures Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
         private AllProcedures()
         {
         }

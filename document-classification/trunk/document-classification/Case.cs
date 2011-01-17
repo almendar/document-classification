@@ -8,6 +8,7 @@ namespace document_classification
     /// Represens a case in the flow.
     /// Assign to all words that case contains TF-IDF measure
     /// </summary>
+    [Serializable]
     public class Case : Dictionary<String, double>
     {   
         /// <summary>
@@ -43,24 +44,9 @@ namespace document_classification
     /// Represents all cases that can be found in the DB
     /// Keys are id of the case in the DB.
     /// </summary>
+    [Serializable]
     public class AllCases : Dictionary<int, Case>
     {
-        static readonly AllCases instance = new AllCases();
-        static AllCases()
-        {
-        }
-        public static AllCases Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
-
-        private AllCases()
-        {
-        }
-
         public int getNumberOfCasesInDB()
         {
             return this.Keys.Count;
