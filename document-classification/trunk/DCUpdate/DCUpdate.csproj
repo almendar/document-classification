@@ -62,14 +62,12 @@
     <Compile Include="AmodDBTools.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="DCDbTools.cs" />
-    <Compile Include="DCTools.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="TestClass.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="amodDataSet.xsc">

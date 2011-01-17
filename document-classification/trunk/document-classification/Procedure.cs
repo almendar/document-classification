@@ -70,7 +70,7 @@ namespace document_classification
     /// </summary>
     public class AllProcedures : Dictionary<int, Procedure>
     {
-        private AllProcedures()
+        public AllProcedures()
         {
         }
         private void rebuild(AllCases allCases)

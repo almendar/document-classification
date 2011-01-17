@@ -19,9 +19,11 @@ namespace document_classification
         {
             allCases = new AllCases();
             dbRepresentation = new DBRepresentation();
+            allProcedures = new AllProcedures();
         }
         private AllCases allCases;
         private DBRepresentation dbRepresentation;
+        private AllProcedures allProcedures;
 
         public AllCases AllCases
         {
@@ -43,6 +45,17 @@ namespace document_classification
             set
             {
                 dbRepresentation = value;
+            }
+        }
+        public AllProcedures AllProcedures
+        {
+            get
+            {
+                return allProcedures;
+            }
+            set
+            {
+                allProcedures = value;
             }
         }
     }
