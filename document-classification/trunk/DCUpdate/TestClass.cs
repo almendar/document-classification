@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace document_classification
 {
-    class DCSettings
+    [Serializable]
+    public class TestClass
     {
-        public  const string connectionString = "Server=localhost;Database=amod;Uid=root;Pwd=password;";
+        public int i;
     }
 }

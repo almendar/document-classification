@@ -10,7 +10,10 @@ namespace document_classification
     {
         static void Main(string[] args)
         {
-            AmodDBTools.Instance.update();
+            //AmodDBTools.Instance.update();
+            //DCDbTools.Instance.sendDBRepresentation();
+            DCDbTools.Instance.getDBRepresentation();
+            int i = Data.Instance.DBRepresentation.Count();
         }
     }
 }
