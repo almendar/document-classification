@@ -80,8 +80,8 @@ namespace document_classification
         {
             string ftsQueryNewData = @"select *
                                 from amod.ftsearchdata
-                                where ftsModified > '2010-11-13 11:26:25'
-                                order by ftsModified;";
+                                where ftsModified > '" + lastRecordDate +
+                                "' order by ftsModified;";
             return executeQuery(ftsQueryNewData);
         }
         public Dictionary<int, Dictionary<string, int> > createDictionaryFromReader(DbDataReader rdr)
@@ -105,16 +105,14 @@ namespace document_classification
                                where caseId =" + caseId.ToString() +
                                   ";";
             DbDataReader rdr = executeQuery(checkProcedureQuery);
-            /*
-            if(!rdr.Read())
-            {
-                //@TODO exception;
-            }
-            */
             int result = 0;
             if (rdr.Read())
             {
                 result = (int)(rdr[0]);
+            }
+            else
+            {
+                //@TODO exception
             }
             rdr.Close();
             return result;

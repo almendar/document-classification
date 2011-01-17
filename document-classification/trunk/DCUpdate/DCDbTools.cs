@@ -77,15 +77,5 @@ namespace document_classification
             DbCommand cmd = new MySqlCommand(query, conn);
             return (cmd.ExecuteReader());
         }
-/*
-        public DBRepresentation getDBRepresentation() 
-        { 
-            return null; 
-        }
-        public AllCases getAllCases() 
-        { 
-            return null; 
-        }
-        */
     }
 }
