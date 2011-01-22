@@ -67,6 +67,62 @@ namespace document_classification
             }
             disconnect();
         }
+        public void getAllCases()
+        {
+            connect();
+            string Query = "SELECT * FROM dc.allcases;";
+            DbDataReader rdr = executeQuery(Query);
+            if (rdr.Read())
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                System.IO.MemoryStream mem =
+                    new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(2)));
+                Data.Instance.AllCases = (AllCases)bf.Deserialize(mem);
+            }
+            disconnect();
+        }
+        public void sendAllCases()
+        {
+            connect();
+            BinaryFormatter bf = new BinaryFormatter();
+            System.IO.MemoryStream mem = new System.IO.MemoryStream();
+            bf.Serialize(mem, Data.Instance.AllCases);
+            String str = Convert.ToBase64String(mem.ToArray());
+
+            string Query = "INSERT INTO dc.allcases(date, data) values" +
+             "('" + System.DateTime.Today + "','" + str + "');";
+
+            executeNonQuery(Query);
+            disconnect();
+        }
+        public void getAllProcedures()
+        {
+            connect();
+            string Query = "SELECT * FROM dc.allprocedures;";
+            DbDataReader rdr = executeQuery(Query);
+            if (rdr.Read())
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                System.IO.MemoryStream mem =
+                    new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(2)));
+                Data.Instance.AllProcedures = (AllProcedures)bf.Deserialize(mem);
+            }
+            disconnect();
+        }
+        public void sendAllProcedures()
+        {
+            connect();
+            BinaryFormatter bf = new BinaryFormatter();
+            System.IO.MemoryStream mem = new System.IO.MemoryStream();
+            bf.Serialize(mem, Data.Instance.AllProcedures);
+            String str = Convert.ToBase64String(mem.ToArray());
+
+            string Query = "INSERT INTO dc.allprocedures(date, data) values" +
+             "('" + System.DateTime.Today + "','" + str + "');";
+
+            executeNonQuery(Query);
+            disconnect();
+        }
         private void executeNonQuery(String query)
         {
             DbCommand cmd = new MySqlCommand(query, conn);
