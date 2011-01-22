@@ -7,7 +7,7 @@ namespace document_classification
     /// <summary>
     /// Singleton instance of classificator based on bag-of-words paradigm
     /// </summary>
-    class BagOfWordsTextClassifier
+   public class BagOfWordsTextClassifier
     {
         #region Singleton stuff
         static readonly BagOfWordsTextClassifier instance = new BagOfWordsTextClassifier();

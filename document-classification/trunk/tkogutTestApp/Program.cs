@@ -1,49 +1,40 @@
-﻿using System;
-using System.Threading;
-
-public class Worker
+﻿using System.IO;
+using document_classification;
+public class TestApp
 {
-    // This method will be called when the thread is started.
-    string a = "abc";
-    public void DoWorkLock()
+
+    private string textFile = null;
+
+    public string TextFile
     {
-        lock (this)
+        set
         {
-            while (true)
-            {
-                a = DateTime.Now.ToLongTimeString();
-                Console.WriteLine(Thread.CurrentThread.Name + " " + a);
-            }
+            textFile = value;
+        }
+
+        get
+        {
+            return textFile;
         }
     }
 
-    public void DoWorkNoLock()
+    void ReadTextFromFile(string fileName)
     {
-   
-            while (true)
-            {
-
-                Console.WriteLine(Thread.CurrentThread.Name + " " + a);
-            }
+        TextReader tr = new StreamReader(fileName);
+        TextFile = tr.ReadToEnd();
     }
-}
 
-public delegate void CallbackFunction(String d); 
-
-public class WorkerThreadExample
-{
     static void Main()
     {
-        // Create the thread object. This does not start the thread.
-        Worker workerObj = new Worker();
-        Thread workerThread1 = new Thread(workerObj.DoWorkLock);
-        workerThread1.Name = "thread1";
-        Thread workerThread2 = new Thread(workerObj.DoWorkLock);
-        workerThread2.Name = "thread2";
-        workerThread1.Start();
-        workerThread2.Start();
-        workerThread1.Join();
-        workerThread2.Join();
+        TestApp app = new TestApp();
+        app.ReadTextFromFile("test1.txt");
+
+        BagOfWordsTextClassifier classifier = BagOfWordsTextClassifier.Instance;
+        int [] resutl = classifier.ProcedureRecognition(app.TextFile);
+        foreach (int a in resutl)
+        {
+            System.Console.WriteLine("Best procedures: {0}", a);
+        }
         
     }
 }
