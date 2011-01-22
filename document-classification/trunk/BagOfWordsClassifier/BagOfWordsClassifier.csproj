@@ -46,6 +46,10 @@
     <Compile Include="VectorOperations.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DCUpdate\DCUpdate.csproj">
+      <Project>{528A55D8-1B98-4841-98E6-2122680C1AE1}</Project>
+      <Name>DCUpdate</Name>
+    </ProjectReference>
     <ProjectReference Include="..\document-classification\document-classification.csproj">
       <Project>{2050C229-9002-46FE-BD6D-9EB9ADE8475D}</Project>
       <Name>document-classification</Name>

@@ -1,37 +1,49 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Threading;
 
-
-
-
-namespace tkogutTestApp
+public class Worker
 {
-    class Program
+    // This method will be called when the thread is started.
+    string a = "abc";
+    public void DoWorkLock()
     {
-        static void Main(string[] args)
+        lock (this)
         {
-            Dictionary<int, Dictionary<int, List<int>>> a = new Dictionary<int, Dictionary<int, List<int>>>();
-            a[1] = new Dictionary<int, List<int>>();
-            a[1][2] = new List<int>();
-
-            Console.Out.WriteLine(a[1][2].Count);
-
-
-            double[] b = new double[50];
-
-            for (int i = 0; i < b.Length; i++)
+            while (true)
             {
-                Console.Out.WriteLine(b[i]);
+                a = DateTime.Now.ToLongTimeString();
+                Console.WriteLine(Thread.CurrentThread.Name + " " + a);
             }
-
-            int k = (int)Math.Floor((34 * 0.9d));
-            Console.Out.WriteLine(k);
-            Console.In.ReadLine();
-
-
-
         }
     }
 
+    public void DoWorkNoLock()
+    {
+   
+            while (true)
+            {
+
+                Console.WriteLine(Thread.CurrentThread.Name + " " + a);
+            }
+    }
+}
+
+public delegate void CallbackFunction(String d); 
+
+public class WorkerThreadExample
+{
+    static void Main()
+    {
+        // Create the thread object. This does not start the thread.
+        Worker workerObj = new Worker();
+        Thread workerThread1 = new Thread(workerObj.DoWorkLock);
+        workerThread1.Name = "thread1";
+        Thread workerThread2 = new Thread(workerObj.DoWorkLock);
+        workerThread2.Name = "thread2";
+        workerThread1.Start();
+        workerThread2.Start();
+        workerThread1.Join();
+        workerThread2.Join();
+        
+    }
 }
