@@ -290,8 +290,10 @@ namespace DocumentClassification.BagOfWords
         /// </summary>
         private void FetchMeaningfulWords()
         {
+            this.NumberOfCases = AllCases.Count;
             this.wordThreshold = (int) Math.Floor((NumberOfCases * MaximumFrequency));
             int vectorIndice = 0;
+            MapWordToColumn = new Dictionary<string, int>();
             foreach(KeyValuePair<string, int> kvp in DBRepresentation)
             {
                 int documentFrequency = kvp.Value;
