@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using document_classification;
 
@@ -10,10 +9,11 @@ namespace document_classification
     {
         static void Main(string[] args)
         {
-            //AmodDBTools.Instance.update();
-            //DCDbTools.Instance.sendDBRepresentation();
-            DCDbTools.Instance.getDBRepresentation();
-            int i = Data.Instance.DBRepresentation.Count();
+            AmodDBTools.Instance.update();
+            DCDbTools.Instance.sendDBRepresentation();
+            DCDbTools.Instance.sendAllCases();
+            Data.Instance.AllProcedures.rebuild(Data.Instance.AllCases);
+            DCDbTools.Instance.sendAllProcedures();
         }
     }
 }

@@ -120,7 +120,7 @@ namespace document_classification
         public void update()
         {
             connect();
-            lastUpdate = "2010-12-13 11:26:25";
+            lastUpdate = "2007-12-13 11:26:25";
             DbDataReader rdr = getNewData(lastUpdate);
             Dictionary<int, Dictionary<string, int> > data = createDictionaryFromReader(rdr);
             rdr.Close();

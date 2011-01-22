@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace document_classification
 {
@@ -22,6 +23,10 @@ namespace document_classification
             this.procedureId = procedureId;
             this.caseId = caseId;
         }
+        public Case(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+
 
         public int CaseId
         {
@@ -51,5 +56,13 @@ namespace document_classification
         {
             return this.Keys.Count;
         }
+        public AllCases(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+
+        public AllCases() : base()
+        {
+        }
+
     }
 }

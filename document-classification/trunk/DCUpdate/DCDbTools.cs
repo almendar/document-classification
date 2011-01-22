@@ -75,6 +75,7 @@ namespace document_classification
             if (rdr.Read())
             {
                 BinaryFormatter bf = new BinaryFormatter();
+
                 System.IO.MemoryStream mem =
                     new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(2)));
                 Data.Instance.AllCases = (AllCases)bf.Deserialize(mem);
@@ -86,6 +87,7 @@ namespace document_classification
             connect();
             BinaryFormatter bf = new BinaryFormatter();
             System.IO.MemoryStream mem = new System.IO.MemoryStream();
+            mem.Position = 0;
             bf.Serialize(mem, Data.Instance.AllCases);
             String str = Convert.ToBase64String(mem.ToArray());
 
