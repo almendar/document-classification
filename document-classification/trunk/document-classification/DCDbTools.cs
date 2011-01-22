@@ -75,7 +75,7 @@ namespace DocumentClassification.Representation
             {
                 BinaryFormatter bf = new BinaryFormatter();
                 System.IO.MemoryStream mem =
-                new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(2)));
+                new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
                 Data.Instance.DBRepresentation = (DBRepresentation)bf.Deserialize(mem);
             }
             disconnect();
@@ -90,7 +90,7 @@ namespace DocumentClassification.Representation
                 BinaryFormatter bf = new BinaryFormatter();
 
                 System.IO.MemoryStream mem =
-                    new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(2)));
+                    new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
                 Data.Instance.AllCases = (AllCases)bf.Deserialize(mem);
             }
             disconnect();
@@ -119,7 +119,7 @@ namespace DocumentClassification.Representation
             {
                 BinaryFormatter bf = new BinaryFormatter();
                 System.IO.MemoryStream mem =
-                    new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(2)));
+                    new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
                 Data.Instance.AllProcedures = (AllProcedures)bf.Deserialize(mem);
             }
             disconnect();
