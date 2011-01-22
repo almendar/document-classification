@@ -25,11 +25,11 @@ namespace document_classification
         
         #region fields
         private int NumberOfCases;
-        private DBRepresentation allWords = null;
-        private AllCases CasesSet = null;
-        private AllProcedures ProceduresSet = null;
-        private AllDecisionsPhase PhaseDecisionData = null;
-        private AllDecisionsPeople PeopleDecisionData = null;
+        private DBRepresentation DBRepresentation = null;
+        private AllCases AllCases = null;
+        private AllProcedures AllProcedures = null;
+        private AllDecisionsPhase AllDecisionsPhase = null;
+        private AllDecisionsPeople AllDecisionsPeople = null;
 
         /// <summary>
         /// Maximum percentage of cases in which word can appear to be take into consideration
@@ -92,6 +92,7 @@ namespace document_classification
 
         BagOfWordsTextClassifier()
         {
+
             ReadDataBase();
             ComputeStatisticParams();
             FetchMeaningfulWords();
@@ -100,7 +101,7 @@ namespace document_classification
 
         private void ComputeStatisticParams()
         {
-            this.numberOfProcedures = ProceduresSet.Keys.Count;
+            this.numberOfProcedures = AllProcedures.Keys.Count;
             this.NumberOfMeaningfulWords = MapWordToColumn.Keys.Count; //vector length
         }
 
@@ -120,7 +121,13 @@ namespace document_classification
         /// </summary>
         private void ReadDataBase()
         {
-            throw new NotImplementedException();
+            DCDbTools.Instance.getDBRepresentation();
+            DCDbTools.Instance.getAllCases();
+            DCDbTools.Instance.getAllProcedures();
+            this.DBRepresentation = document_classification.Data.Instance.DBRepresentation;
+            this.AllCases = Data.Instance.AllCases;
+            this.AllProcedures = Data.Instance.AllProcedures;
+ 
         }
 
 
@@ -153,13 +160,13 @@ namespace document_classification
             return ret;
           }
 
-        public int[] NextStagePrediciton(string text)
+        public int[] NextStagePrediciton(int procedurId, int phaseId, string text)
         {
             throw new NotImplementedException();
         }
 
 
-        public int[] NextPersonPrediction(string text)
+        public int[] NextPersonPrediction(int procedurId, int phaseId, string text)
         {
             throw new NotImplementedException();
         }
@@ -188,7 +195,7 @@ namespace document_classification
 
 
         /// <summary>
-        /// Builds the <see cref="ProcedureMatrix"/> out of <see cref="ProceduresSet"/> for words
+        /// Builds the <see cref="ProcedureMatrix"/> out of <see cref="AllProcedures"/> for words
         /// that are listed in <see cref="MapWordToColumn"/>
         /// </summary>
         private void ProcedureMatrixBuild()
@@ -201,7 +208,7 @@ namespace document_classification
                 ProcedureMatrix[h] = new double[NumberOfMeaningfulWords];
             }
             int procedurIndex = 0;
-            foreach (KeyValuePair<int, Procedure> kvp in ProceduresSet)
+            foreach (KeyValuePair<int, Procedure> kvp in AllProcedures)
             {
                 int procedurId = kvp.Key;
                 Procedure currentProcedure = kvp.Value;
@@ -230,19 +237,19 @@ namespace document_classification
 
         private void NextPhaseMatrixBuild()
         {
-            int nrOfDecisions = PhaseDecisionData.GetNrOfDecisions();
+            int nrOfDecisions = AllDecisionsPhase.GetNrOfDecisions();
             PhaseMatrix = new double[nrOfDecisions, NumberOfMeaningfulWords];
             MapRowToNextPhaseId = new int[nrOfDecisions];
             int indexer = 0;
-            foreach (int procId in PhaseDecisionData.Keys)
+            foreach (int procId in AllDecisionsPhase.Keys)
             {
                 MapProcIdPhasIdToRowsSet[procId] = new Dictionary<int, List<int>>();
-                foreach (int phaseId in PhaseDecisionData[procId].Keys)
+                foreach (int phaseId in AllDecisionsPhase[procId].Keys)
                 {
                     MapProcIdPhasIdToRowsSet[procId][phaseId] = new List<int>();
-                    foreach (int nextPhasId in PhaseDecisionData[procId][phaseId].Keys)
+                    foreach (int nextPhasId in AllDecisionsPhase[procId][phaseId].Keys)
                     {
-                        Dictionary<string, double> textRepresentation = PhaseDecisionData[procId][phaseId][nextPhasId];
+                        Dictionary<string, double> textRepresentation = AllDecisionsPhase[procId][phaseId][nextPhasId];
                         foreach (KeyValuePair<string, double> kvp in textRepresentation)
                         {
 
@@ -256,7 +263,6 @@ namespace document_classification
                                 double TFIDF = kvp.Value;
                                 int indice = MapWordToColumn[word];
                                 PhaseMatrix[indexer,indice]= TFIDF;
-
                                 //wstaw wektor do tablicy
                                 //dodaj do listy, gdzie są takie przejścia
                                 //zwiększ indeks bo dalej trzeba szukać
@@ -277,13 +283,13 @@ namespace document_classification
         }
 
         /// <summary>
-        /// Finds all words that frequency in <see cref="CasesSet"/> is less than threashold
+        /// Finds all words that frequency in <see cref="AllCases"/> is less than threashold
         /// </summary>
         private void FetchMeaningfulWords()
         {
             this.wordThreshold = (int) Math.Floor((NumberOfCases * MaximumFrequency));
             int vectorIndice = 0;
-            foreach(KeyValuePair<string, int> kvp in allWords)
+            foreach(KeyValuePair<string, int> kvp in DBRepresentation)
             {
                 int documentFrequency = kvp.Value;
                 string word = kvp.Key;

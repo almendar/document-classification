@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace document_classification
 {
-    class Data
+    public class Data
     {
-        public static readonly Data instance = new Data();
+        private static readonly Data instance = new Data();
         public static Data Instance
         {
             get
@@ -15,12 +14,16 @@ namespace document_classification
                 return instance;
             }
         }
+
+        private static Data() { }
+
         private Data()
         {
             allCases = new AllCases();
             dbRepresentation = new DBRepresentation();
             allProcedures = new AllProcedures();
         }
+
         private AllCases allCases;
         private DBRepresentation dbRepresentation;
         private AllProcedures allProcedures;
