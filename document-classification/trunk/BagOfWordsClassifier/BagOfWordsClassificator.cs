@@ -96,8 +96,8 @@ namespace DocumentClassification.BagOfWords
         {
 
             ReadDataBase();
-            ComputeStatisticParams();
             FetchMeaningfulWords();
+            ComputeStatisticParams();
             CreateDataMatrices();
         }
 
@@ -129,6 +129,7 @@ namespace DocumentClassification.BagOfWords
             this.DBRepresentation = Data.Instance.DBRepresentation;
             this.AllCases = Data.Instance.AllCases;
             this.AllProcedures = Data.Instance.AllProcedures;
+
  
         }
 
