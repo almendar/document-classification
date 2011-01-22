@@ -206,6 +206,7 @@ namespace DocumentClassification.BagOfWords
 
             //int nrOfProcedures = ProceduresSet.Keys.Count;
             ProcedureMatrix = new double[numberOfProcedures][];
+            MapRowToProcedureId = new int[numberOfProcedures];
             for (int h = 0; h < numberOfProcedures; h++)
             {
                 ProcedureMatrix[h] = new double[NumberOfMeaningfulWords];
