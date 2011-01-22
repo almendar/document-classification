@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using DocumentClassification.BagOfWords;
+
 public class TestApp
 {
 
@@ -26,8 +27,9 @@ public class TestApp
 
     static void Main()
     {
+
         TestApp app = new TestApp();
-        app.ReadTextFromFile("test1.txt");
+        app.ReadTextFromFile(@"C:\Users\karol.galazka\Documents\test.txt");
 
         BagOfWordsTextClassifier classifier = BagOfWordsTextClassifier.Instance;
         int [] resutl = classifier.ProcedureRecognition(app.TextFile);
@@ -35,6 +37,6 @@ public class TestApp
         {
             System.Console.WriteLine("Best procedures: {0}", a);
         }
-        
+        System.Console.ReadLine();
     }
 }

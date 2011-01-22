@@ -12,10 +12,14 @@
     <AssemblyName>tkogutTestApp</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>Svn</SccProjectName>
-    <SccLocalPath>Svn</SccLocalPath>
-    <SccAuxPath>Svn</SccAuxPath>
-    <SccProvider>SubversionScc</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -37,6 +41,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MySql.Data">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\MySQL\MySQL Connector Net 6.3.6\Assemblies\v2.0\MySql.Data.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -49,10 +56,6 @@
     <ProjectReference Include="..\BagOfWordsClassifier\BagOfWordsClassifier.csproj">
       <Project>{828947B5-B2CD-41E4-9C56-43B169493181}</Project>
       <Name>BagOfWordsClassifier</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DCUpdate\DCUpdate.csproj">
-      <Project>{528A55D8-1B98-4841-98E6-2122680C1AE1}</Project>
-      <Name>DCUpdate</Name>
     </ProjectReference>
     <ProjectReference Include="..\document-classification\document-classification.csproj">
       <Project>{2050C229-9002-46FE-BD6D-9EB9ADE8475D}</Project>

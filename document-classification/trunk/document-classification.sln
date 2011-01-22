@@ -9,11 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DCUpdate", "DCUpdate\DCUpda
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BagOfWordsClassifier", "BagOfWordsClassifier\BagOfWordsClassifier.csproj", "{828947B5-B2CD-41E4-9C56-43B169493181}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{06B00F13-F9F6-4C46-8415-1EFB0C1A773E}"
+EndProject
 Global
-	GlobalSection(SubversionScc) = preSolution
-		Svn-Managed = True
-		Manager = AnkhSVN - Subversion Support for Visual Studio
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -63,8 +61,22 @@ Global
 		{828947B5-B2CD-41E4-9C56-43B169493181}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{828947B5-B2CD-41E4-9C56-43B169493181}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{828947B5-B2CD-41E4-9C56-43B169493181}.Release|x86.ActiveCfg = Release|Any CPU
+		{06B00F13-F9F6-4C46-8415-1EFB0C1A773E}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{06B00F13-F9F6-4C46-8415-1EFB0C1A773E}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{06B00F13-F9F6-4C46-8415-1EFB0C1A773E}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{06B00F13-F9F6-4C46-8415-1EFB0C1A773E}.Debug|x86.ActiveCfg = Debug|x86
+		{06B00F13-F9F6-4C46-8415-1EFB0C1A773E}.Debug|x86.Build.0 = Debug|x86
+		{06B00F13-F9F6-4C46-8415-1EFB0C1A773E}.Release|Any CPU.ActiveCfg = Release|x86
+		{06B00F13-F9F6-4C46-8415-1EFB0C1A773E}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{06B00F13-F9F6-4C46-8415-1EFB0C1A773E}.Release|Mixed Platforms.Build.0 = Release|x86
+		{06B00F13-F9F6-4C46-8415-1EFB0C1A773E}.Release|x86.ActiveCfg = Release|x86
+		{06B00F13-F9F6-4C46-8415-1EFB0C1A773E}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
 	EndGlobalSection
 EndGlobal

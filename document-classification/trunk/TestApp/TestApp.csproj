@@ -5,23 +5,13 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{528A55D8-1B98-4841-98E6-2122680C1AE1}</ProjectGuid>
+    <ProjectGuid>{06B00F13-F9F6-4C46-8415-1EFB0C1A773E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DCUpdate</RootNamespace>
-    <AssemblyName>DCUpdate</AssemblyName>
+    <RootNamespace>TestApp</RootNamespace>
+    <AssemblyName>TestApp</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -47,45 +37,18 @@
       <HintPath>..\..\..\..\..\..\Program Files (x86)\MySQL\MySQL Connector Net 6.3.6\Assemblies\v2.0\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration.Install" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Transactions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="amodDataSet.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>amodDataSet.xsd</DependentUpon>
-    </Compile>
-    <Compile Include="AmodDBTools.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="amodDataSet.xsc">
-      <DependentUpon>amodDataSet.xsd</DependentUpon>
-    </None>
-    <None Include="amodDataSet.xsd">
-      <Generator>MSDataSetGenerator</Generator>
-      <LastGenOutput>amodDataSet.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="amodDataSet.xss">
-      <DependentUpon>amodDataSet.xsd</DependentUpon>
-    </None>
-    <None Include="app.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\DCUpdate\DCUpdate.csproj">
+      <Project>{528A55D8-1B98-4841-98E6-2122680C1AE1}</Project>
+      <Name>DCUpdate</Name>
+    </ProjectReference>
     <ProjectReference Include="..\document-classification\document-classification.csproj">
       <Project>{2050C229-9002-46FE-BD6D-9EB9ADE8475D}</Project>
       <Name>document-classification</Name>
