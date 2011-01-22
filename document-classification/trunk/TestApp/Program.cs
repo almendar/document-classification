@@ -11,6 +11,7 @@ namespace TestApp
         static void Main(string[] args)
         {
             AmodDBTools.Instance.update();
+            DCDbTools.Instance.createNewVersion();
             DCDbTools.Instance.sendDBRepresentation();
             DCDbTools.Instance.sendAllCases();
             Data.Instance.AllProcedures.rebuild(Data.Instance.AllCases);
