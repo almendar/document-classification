@@ -24,6 +24,7 @@ namespace DocumentClassification.Representation
         {
         }
         private MySqlConnection conn;
+        private int CurrentVersion;
 
         private const string connectionString = "Server=localhost;Database=dc;Uid=root;Pwd=1207pegazo;";
         private void connect()
@@ -39,6 +40,18 @@ namespace DocumentClassification.Representation
             conn.Close();
         }
 
+        public void createNewVersion()
+        {
+            connect();
+            string Query = "INSERT INTO dc.versionHistory(imageDate) values" +
+             "('" + System.DateTime.Now + "');" +
+             "select LAST_INSERT_ID();";
+            DbDataReader rdr = executeQuery(Query);
+            rdr.Read();
+            CurrentVersion = rdr.GetInt32(0);
+            disconnect();
+        }
+
         public void sendDBRepresentation()
         {
             connect();
@@ -47,8 +60,8 @@ namespace DocumentClassification.Representation
             bf.Serialize(mem, Data.Instance.DBRepresentation);
             String str = Convert.ToBase64String(mem.ToArray());
 
-            string Query = "INSERT INTO dc.dbrepresentation(date, data) values" +
-             "('" + "2011-01-01 12:00:00" + "','" + str + "');";
+            string Query = "INSERT INTO dc.dbrepresentation(base64BinaryData,versionhistory_idversionHistory) values" +
+             "('" + str + "'," + CurrentVersion + ");";
 
             executeNonQuery(Query);
             disconnect();
@@ -91,8 +104,8 @@ namespace DocumentClassification.Representation
             bf.Serialize(mem, Data.Instance.AllCases);
             String str = Convert.ToBase64String(mem.ToArray());
 
-            string Query = "INSERT INTO dc.allcases(date, data) values" +
-             "('" + System.DateTime.Today + "','" + str + "');";
+            string Query = "INSERT INTO dc.allcases(base64BinaryData,versionhistory_idversionHistory) values" +
+             "('" + str + "'," + CurrentVersion + ");";
 
             executeNonQuery(Query);
             disconnect();
@@ -119,8 +132,8 @@ namespace DocumentClassification.Representation
             bf.Serialize(mem, Data.Instance.AllProcedures);
             String str = Convert.ToBase64String(mem.ToArray());
 
-            string Query = "INSERT INTO dc.allprocedures(date, data) values" +
-             "('" + System.DateTime.Today + "','" + str + "');";
+            string Query = "INSERT INTO dc.allprocedures(base64BinaryData,versionhistory_idversionHistory) values" +
+             "('" + str + "'," + CurrentVersion + ");";
 
             executeNonQuery(Query);
             disconnect();
