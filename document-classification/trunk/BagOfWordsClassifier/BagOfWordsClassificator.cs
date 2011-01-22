@@ -19,6 +19,7 @@ namespace DocumentClassification.BagOfWords
                 return instance;
             }
         }
+
         static BagOfWordsTextClassifier()
         {
         }
@@ -91,7 +92,7 @@ namespace DocumentClassification.BagOfWords
 #endregion
         
 
-        BagOfWordsTextClassifier()
+        private BagOfWordsTextClassifier()
         {
 
             ReadDataBase();
