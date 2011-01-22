@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.Serialization;
 
-namespace document_classification
+namespace DocumentClassification.Representation
 {
     /// <summary>
     /// Represens a case in the flow.

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace document_classification
+namespace DocumentClassification.BagOfWords
 {
     class VectorOperations
     {

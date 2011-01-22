@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace document_classification
+namespace DocumentClassification.Representation
 {
     [Serializable]
    public class DecisionRepresentationPeople : Dictionary<string, double>

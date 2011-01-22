@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using document_classification;
+using DocumentClassification.Representation;
 
-namespace document_classification
+namespace DocumentClassification.DCUpdate
 {
     class Program
     {
