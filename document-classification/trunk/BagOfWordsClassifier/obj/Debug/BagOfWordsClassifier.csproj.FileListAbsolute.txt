@@ -1,0 +1,9 @@
+D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\BagOfWordsClassifier\bin\Debug\BagOfWordsClassifier.dll
+D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\BagOfWordsClassifier\bin\Debug\BagOfWordsClassifier.pdb
+D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\BagOfWordsClassifier\bin\Debug\DCUpdate.exe
+D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\BagOfWordsClassifier\bin\Debug\document-classification.dll
+D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\BagOfWordsClassifier\bin\Debug\DCUpdate.pdb
+D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\BagOfWordsClassifier\bin\Debug\document-classification.pdb
+D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\BagOfWordsClassifier\obj\Debug\ResolveAssemblyReference.cache
+D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\BagOfWordsClassifier\obj\Debug\BagOfWordsClassifier.dll
+D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\BagOfWordsClassifier\obj\Debug\BagOfWordsClassifier.pdb

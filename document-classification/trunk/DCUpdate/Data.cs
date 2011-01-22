@@ -15,7 +15,7 @@ namespace document_classification
             }
         }
 
-        private static Data() { }
+        static Data() { }
 
         private Data()
         {
