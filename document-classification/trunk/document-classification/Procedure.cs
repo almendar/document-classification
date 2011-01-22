@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace document_classification
 {
@@ -8,6 +9,7 @@ namespace document_classification
     /// Represent a procedure.
     /// Procedure assigns to words TF-IDF measure sumed over all associated Cases with this procedure.
     /// </summary>
+    [Serializable]
     public class Procedure : Dictionary<string, double>
     {
 
@@ -25,9 +27,15 @@ namespace document_classification
 
         }
 
-        public Procedure(int procedureId)
+        public Procedure(int procedureId) : base()
         {
             this.procedureId = procedureId;
+        }
+        public Procedure() : base()
+        {
+        }
+        public Procedure(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
         }
 
         /// <summary>
@@ -68,12 +76,16 @@ namespace document_classification
     /// Represent all known procedures in the DB.
     /// Keys are IDs of the procedures stored in the DB.
     /// </summary>
+    [Serializable]
     public class AllProcedures : Dictionary<int, Procedure>
     {
-        public AllProcedures()
+        public AllProcedures() : base()
         {
         }
-        private void rebuild(AllCases allCases)
+        public AllProcedures(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+        public void rebuild(AllCases allCases)
         {
             this.Clear();
             foreach (Case tempCase in allCases.Values)
