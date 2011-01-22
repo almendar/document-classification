@@ -56,8 +56,6 @@
       <DependentUpon>amodDataSet.xsd</DependentUpon>
     </Compile>
     <Compile Include="AmodDBTools.cs" />
-    <Compile Include="Data.cs" />
-    <Compile Include="DCDbTools.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

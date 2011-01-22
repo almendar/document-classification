@@ -6,8 +6,9 @@ using System.Configuration;
 using System.Web;
 using System.Data.Common;
 using System.Data.SqlClient;
+using DocumentClassification.Representation;
 
-namespace document_classification
+namespace DocumentClassification.DCUpdate
 {
     public class AmodDBTools
     {

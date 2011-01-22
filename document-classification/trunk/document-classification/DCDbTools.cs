@@ -5,7 +5,7 @@ using MySql.Data.MySqlClient;
 using System.Data.Common;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace document_classification
+namespace DocumentClassification.Representation
 {
     public class DCDbTools
     {

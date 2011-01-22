@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using DocumentClassification.Representation;
 
-namespace document_classification
+namespace DocumentClassification.BagOfWords
 {
     /// <summary>
     /// Singleton instance of classificator based on bag-of-words paradigm
@@ -124,7 +125,7 @@ namespace document_classification
             DCDbTools.Instance.getDBRepresentation();
             DCDbTools.Instance.getAllCases();
             DCDbTools.Instance.getAllProcedures();
-            this.DBRepresentation = document_classification.Data.Instance.DBRepresentation;
+            this.DBRepresentation = Data.Instance.DBRepresentation;
             this.AllCases = Data.Instance.AllCases;
             this.AllProcedures = Data.Instance.AllProcedures;
  

@@ -8,7 +8,7 @@
     <ProjectGuid>{2050C229-9002-46FE-BD6D-9EB9ADE8475D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>document_classification</RootNamespace>
+    <RootNamespace>DocumentClassfication.BagOfWords</RootNamespace>
     <AssemblyName>document-classification</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -62,8 +62,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Case.cs" />
+    <Compile Include="Data.cs" />
     <Compile Include="DBRepresentation.cs" />
-    <Compile Include="DCSettings.cs" />
+    <Compile Include="DCDbTools.cs" />
     <Compile Include="DecisionRepresentation.cs" />
     <Compile Include="Procedure.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

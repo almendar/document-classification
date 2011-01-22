@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using document_classification;
+using DocumentClassification.BagOfWords;
 public class TestApp
 {
 
