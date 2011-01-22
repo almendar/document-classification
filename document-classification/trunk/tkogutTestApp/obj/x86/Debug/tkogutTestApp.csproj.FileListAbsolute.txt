@@ -1,9 +1,0 @@
-D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\tkogutTestApp\obj\x86\Debug\ResolveAssemblyReference.cache
-D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\tkogutTestApp\bin\Debug\tkogutTestApp.exe
-D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\tkogutTestApp\bin\Debug\tkogutTestApp.pdb
-D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\tkogutTestApp\bin\Debug\DCUpdate.exe
-D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\tkogutTestApp\bin\Debug\document-classification.dll
-D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\tkogutTestApp\bin\Debug\DCUpdate.pdb
-D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\tkogutTestApp\bin\Debug\document-classification.pdb
-D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\tkogutTestApp\obj\x86\Debug\tkogutTestApp.exe
-D:\tomek\programowanie\VisualStudio\document-clasification\document-classification\tkogutTestApp\obj\x86\Debug\tkogutTestApp.pdb
