@@ -19,9 +19,13 @@ namespace TestApp
             DCDbTools.Instance.sendAllProcedures();
             DCDbTools.Instance.sendAllDecisionsStatus();
             */
+            /*
             DCDbTools.Instance.setCurrentVersion();
             DCDbTools.Instance.getAllDecisionsStatus();
             int i = Data.Instance.AllDecisionsStatus.Count;
+            */
+            DCDbTools.Instance.loadData();
+            int i = Data.Instance.AllCases.Count;
         }
     }
 }
