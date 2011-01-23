@@ -189,5 +189,14 @@ namespace DocumentClassification.Representation
             DbCommand cmd = new MySqlCommand(query, conn);
             return (cmd.ExecuteReader());
         }
+
+        public void loadData()
+        {
+            setCurrentVersion();
+            getDBRepresentation();
+            getAllCases();
+            getAllDecisionsStatus();
+            getAllProcedures();
+        }
     }
 }
