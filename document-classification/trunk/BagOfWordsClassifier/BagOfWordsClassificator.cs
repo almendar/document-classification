@@ -79,7 +79,7 @@ namespace DocumentClassification.BagOfWords
 
         //TODO
         //**********************************************************************//
-        private double[,] PhaseMatrix = null;
+        private double[][] PhaseMatrix = null;
         private Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToRowsSet = null;
         private int [] MapRowToNextPhaseId = null;
 
@@ -114,7 +114,7 @@ namespace DocumentClassification.BagOfWords
             ProcedureMatrixBuild();
             
             //Not ready yet
-            //NextPhaseMatrixBuild();
+            NextPhaseMatrixBuild();
             //NextPersonMatrixBuild();
         }
 
@@ -163,9 +163,27 @@ namespace DocumentClassification.BagOfWords
             return ret;
           }
 
-        public int[] NextStagePrediciton(int procedurId, int phaseId, string text)
+        public int[] NextPhasePrediciton(int procedurId, int phaseId, string text)
         {
-            throw new NotImplementedException();
+            String[] textTokens = TextExtraction.GetTextTokens(text);
+            double[] textVector = CreateVectorFromText(textTokens);
+            int nrOfDecisions = PhaseMatrix.Length;
+            int bestDecisionIndice = int.MinValue;
+            double bestSimilarity = double.PositiveInfinity;
+            List<int> rowSet = MapProcIdPhasIdToRowsSet[procedurId][phaseId];
+            for (int i = 0; i < rowSet.Count; i++)
+            {
+                double[] checkedVector = PhaseMatrix[rowSet[i]];
+                double similarity = (1-VectorOperations.VectorsConsine(checkedVector,textVector));
+                if (similarity < bestSimilarity)
+                {
+                    bestSimilarity = similarity;
+                    bestDecisionIndice = i;
+                }
+            }
+            int bestNextPhaseId = MapRowToNextPhaseId[bestDecisionIndice];
+            int[] ret = new int[] { bestNextPhaseId };
+            return ret;
         }
 
 
@@ -242,7 +260,12 @@ namespace DocumentClassification.BagOfWords
         private void NextPhaseMatrixBuild()
         {
             int nrOfDecisions = AllDecisionsPhase.GetNrOfDecisions();
-            PhaseMatrix = new double[nrOfDecisions, NumberOfMeaningfulWords];
+            PhaseMatrix = new double[nrOfDecisions][];
+            for(int i=0; i < nrOfDecisions; i++)
+            {
+                PhaseMatrix[i] = new double[NumberOfMeaningfulWords];
+            }
+            
             MapRowToNextPhaseId = new int[nrOfDecisions];
             int indexer = 0;
             foreach (int procId in AllDecisionsPhase.Keys)
@@ -266,10 +289,7 @@ namespace DocumentClassification.BagOfWords
                                 String word = kvp.Key;
                                 double TFIDF = kvp.Value;
                                 int indice = MapWordToColumn[word];
-                                PhaseMatrix[indexer,indice]= TFIDF;
-                                //wstaw wektor do tablicy
-                                //dodaj do listy, gdzie są takie przejścia
-                                //zwiększ indeks bo dalej trzeba szukać
+                                PhaseMatrix[indexer][indice]= TFIDF;
                             }
                         }
                         
@@ -312,4 +332,37 @@ namespace DocumentClassification.BagOfWords
         }
         
     }
+
+   public class ClassificationResult : IComparable<ClassificationResult>
+   {
+       private readonly int id;
+       private readonly double similarity;
+
+       public int CompareTo(ClassificationResult other)
+       {
+           return this.Similarity.CompareTo(other.Similarity);
+       }
+
+       public ClassificationResult(int id, double similarity)
+       {
+           this.id = id;
+           this.similarity = similarity;
+       }
+
+      public int Id
+       {
+           get
+           {
+               return id;
+           }
+       }
+
+       public double Similarity
+       {
+           get
+           {
+               return similarity;
+           }
+       }
+   }
 }
