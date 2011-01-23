@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace DocumentClassification.Representation
 {
     [Serializable]
    public class DecisionRepresentationPeople : Dictionary<string, double>
    {
+        public DecisionRepresentationPeople() : base()
+        {
+        }
+        public DecisionRepresentationPeople(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
         private int procedureId;
         private int phaseId;
         private int nextPhaseId;
@@ -19,6 +26,12 @@ namespace DocumentClassification.Representation
     [Serializable]
     public class AllDecisionsPeople : Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationPeople>>>
     {
+        public AllDecisionsPeople() : base()
+        {
+        }
+        public AllDecisionsPeople(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
         public int GetNrOfDecisions()
         {
             int nrRet = 0;
@@ -36,8 +49,15 @@ namespace DocumentClassification.Representation
     /// ProcedurID,PersonId,nextStageId
     /// </summary>
     [Serializable]
-    public class AllDecisionsPhase : Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationPhase>>> 
+    public class AllDecisionsStatus : Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationStatus>>> 
     {
+        public AllDecisionsStatus()
+            : base()
+        {
+        }
+        public AllDecisionsStatus(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
         public int GetNrOfDecisions()
         {
             int nrRet = 0;
@@ -52,10 +72,17 @@ namespace DocumentClassification.Representation
     }
 
     [Serializable]
-    public class DecisionRepresentationPhase :  Dictionary<string, double>
+    public class DecisionRepresentationStatus :  Dictionary<string, double>
     {
-        private int procedureId;
-        private int personId;
-        private int nextPersonId;
+        public DecisionRepresentationStatus() : base()
+        {
+        }
+        public DecisionRepresentationStatus(Dictionary<string, double> dict) : base(dict)
+        {
+        }
+        public DecisionRepresentationStatus(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+
     }
 }

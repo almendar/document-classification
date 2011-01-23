@@ -22,11 +22,13 @@ namespace DocumentClassification.Representation
             allCases = new AllCases();
             dbRepresentation = new DBRepresentation();
             allProcedures = new AllProcedures();
+            allDecsisionsStatus = new AllDecisionsStatus();
         }
 
         private AllCases allCases;
         private DBRepresentation dbRepresentation;
         private AllProcedures allProcedures;
+        private AllDecisionsStatus allDecsisionsStatus;
 
         public AllCases AllCases
         {
@@ -37,6 +39,17 @@ namespace DocumentClassification.Representation
             set
             {
                 allCases = value;
+            }
+        }
+        public AllDecisionsStatus AllDecisionsStatus
+        {
+            get
+            {
+                return allDecsisionsStatus;
+            }
+            set
+            {
+                allDecsisionsStatus = value;
             }
         }
         public DBRepresentation DBRepresentation

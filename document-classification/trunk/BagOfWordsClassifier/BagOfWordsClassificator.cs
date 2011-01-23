@@ -30,7 +30,7 @@ namespace DocumentClassification.BagOfWords
         private DBRepresentation DBRepresentation = null;
         private AllCases AllCases = null;
         private AllProcedures AllProcedures = null;
-        private AllDecisionsPhase AllDecisionsPhase = null;
+        private AllDecisionsStatus AllDecisionsPhase = null;
         private AllDecisionsPeople AllDecisionsPeople = null;
 
         /// <summary>

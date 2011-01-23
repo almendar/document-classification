@@ -27,6 +27,7 @@ namespace DocumentClassification.Representation
         private int CurrentVersion;
 
         private const string connectionString = "Server=localhost;Database=dc;Uid=root;Pwd=1207pegazo;";
+
         private void connect()
         {
             if (conn == null)
@@ -34,7 +35,6 @@ namespace DocumentClassification.Representation
             conn.ConnectionString = connectionString;
             conn.Open();
         }
-
         private void disconnect()
         {
             conn.Close();
@@ -46,6 +46,15 @@ namespace DocumentClassification.Representation
             string Query = "INSERT INTO dc.versionHistory(imageDate) values" +
              "('" + System.DateTime.Now + "');" +
              "select LAST_INSERT_ID();";
+            DbDataReader rdr = executeQuery(Query);
+            rdr.Read();
+            CurrentVersion = rdr.GetInt32(0);
+            disconnect();
+        }
+        public void setCurrentVersion()
+        {
+            connect();
+            string Query = "SELECT MAX(idversionHistory) FROM versionhistory;";
             DbDataReader rdr = executeQuery(Query);
             rdr.Read();
             CurrentVersion = rdr.GetInt32(0);
@@ -69,7 +78,8 @@ namespace DocumentClassification.Representation
         public void getDBRepresentation()
         {
             connect();
-            string Query = "SELECT * FROM dc.dbrepresentation;";
+            string Query = @"SELECT * FROM dc.dbrepresentation
+                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
             DbDataReader rdr = executeQuery(Query);
             if (rdr.Read())
             {
@@ -83,7 +93,8 @@ namespace DocumentClassification.Representation
         public void getAllCases()
         {
             connect();
-            string Query = "SELECT * FROM dc.allcases;";
+            string Query = @"SELECT * FROM dc.allcases
+                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
             DbDataReader rdr = executeQuery(Query);
             if (rdr.Read())
             {
@@ -113,7 +124,8 @@ namespace DocumentClassification.Representation
         public void getAllProcedures()
         {
             connect();
-            string Query = "SELECT * FROM dc.allprocedures;";
+            string Query = @"SELECT * FROM dc.allprocedures
+                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
             DbDataReader rdr = executeQuery(Query);
             if (rdr.Read())
             {
@@ -136,6 +148,35 @@ namespace DocumentClassification.Representation
              "('" + str + "'," + CurrentVersion + ");";
 
             executeNonQuery(Query);
+            disconnect();
+        }
+        public void sendAllDecisionsStatus()
+        {
+            connect();
+            BinaryFormatter bf = new BinaryFormatter();
+            System.IO.MemoryStream mem = new System.IO.MemoryStream();
+            bf.Serialize(mem, Data.Instance.AllDecisionsStatus);
+            String str = Convert.ToBase64String(mem.ToArray());
+
+            string Query = "INSERT INTO dc.alldecisionsstatus(base64BinaryData,versionhistory_idversionHistory) values" +
+             "('" + str + "'," + CurrentVersion + ");";
+
+            executeNonQuery(Query);
+            disconnect();
+        }
+        public void getAllDecisionsStatus()
+        {
+            connect();
+            string Query = @"SELECT * FROM dc.alldecisionsstatus
+                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
+            DbDataReader rdr = executeQuery(Query);
+            if (rdr.Read())
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                System.IO.MemoryStream mem =
+                    new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
+                Data.Instance.AllDecisionsStatus = (AllDecisionsStatus)bf.Deserialize(mem);
+            }
             disconnect();
         }
         private void executeNonQuery(String query)
