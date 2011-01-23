@@ -175,7 +175,7 @@ namespace DocumentClassification.BagOfWords
                 if (similarity < bestSimilarity)
                 {
                     bestSimilarity = similarity;
-                    bestDecisionIndice = i;
+                    bestDecisionIndice = rowSet[i];
                 }
             }
             int bestNextPhaseId = MapRowToNextPhaseId[bestDecisionIndice];
