@@ -74,8 +74,7 @@ namespace DocumentClassification.DCUpdate
         }
         private DbDataReader executeQuery(String query)
         {
-            DbCommand cmd = new MySqlCommand(query, conn);
-            return(cmd.ExecuteReader());
+            return executeQuery(query, conn);
         }
         private DbDataReader getNewData(String lastRecordDate)
         {
@@ -101,11 +100,14 @@ namespace DocumentClassification.DCUpdate
         /** return procedure Id for particular case */
         public int getProcedureId(int caseId)
         {
-            string checkProcedureQuery = @"select caseProcedureId
+            MySqlConnection connection = new MySqlConnection();
+            connection.ConnectionString = connectionString;
+            connection.Open();
+            string checkProcedureQuery = @"select caseProcedureId
                                from amod.casedefinition
                                where caseId =" + caseId.ToString() +
                                   ";";
-            DbDataReader rdr = executeQuery(checkProcedureQuery);
+            DbDataReader rdr = executeQuery(checkProcedureQuery, connection);
             int result = 0;
             if (rdr.Read())
             {
@@ -115,8 +117,14 @@ namespace DocumentClassification.DCUpdate
             {
                 //@TODO exception
             }
-            rdr.Close();
+            connection.Close();
             return result;
+        }
+
+        private DbDataReader executeQuery(string checkProcedureQuery, MySqlConnection connection)
+        {
+            DbCommand cmd = new MySqlCommand(checkProcedureQuery, connection);
+            return(cmd.ExecuteReader());
         }
         public void update()
         {
@@ -212,7 +220,90 @@ namespace DocumentClassification.DCUpdate
                     }
                 }
             }
+            rdr.Close();
+            updateAllDecisionsStatus();
             disconnect();
+        }
+        private void updateAllDecisionsStatus()
+        {
+            string Query = @"SELECT `caseId`, `caseVersion`, `caseStatusId`, `caseModified`, `casePrevStatusId`, `caseNextStatusId` 
+                            FROM `amod`.`casehistory` 
+                            WHERE `caseNextStatusId` IS NOT NULL AND `caseNextStatusId` <> `caseStatusId` 
+                            ORDER BY `caseId`, `caseVersion`;";
+            DbDataReader rdr = executeQuery(Query);
+
+            int caseId = -1;
+            int procedureId = -1;
+            while (rdr.Read())
+            {
+                if (caseId != rdr.GetInt32(0))
+                {
+                    caseId = rdr.GetInt32(0);
+                    procedureId = getProcedureId(caseId);
+                    Int32 currentStatus = rdr.GetInt32(2);
+                    Int32? prevStatus = null;
+                    if (!rdr.IsDBNull(4))
+                        prevStatus = rdr.GetInt32(4);
+
+                    Int32 nextStatus = rdr.GetInt32(5);
+                    if (!Data.Instance.AllDecisionsStatus.ContainsKey(procedureId))
+                    {
+                        Data.Instance.AllDecisionsStatus.Add(procedureId, new Dictionary<int, Dictionary<int, DecisionRepresentationStatus>>());
+                        if (prevStatus == null)
+                        {
+                            Data.Instance.AllDecisionsStatus[procedureId].Add(currentStatus, new Dictionary<int, DecisionRepresentationStatus>());
+                            Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new DecisionRepresentationStatus(Data.Instance.AllCases[caseId]));
+                        }
+                    }
+                    else
+                    {
+                        if (prevStatus == null)
+                        {
+                            addConnection(caseId, procedureId, currentStatus, nextStatus);
+                        }
+                        else
+                        {
+                            addConnection(caseId, procedureId, (int)prevStatus, currentStatus);
+                            addConnection(caseId, procedureId, currentStatus, nextStatus);
+                        }
+                    }
+                }
+                else
+                {
+                    addConnection(caseId, procedureId, rdr.GetInt32(2), rdr.GetInt32(5));
+                }
+            }
+            rdr.Close();
+        }
+
+        private static void addConnection(int caseId, int procedureId, Int32 currentStatus, Int32 nextStatus)
+        {
+            if (!Data.Instance.AllDecisionsStatus[procedureId].ContainsKey(currentStatus))
+            {
+                Data.Instance.AllDecisionsStatus[procedureId].Add(currentStatus, new Dictionary<int, DecisionRepresentationStatus>());
+                Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new DecisionRepresentationStatus(Data.Instance.AllCases[caseId]));
+            }
+            else
+            {
+                if (!Data.Instance.AllDecisionsStatus[procedureId][currentStatus].ContainsKey(nextStatus))
+                {
+                    Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new DecisionRepresentationStatus(Data.Instance.AllCases[caseId]));
+                }
+                else
+                {
+                    foreach (String word in Data.Instance.AllCases[caseId].Keys)
+                    {
+                        if (!Data.Instance.AllDecisionsStatus[procedureId][currentStatus][nextStatus].ContainsKey(word))
+                        {
+                            Data.Instance.AllDecisionsStatus[procedureId][currentStatus][nextStatus].Add(word, Data.Instance.AllCases[caseId][word]);
+                        }
+                        else
+                        {
+                            Data.Instance.AllDecisionsStatus[procedureId][currentStatus][nextStatus][word] += Data.Instance.AllCases[caseId][word];
+                        }
+                    }
+                }
+            }
         }
         private void updateDBRepresentation(Dictionary<int, Dictionary<string, int> > data)
         {
