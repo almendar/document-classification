@@ -31,8 +31,8 @@ public class TestApp
     static void Main()
     {
 
-        //ProcedureRecognitionTest();
-        FindBestREsult();
+        ProcedureRecognitionTest();
+       // FindBestREsult();
         Console.ReadKey();
        
     }
@@ -42,7 +42,7 @@ public class TestApp
         List<ClassificationResult> testData = new List<ClassificationResult>();
         LinkedList<ClassificationResult> bestData = new LinkedList<ClassificationResult>();
         Random rand = new Random(DateTime.Now.Second);
-        for (int i = 0; i < 100000000; i++)
+        for (int i = 0; i < 1000; i++)
         {
             ClassificationResult cr = new ClassificationResult(rand.Next(), rand.NextDouble() * 1000);
             testData.Add(cr);
@@ -98,21 +98,22 @@ public class TestApp
         foreach (ClassificationResult cr in bestData)
         {
             Console.WriteLine("{0}", cr.Similarity);
-        }
 
-        /* testData.Sort();
-         Console.WriteLine("!!!!!!!!!");
-         Console.WriteLine("{0}\n{1}\n{2}", testData[0].Similarity, testData[1].Similarity, testData[2].Similarity);
-         */
+
+            /* testData.Sort();
+             Console.WriteLine("!!!!!!!!!");
+             Console.WriteLine("{0}\n{1}\n{2}", testData[0].Similarity, testData[1].Similarity, testData[2].Similarity);
+             */
+        }
     }
 
     private static void ProcedureRecognitionTest()
     {
         TestApp app = new TestApp();
-        app.ReadTextFromFile(@"D:\test.txt");
+        app.ReadTextFromFile(@"C:\Users\karol.galazka\Documents\test.txt");
 
         BagOfWordsTextClassifier classifier = BagOfWordsTextClassifier.Instance;
-        int[] resutl = classifier.ProcedureRecognition(app.TextFile);
+        int [] resutl = classifier.NextPhasePrediciton(19, 338, app.TextFile);
         foreach (int a in resutl)
         {
             System.Console.WriteLine("Best procedures: {0}", a);
