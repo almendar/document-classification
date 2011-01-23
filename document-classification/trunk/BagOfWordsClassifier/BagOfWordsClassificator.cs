@@ -123,14 +123,11 @@ namespace DocumentClassification.BagOfWords
         /// </summary>
         private void ReadDataBase()
         {
-            DCDbTools.Instance.getDBRepresentation();
-            DCDbTools.Instance.getAllCases();
-            DCDbTools.Instance.getAllProcedures();
+            DCDbTools.Instance.loadData();
             this.DBRepresentation = Data.Instance.DBRepresentation;
             this.AllCases = Data.Instance.AllCases;
             this.AllProcedures = Data.Instance.AllProcedures;
-
- 
+            this.AllDecisionsPhase = Data.Instance.AllDecisionsStatus;
         }
 
 
@@ -259,6 +256,7 @@ namespace DocumentClassification.BagOfWords
 
         private void NextPhaseMatrixBuild()
         {
+            MapProcIdPhasIdToRowsSet = new Dictionary<int, Dictionary<int, List<int>>>();
             int nrOfDecisions = AllDecisionsPhase.GetNrOfDecisions();
             PhaseMatrix = new double[nrOfDecisions][];
             for(int i=0; i < nrOfDecisions; i++)
