@@ -24,7 +24,6 @@ namespace DocumentClassification.DCUpdate
         static AmodDBTools()
         {
         }
-
         AmodDBTools()
         {
         }
@@ -103,7 +102,8 @@ namespace DocumentClassification.DCUpdate
             MySqlConnection connection = new MySqlConnection();
             connection.ConnectionString = connectionString;
             connection.Open();
-            string checkProcedureQuery = @"select caseProcedureId
+
+            string checkProcedureQuery = @"select caseProcedureId
                                from amod.casedefinition
                                where caseId =" + caseId.ToString() +
                                   ";";
@@ -158,7 +158,6 @@ namespace DocumentClassification.DCUpdate
                             Data.Instance.AllCases[caseId].Add(word, 0);
                             if (!newWords.Contains(word))
                                 newWords.Add(word);
-
                         }
                     }
                 }
@@ -221,7 +220,91 @@ namespace DocumentClassification.DCUpdate
             }
             rdr.Close();
             updateAllDecisionsStatus();
+            updateAllDecisionsPeople();
+            Data.Instance.AllProcedures.rebuild(Data.Instance.AllCases);
             disconnect();
+        }
+
+        private void updateAllDecisionsPeople()
+        {
+            string Query = @"SELECT `caseId`, `caseVersion`, `caseOwnerId`, `caseModified`, `casePrevOwnerId`, `caseNextOwnerId` 
+                            FROM `amod`.`casehistory` 
+                            WHERE `caseNextOwnerId` IS NOT NULL AND `caseNextOwnerId` <> `caseOwnerId` 
+                            ORDER BY `caseOwnerId`, `caseVersion`;";
+            DbDataReader rdr = executeQuery(Query);
+
+            int caseId = -1;
+            int procedureId = -1;
+            while (rdr.Read())
+            {
+                if (caseId != rdr.GetInt32(0))
+                {
+                    caseId = rdr.GetInt32(0);
+                    procedureId = getProcedureId(caseId);
+                    Int32 currentOwner = rdr.GetInt32(2);
+                    Int32? prevOwner = null;
+                    if (!rdr.IsDBNull(4))
+                        prevOwner = rdr.GetInt32(4);
+
+                    Int32 nextStatus = rdr.GetInt32(5);
+                    if (!Data.Instance.AllDecisionsPeople.ContainsKey(procedureId))
+                    {
+                        Data.Instance.AllDecisionsPeople.Add(procedureId, new Dictionary<int, Dictionary<int, DecisionRepresentationPeople>>());
+                        if (prevOwner == null)
+                        {
+                            Data.Instance.AllDecisionsPeople[procedureId].Add(currentOwner, new Dictionary<int, DecisionRepresentationPeople>());
+                            Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextStatus, new DecisionRepresentationPeople(Data.Instance.AllCases[caseId]));
+                        }
+                    }
+                    else
+                    {
+                        if (prevOwner == null)
+                        {
+                            addPeopleConnection(caseId, procedureId, currentOwner, nextStatus);
+                        }
+                        else
+                        {
+                            addPeopleConnection(caseId, procedureId, (int)prevOwner, currentOwner);
+                            addPeopleConnection(caseId, procedureId, currentOwner, nextStatus);
+                        }
+                    }
+                }
+                else
+                {
+                    addPeopleConnection(caseId, procedureId, rdr.GetInt32(2), rdr.GetInt32(5));
+                }
+            }
+            rdr.Close();
+        }
+        private void addPeopleConnection(int caseId,int procedureId,int currentOwner,int nextOwner)
+        {
+            if (!Data.Instance.AllDecisionsPeople[procedureId].ContainsKey(currentOwner))
+            {
+                Data.Instance.AllDecisionsPeople[procedureId].Add(currentOwner, new Dictionary<int, DecisionRepresentationPeople>());
+                Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextOwner, new DecisionRepresentationPeople(Data.Instance.AllCases[caseId]));
+            }
+            else
+            {
+                if (!Data.Instance.AllDecisionsPeople[procedureId][currentOwner].ContainsKey(nextOwner))
+                {
+                    Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextOwner, new DecisionRepresentationPeople(Data.Instance.AllCases[caseId]));
+                }
+                else
+                {
+                    foreach (String word in Data.Instance.AllCases[caseId].Keys)
+                    {
+                        if (!Data.Instance.AllDecisionsPeople[procedureId][currentOwner][nextOwner].ContainsKey(word))
+                        {
+                            Data.Instance.AllDecisionsPeople[procedureId][currentOwner][nextOwner].Add(word, Data.Instance.AllCases[caseId][word]);
+                        }
+                        else
+                        {
+                            Data.Instance.AllDecisionsPeople[procedureId][currentOwner][nextOwner][word] += Data.Instance.AllCases[caseId][word];
+                        }
+                    }
+                }
+            }
+
         }
         private void updateAllDecisionsStatus()
         {
@@ -258,24 +341,23 @@ namespace DocumentClassification.DCUpdate
                     {
                         if (prevStatus == null)
                         {
-                            addConnection(caseId, procedureId, currentStatus, nextStatus);
+                            addStatusConnection(caseId, procedureId, currentStatus, nextStatus);
                         }
                         else
                         {
-                            addConnection(caseId, procedureId, (int)prevStatus, currentStatus);
-                            addConnection(caseId, procedureId, currentStatus, nextStatus);
+                            addStatusConnection(caseId, procedureId, (int)prevStatus, currentStatus);
+                            addStatusConnection(caseId, procedureId, currentStatus, nextStatus);
                         }
                     }
                 }
                 else
                 {
-                    addConnection(caseId, procedureId, rdr.GetInt32(2), rdr.GetInt32(5));
+                    addStatusConnection(caseId, procedureId, rdr.GetInt32(2), rdr.GetInt32(5));
                 }
             }
             rdr.Close();
         }
-
-        private static void addConnection(int caseId, int procedureId, Int32 currentStatus, Int32 nextStatus)
+        private static void addStatusConnection(int caseId, int procedureId, Int32 currentStatus, Int32 nextStatus)
         {
             if (!Data.Instance.AllDecisionsStatus[procedureId].ContainsKey(currentStatus))
             {

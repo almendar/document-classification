@@ -22,18 +22,20 @@ namespace DocumentClassification.Representation
             allCases = new AllCases();
             dbRepresentation = new DBRepresentation();
             allProcedures = new AllProcedures();
-            allDecsisionsStatus = new AllDecisionsStatus();
+            allDecisionsStatus = new AllDecisionsStatus();
+            allDecisionsPeople = new AllDecisionsPeople(); 
         }
 
         private AllCases allCases;
         private DBRepresentation dbRepresentation;
         private AllProcedures allProcedures;
-        private AllDecisionsStatus allDecsisionsStatus;
+        private AllDecisionsStatus allDecisionsStatus;
+        private AllDecisionsPeople allDecisionsPeople;
 
         public AllCases AllCases
         {
             get
-            { 
+            {
                 return allCases;
             }
             set
@@ -45,11 +47,22 @@ namespace DocumentClassification.Representation
         {
             get
             {
-                return allDecsisionsStatus;
+                return allDecisionsStatus;
             }
             set
             {
-                allDecsisionsStatus = value;
+                allDecisionsStatus = value;
+            }
+        }
+        public AllDecisionsPeople AllDecisionsPeople
+        {
+            get
+            {
+                return allDecisionsPeople;
+            }
+            set
+            {
+                allDecisionsPeople = value;
             }
         }
         public DBRepresentation DBRepresentation
