@@ -8,15 +8,20 @@ namespace DocumentClassification.Representation
     [Serializable]
    public class DecisionRepresentationPeople : Dictionary<string, double>
    {
+        private Case p;
+
         public DecisionRepresentationPeople() : base()
         {
         }
         public DecisionRepresentationPeople(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
-        private int procedureId;
-        private int phaseId;
-        private int nextPhaseId;
+
+        public DecisionRepresentationPeople(Case p)
+        {
+            // TODO: Complete member initialization
+            this.p = p;
+        }
     }
 
     /// <summary>

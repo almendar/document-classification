@@ -40,26 +40,30 @@ namespace DocumentClassification.Representation
             conn.Close();
         }
 
-        private void createNewVersion()
+        public void createNewVersion()
         {
+            connect();
             string Query = "INSERT INTO dc.versionHistory(imageDate) values" +
              "('" + System.DateTime.Now + "');" +
              "select LAST_INSERT_ID();";
             DbDataReader rdr = executeQuery(Query);
             rdr.Read();
             CurrentVersion = rdr.GetInt32(0);
-            rdr.Close();
+            disconnect();
         }
-        private void setCurrentVersion()
+        public void setCurrentVersion()
         {
+            connect();
             string Query = "SELECT MAX(idversionHistory) FROM versionhistory;";
             DbDataReader rdr = executeQuery(Query);
             rdr.Read();
             CurrentVersion = rdr.GetInt32(0);
-            rdr.Close();
+            disconnect();
         }
-        private void sendDBRepresentation()
+
+        public void sendDBRepresentation()
         {
+            connect();
             BinaryFormatter bf = new BinaryFormatter();
             System.IO.MemoryStream mem = new System.IO.MemoryStream();
             bf.Serialize(mem, Data.Instance.DBRepresentation);
@@ -69,9 +73,11 @@ namespace DocumentClassification.Representation
              "('" + str + "'," + CurrentVersion + ");";
 
             executeNonQuery(Query);
+            disconnect();
         }
-        private void getDBRepresentation()
+        public void getDBRepresentation()
         {
+            connect();
             string Query = @"SELECT * FROM dc.dbrepresentation
                            where versionhistory_idversionHistory = " + CurrentVersion + ";";
             DbDataReader rdr = executeQuery(Query);
@@ -82,10 +88,11 @@ namespace DocumentClassification.Representation
                 new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
                 Data.Instance.DBRepresentation = (DBRepresentation)bf.Deserialize(mem);
             }
-            rdr.Close();
+            disconnect();
         }
-        private void getAllCases()
+        public void getAllCases()
         {
+            connect();
             string Query = @"SELECT * FROM dc.allcases
                            where versionhistory_idversionHistory = " + CurrentVersion + ";";
             DbDataReader rdr = executeQuery(Query);
@@ -97,10 +104,11 @@ namespace DocumentClassification.Representation
                     new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
                 Data.Instance.AllCases = (AllCases)bf.Deserialize(mem);
             }
-            rdr.Close();
+            disconnect();
         }
-        private void sendAllCases()
+        public void sendAllCases()
         {
+            connect();
             BinaryFormatter bf = new BinaryFormatter();
             System.IO.MemoryStream mem = new System.IO.MemoryStream();
             mem.Position = 0;
@@ -111,9 +119,11 @@ namespace DocumentClassification.Representation
              "('" + str + "'," + CurrentVersion + ");";
 
             executeNonQuery(Query);
+            disconnect();
         }
-        private void getAllProcedures()
+        public void getAllProcedures()
         {
+            connect();
             string Query = @"SELECT * FROM dc.allprocedures
                            where versionhistory_idversionHistory = " + CurrentVersion + ";";
             DbDataReader rdr = executeQuery(Query);
@@ -124,10 +134,11 @@ namespace DocumentClassification.Representation
                     new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
                 Data.Instance.AllProcedures = (AllProcedures)bf.Deserialize(mem);
             }
-            rdr.Close();
+            disconnect();
         }
-        private void sendAllProcedures()
+        public void sendAllProcedures()
         {
+            connect();
             BinaryFormatter bf = new BinaryFormatter();
             System.IO.MemoryStream mem = new System.IO.MemoryStream();
             bf.Serialize(mem, Data.Instance.AllProcedures);
@@ -137,9 +148,11 @@ namespace DocumentClassification.Representation
              "('" + str + "'," + CurrentVersion + ");";
 
             executeNonQuery(Query);
+            disconnect();
         }
-        private void sendAllDecisionsStatus()
+        public void sendAllDecisionsStatus()
         {
+            connect();
             BinaryFormatter bf = new BinaryFormatter();
             System.IO.MemoryStream mem = new System.IO.MemoryStream();
             bf.Serialize(mem, Data.Instance.AllDecisionsStatus);
@@ -149,9 +162,11 @@ namespace DocumentClassification.Representation
              "('" + str + "'," + CurrentVersion + ");";
 
             executeNonQuery(Query);
+            disconnect();
         }
-        private void getAllDecisionsStatus()
+        public void getAllDecisionsStatus()
         {
+            connect();
             string Query = @"SELECT * FROM dc.alldecisionsstatus
                            where versionhistory_idversionHistory = " + CurrentVersion + ";";
             DbDataReader rdr = executeQuery(Query);
@@ -162,7 +177,7 @@ namespace DocumentClassification.Representation
                     new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
                 Data.Instance.AllDecisionsStatus = (AllDecisionsStatus)bf.Deserialize(mem);
             }
-            rdr.Close();
+            disconnect();
         }
         private void executeNonQuery(String query)
         {
@@ -177,43 +192,21 @@ namespace DocumentClassification.Representation
 
         public void loadData()
         {
-            connect();
             setCurrentVersion();
             getDBRepresentation();
             getAllCases();
             getAllDecisionsStatus();
             getAllProcedures();
             getAllDecisionsPeople();
-            disconnect();
         }
         public void sendData()
         {
-            connect();
-            createNewVersion();
-            startTransation();
-            sendAllCases();
-            sendAllDecisionsPeople();
-            sendAllDecisionsStatus();
-            sendAllProcedures();
-            sendDBRepresentation();
-            commit();
-            disconnect();
-        }
-
-        private void commit()
-        {
-            string Query = "COMMIT;";
-            executeNonQuery(Query);
-        }
-
-        private void startTransation()
-        {
-            string Query = "START TRANSACTION;";
-            executeNonQuery(Query);
+            
         }
 
         private void getAllDecisionsPeople()
         {
+            connect();
             string Query = @"SELECT * FROM dc.alldecisionspeople
                            where versionhistory_idversionHistory = " + CurrentVersion + ";";
             DbDataReader rdr = executeQuery(Query);
@@ -224,9 +217,10 @@ namespace DocumentClassification.Representation
                     new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
                 Data.Instance.AllDecisionsPeople = (AllDecisionsPeople)bf.Deserialize(mem);
             }
-            rdr.Close();
+            disconnect();
+ 
         }
-        private void sendAllDecisionsPeople()
+        public void sendAllDecisionsPeople()
         {
             BinaryFormatter bf = new BinaryFormatter();
             System.IO.MemoryStream mem = new System.IO.MemoryStream();
@@ -236,7 +230,9 @@ namespace DocumentClassification.Representation
             string Query = "INSERT INTO dc.alldecisionspeople(base64BinaryData,versionhistory_idversionHistory) values" +
              "('" + str + "'," + CurrentVersion + ");";
 
+            connect();
             executeNonQuery(Query);
+            disconnect();
         }
 
     }
