@@ -1,11 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DocumentClassification.BagOfWords
+﻿namespace DocumentClassification.BagOfWords
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
+    class VectorLenghtException : Exception
+    {
+        #region Fields
+
+        private string p;
+
+        #endregion Fields
+
+        #region Constructors
+
+        public VectorLenghtException(string p)
+            : base(p)
+        {
+            this.p = p;
+        }
+
+        VectorLenghtException()
+        {
+        }
+
+        #endregion Constructors
+    }
+
     class VectorOperations
     {
+        #region Methods
+
         public static double DotProduct(double[] v1, double[] v2)
         {
             if (v1.Length != v2.Length)
@@ -39,28 +64,8 @@ namespace DocumentClassification.BagOfWords
             double vec2Len = VectorLength(v2);
             double ret = (dotProduct) / (vec1Len*vec2Len);
             return ret;
-
         }
+
+        #endregion Methods
     }
-
-
-
-    class VectorLenghtException : Exception
-    {
-        private string p;
-
-        VectorLenghtException()
-        {
-        }
-
- 
-
-        public VectorLenghtException(string p) : base(p)
-        {
-            this.p = p;
-        }
-
-    }
-
-
 }

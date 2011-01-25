@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DocumentClassification.BagOfWords
+﻿namespace DocumentClassification.BagOfWords
 {
-   public  class TextExtraction
-    {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
 
-       private static char[] splitChars = new char[] {
+    public class TextExtraction
+    {
+        #region Fields
+
+        private static char[] splitChars = new char[] {
                 ' ',
                 ',',
                 '.',
@@ -19,11 +20,17 @@ namespace DocumentClassification.BagOfWords
                 '(',
                 '\n'};
 
-      public static String[] GetTextTokens(String text)
-       {
-           String trimmedText = text.Trim();
-           String[] tokens = trimmedText.Split(splitChars, StringSplitOptions.RemoveEmptyEntries);
-           return tokens;
-       }
+        #endregion Fields
+
+        #region Methods
+
+        public static String[] GetTextTokens(String text)
+        {
+            String trimmedText = text.Trim();
+               String[] tokens = trimmedText.Split(splitChars, StringSplitOptions.RemoveEmptyEntries);
+               return tokens;
+        }
+
+        #endregion Methods
     }
 }

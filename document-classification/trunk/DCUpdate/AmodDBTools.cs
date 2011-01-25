@@ -1,32 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using MySql.Data.MySqlClient;
-using System.Configuration;
-using System.Web;
-using System.Data.Common;
-using System.Data.SqlClient;
-using DocumentClassification.Representation;
-
-namespace DocumentClassification.DCUpdate
+﻿namespace DocumentClassification.DCUpdate
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Configuration;
+    using System.Data.Common;
+    using System.Data.SqlClient;
+    using System.Text;
+    using System.Web;
+
+    using DocumentClassification.Representation;
+
+    using MySql.Data.MySqlClient;
+
     public class AmodDBTools
     {
+        #region Fields
+
+        private const string connectionString = "Server=localhost;Database=amod;Uid=root;Pwd=1207pegazo;";
+
         static readonly AmodDBTools instance = new AmodDBTools();
 
         private MySqlConnection conn;
-        private string lastUpdate;
         private string lastRecord;
-        private const string connectionString = "Server=localhost;Database=amod;Uid=root;Pwd=1207pegazo;";
+        private string lastUpdate;
+
+        #endregion Fields
+
+        #region Constructors
 
         // Explicit static constructor to tell C# compiler
         // not to mark type as beforefieldinit
         static AmodDBTools()
         {
         }
-        AmodDBTools()
+
+        private AmodDBTools()
         {
         }
+
+        #endregion Constructors
+
+        #region Properties
 
         public static AmodDBTools Instance
         {
@@ -35,104 +49,18 @@ namespace DocumentClassification.DCUpdate
                 return instance;
             }
         }
-        public void connect()
-        {
-            if(conn == null)
-                conn = new MySqlConnection();
-            conn.ConnectionString = connectionString;
-            conn.Open();
-        }
-        public void disconnect()
-        {
-            conn.Close();
-        }
-        public Dictionary<string, int> extractDocument(String doc)
-        {
-            return extractDocument(doc, new Dictionary<string, int>());
-        }
-        private Dictionary<string,int> extractDocument(String doc, Dictionary<string, int> extractedDoc)
-        {
-            char[] delimiterChars = { ' ', ',', '.', ':', '\t' };
-            string[] words = doc.Split(delimiterChars);
 
-            foreach(string s in words)
-            {
-                if (extractedDoc.ContainsKey(s))
-                    extractedDoc[s]++;
-                else
-                    extractedDoc.Add(s, 1);
-            }
-            return extractedDoc;
-        }
-        private DbDataReader getData()
-        {
-            string ftsQuery = @"select *
-                               from amod.ftsearchdata 
-                                 order by ftsModified;";
-            return executeQuery(ftsQuery);
-        }
-        private DbDataReader executeQuery(String query)
-        {
-            return executeQuery(query, conn);
-        }
-        private DbDataReader getNewData(String lastRecordDate)
-        {
-            string ftsQueryNewData = @"select *
-                                from amod.ftsearchdata
-                                where ftsModified > '" + lastRecordDate +
-                                "' order by ftsModified;";
-            return executeQuery(ftsQueryNewData);
-        }
-        public Dictionary<int, Dictionary<string, int> > createDictionaryFromReader(DbDataReader rdr)
-        {
-            Dictionary<int, Dictionary<string, int>> data = new Dictionary<int, Dictionary<string, int>>();
-            while (rdr.Read())
-            {
-                if (!data.ContainsKey((int)rdr["ftsCaseId"]))
-                    data.Add((int)rdr["ftsCaseId"], extractDocument((string)rdr["ftsText"]));
-                else
-                    extractDocument((string)rdr["ftsText"], data[(int)rdr["ftsCaseId"]]);
-                lastRecord = rdr["ftsModified"].ToString();
-            }
-            return data;
-        }
-        /** return procedure Id for particular case */
-        public int getProcedureId(int caseId)
-        {
-            MySqlConnection connection = new MySqlConnection();
-            connection.ConnectionString = connectionString;
-            connection.Open();
+        #endregion Properties
 
-            string checkProcedureQuery = @"select caseProcedureId
-                               from amod.casedefinition
-                               where caseId =" + caseId.ToString() +
-                                  ";";
-            DbDataReader rdr = executeQuery(checkProcedureQuery, connection);
-            int result = 0;
-            if (rdr.Read())
-            {
-                result = (int)(rdr[0]);
-            }
-            else
-            {
-                //@TODO exception
-            }
-            connection.Close();
-            return result;
-        }
+        #region Methods
 
-        private DbDataReader executeQuery(string checkProcedureQuery, MySqlConnection connection)
-        {
-            DbCommand cmd = new MySqlCommand(checkProcedureQuery, connection);
-            return(cmd.ExecuteReader());
-        }
         public void update()
         {
             connect();
             DbDataReader rdr = getNewData(lastUpdate);
             Dictionary<int, Dictionary<string, int> > data = createDictionaryFromReader(rdr);
             rdr.Close();
-            
+
             // splitting data and updating AllCases structure
             List<string> newWords = new List<string>();
             Dictionary<int, Dictionary<string, int>> newCases = new Dictionary<int, Dictionary<string, int>>();
@@ -177,9 +105,8 @@ namespace DocumentClassification.DCUpdate
             updateDBRepresentation(newCases);
             updateDBRepresentation(oldCasesNewWords);
 
-
             // recalculate TF-IDF
-            // if new cases appeared recalculate all 
+            // if new cases appeared recalculate all
             if (newCases.Count != 0)
             {
                 // recalculating IDF
@@ -201,7 +128,7 @@ namespace DocumentClassification.DCUpdate
                 {
                     foreach (string word in oldCasesOldWords[caseId].Keys)
                     {
-                        Data.Instance.AllCases[caseId][word] += IDFcalculaction.Instance[word].IDF;    
+                        Data.Instance.AllCases[caseId][word] += IDFcalculaction.Instance[word].IDF;
                     }
                 }
 
@@ -225,11 +152,176 @@ namespace DocumentClassification.DCUpdate
             disconnect();
         }
 
+        private static void addStatusConnection(int caseId, int procedureId, Int32 currentStatus, Int32 nextStatus)
+        {
+            if (!Data.Instance.AllDecisionsStatus[procedureId].ContainsKey(currentStatus))
+            {
+                Data.Instance.AllDecisionsStatus[procedureId].Add(currentStatus, new Dictionary<int, DecisionRepresentationStatus>());
+                Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new DecisionRepresentationStatus(Data.Instance.AllCases[caseId]));
+            }
+            else
+            {
+                if (!Data.Instance.AllDecisionsStatus[procedureId][currentStatus].ContainsKey(nextStatus))
+                {
+                    Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new DecisionRepresentationStatus(Data.Instance.AllCases[caseId]));
+                }
+                else
+                {
+                    foreach (String word in Data.Instance.AllCases[caseId].Keys)
+                    {
+                        if (!Data.Instance.AllDecisionsStatus[procedureId][currentStatus][nextStatus].ContainsKey(word))
+                        {
+                            Data.Instance.AllDecisionsStatus[procedureId][currentStatus][nextStatus].Add(word, Data.Instance.AllCases[caseId][word]);
+                        }
+                        else
+                        {
+                            Data.Instance.AllDecisionsStatus[procedureId][currentStatus][nextStatus][word] += Data.Instance.AllCases[caseId][word];
+                        }
+                    }
+                }
+            }
+        }
+
+        private void addPeopleConnection(int caseId,int procedureId,int currentOwner,int nextOwner)
+        {
+            if (!Data.Instance.AllDecisionsPeople[procedureId].ContainsKey(currentOwner))
+            {
+                Data.Instance.AllDecisionsPeople[procedureId].Add(currentOwner, new Dictionary<int, DecisionRepresentationPeople>());
+                Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextOwner, new DecisionRepresentationPeople(Data.Instance.AllCases[caseId]));
+            }
+            else
+            {
+                if (!Data.Instance.AllDecisionsPeople[procedureId][currentOwner].ContainsKey(nextOwner))
+                {
+                    Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextOwner, new DecisionRepresentationPeople(Data.Instance.AllCases[caseId]));
+                }
+                else
+                {
+                    foreach (String word in Data.Instance.AllCases[caseId].Keys)
+                    {
+                        if (!Data.Instance.AllDecisionsPeople[procedureId][currentOwner][nextOwner].ContainsKey(word))
+                        {
+                            Data.Instance.AllDecisionsPeople[procedureId][currentOwner][nextOwner].Add(word, Data.Instance.AllCases[caseId][word]);
+                        }
+                        else
+                        {
+                            Data.Instance.AllDecisionsPeople[procedureId][currentOwner][nextOwner][word] += Data.Instance.AllCases[caseId][word];
+                        }
+                    }
+                }
+            }
+        }
+
+        private double calculateTFIDF(int caseId, string word)
+        {
+            return (double)CasesTF.Instance[caseId][word] * IDFcalculaction.Instance[word].IDF;
+        }
+
+        private void connect()
+        {
+            if(conn == null)
+                conn = new MySqlConnection();
+            conn.ConnectionString = connectionString;
+            conn.Open();
+        }
+
+        private Dictionary<int, Dictionary<string, int>> createDictionaryFromReader(DbDataReader rdr)
+        {
+            Dictionary<int, Dictionary<string, int>> data = new Dictionary<int, Dictionary<string, int>>();
+            while (rdr.Read())
+            {
+                if (!data.ContainsKey((int)rdr["ftsCaseId"]))
+                    data.Add((int)rdr["ftsCaseId"], extractDocument((string)rdr["ftsText"]));
+                else
+                    extractDocument((string)rdr["ftsText"], data[(int)rdr["ftsCaseId"]]);
+                lastRecord = rdr["ftsModified"].ToString();
+            }
+            return data;
+        }
+
+        private void disconnect()
+        {
+            conn.Close();
+        }
+
+        private DbDataReader executeQuery(String query)
+        {
+            return executeQuery(query, conn);
+        }
+
+        private DbDataReader executeQuery(string checkProcedureQuery, MySqlConnection connection)
+        {
+            DbCommand cmd = new MySqlCommand(checkProcedureQuery, connection);
+            return(cmd.ExecuteReader());
+        }
+
+        private Dictionary<string, int> extractDocument(String doc)
+        {
+            return extractDocument(doc, new Dictionary<string, int>());
+        }
+
+        private Dictionary<string, int> extractDocument(String doc, Dictionary<string, int> extractedDoc)
+        {
+            char[] delimiterChars = { ' ', ',', '.', ':', '\t' };
+            string[] words = doc.Split(delimiterChars);
+
+            foreach(string s in words)
+            {
+                if (extractedDoc.ContainsKey(s))
+                    extractedDoc[s]++;
+                else
+                    extractedDoc.Add(s, 1);
+            }
+            return extractedDoc;
+        }
+
+        private DbDataReader getData()
+        {
+            string ftsQuery = @"select *
+                               from amod.ftsearchdata
+                                 order by ftsModified;";
+            return executeQuery(ftsQuery);
+        }
+
+        private DbDataReader getNewData(String lastRecordDate)
+        {
+            string ftsQueryNewData = @"select *
+                                from amod.ftsearchdata
+                                where ftsModified > '" + lastRecordDate +
+                                "' order by ftsModified;";
+            return executeQuery(ftsQueryNewData);
+        }
+
+        /** return procedure Id for particular case */
+        private int getProcedureId(int caseId)
+        {
+            MySqlConnection connection = new MySqlConnection();
+            connection.ConnectionString = connectionString;
+            connection.Open();
+
+            string checkProcedureQuery = @"select caseProcedureId
+                               from amod.casedefinition
+                               where caseId =" + caseId.ToString() +
+                                  ";";
+            DbDataReader rdr = executeQuery(checkProcedureQuery, connection);
+            int result = 0;
+            if (rdr.Read())
+            {
+                result = (int)(rdr[0]);
+            }
+            else
+            {
+                //@TODO exception
+            }
+            connection.Close();
+            return result;
+        }
+
         private void updateAllDecisionsPeople()
         {
-            string Query = @"SELECT `caseId`, `caseVersion`, `caseOwnerId`, `caseModified`, `casePrevOwnerId`, `caseNextOwnerId` 
-                            FROM `amod`.`casehistory` 
-                            WHERE `caseNextOwnerId` IS NOT NULL AND `caseNextOwnerId` <> `caseOwnerId` 
+            string Query = @"SELECT `caseId`, `caseVersion`, `caseOwnerId`, `caseModified`, `casePrevOwnerId`, `caseNextOwnerId`
+                            FROM `amod`.`casehistory`
+                            WHERE `caseNextOwnerId` IS NOT NULL AND `caseNextOwnerId` <> `caseOwnerId`
                             ORDER BY `caseOwnerId`, `caseVersion`;";
             DbDataReader rdr = executeQuery(Query);
 
@@ -276,41 +368,12 @@ namespace DocumentClassification.DCUpdate
             }
             rdr.Close();
         }
-        private void addPeopleConnection(int caseId,int procedureId,int currentOwner,int nextOwner)
-        {
-            if (!Data.Instance.AllDecisionsPeople[procedureId].ContainsKey(currentOwner))
-            {
-                Data.Instance.AllDecisionsPeople[procedureId].Add(currentOwner, new Dictionary<int, DecisionRepresentationPeople>());
-                Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextOwner, new DecisionRepresentationPeople(Data.Instance.AllCases[caseId]));
-            }
-            else
-            {
-                if (!Data.Instance.AllDecisionsPeople[procedureId][currentOwner].ContainsKey(nextOwner))
-                {
-                    Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextOwner, new DecisionRepresentationPeople(Data.Instance.AllCases[caseId]));
-                }
-                else
-                {
-                    foreach (String word in Data.Instance.AllCases[caseId].Keys)
-                    {
-                        if (!Data.Instance.AllDecisionsPeople[procedureId][currentOwner][nextOwner].ContainsKey(word))
-                        {
-                            Data.Instance.AllDecisionsPeople[procedureId][currentOwner][nextOwner].Add(word, Data.Instance.AllCases[caseId][word]);
-                        }
-                        else
-                        {
-                            Data.Instance.AllDecisionsPeople[procedureId][currentOwner][nextOwner][word] += Data.Instance.AllCases[caseId][word];
-                        }
-                    }
-                }
-            }
 
-        }
         private void updateAllDecisionsStatus()
         {
-            string Query = @"SELECT `caseId`, `caseVersion`, `caseStatusId`, `caseModified`, `casePrevStatusId`, `caseNextStatusId` 
-                            FROM `amod`.`casehistory` 
-                            WHERE `caseNextStatusId` IS NOT NULL AND `caseNextStatusId` <> `caseStatusId` 
+            string Query = @"SELECT `caseId`, `caseVersion`, `caseStatusId`, `caseModified`, `casePrevStatusId`, `caseNextStatusId`
+                            FROM `amod`.`casehistory`
+                            WHERE `caseNextStatusId` IS NOT NULL AND `caseNextStatusId` <> `caseStatusId`
                             ORDER BY `caseId`, `caseVersion`;";
             DbDataReader rdr = executeQuery(Query);
 
@@ -357,35 +420,7 @@ namespace DocumentClassification.DCUpdate
             }
             rdr.Close();
         }
-        private static void addStatusConnection(int caseId, int procedureId, Int32 currentStatus, Int32 nextStatus)
-        {
-            if (!Data.Instance.AllDecisionsStatus[procedureId].ContainsKey(currentStatus))
-            {
-                Data.Instance.AllDecisionsStatus[procedureId].Add(currentStatus, new Dictionary<int, DecisionRepresentationStatus>());
-                Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new DecisionRepresentationStatus(Data.Instance.AllCases[caseId]));
-            }
-            else
-            {
-                if (!Data.Instance.AllDecisionsStatus[procedureId][currentStatus].ContainsKey(nextStatus))
-                {
-                    Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new DecisionRepresentationStatus(Data.Instance.AllCases[caseId]));
-                }
-                else
-                {
-                    foreach (String word in Data.Instance.AllCases[caseId].Keys)
-                    {
-                        if (!Data.Instance.AllDecisionsStatus[procedureId][currentStatus][nextStatus].ContainsKey(word))
-                        {
-                            Data.Instance.AllDecisionsStatus[procedureId][currentStatus][nextStatus].Add(word, Data.Instance.AllCases[caseId][word]);
-                        }
-                        else
-                        {
-                            Data.Instance.AllDecisionsStatus[procedureId][currentStatus][nextStatus][word] += Data.Instance.AllCases[caseId][word];
-                        }
-                    }
-                }
-            }
-        }
+
         private void updateDBRepresentation(Dictionary<int, Dictionary<string, int> > data)
         {
             foreach(Dictionary<string, int> tempCase in data.Values)
@@ -405,17 +440,28 @@ namespace DocumentClassification.DCUpdate
                 }
             }
         }
-        private double calculateTFIDF(int caseId, string word)
-        {
-            return (double)CasesTF.Instance[caseId][word] * IDFcalculaction.Instance[word].IDF;
-        }
+
+        #endregion Methods
     }
-    public class CasesTF : Dictionary<int, Dictionary<string, int> >
+
+    private class CasesTF : Dictionary<int, Dictionary<string, int>>
     {
+        #region Fields
+
         static readonly CasesTF instance = new CasesTF();
+
+        #endregion Fields
+
+        #region Constructors
+
         private CasesTF()
         {
         }
+
+        #endregion Constructors
+
+        #region Properties
+
         public static CasesTF Instance
         {
             get
@@ -423,6 +469,11 @@ namespace DocumentClassification.DCUpdate
                 return instance;
             }
         }
+
+        #endregion Properties
+
+        #region Methods
+
         public void Add(Dictionary<int, Dictionary<string, int> > data)
         {
             foreach(int caseId in data.Keys)
@@ -430,10 +481,31 @@ namespace DocumentClassification.DCUpdate
                 Add(caseId, data[caseId]);
             }
         }
+
+        #endregion Methods
     }
-    public class IDFcalculaction : Dictionary<string, IDFData>
+
+    private class IDFcalculaction : Dictionary<string, IDFData>
     {
+        #region Fields
+
         private static IDFcalculaction instance = new IDFcalculaction();
+
+        private int D;
+        private double logD;
+
+        #endregion Fields
+
+        #region Constructors
+
+        private IDFcalculaction()
+        {
+        }
+
+        #endregion Constructors
+
+        #region Properties
+
         public static IDFcalculaction Instance
         {
             get
@@ -441,15 +513,11 @@ namespace DocumentClassification.DCUpdate
                 return instance;
             }
         }
-        private IDFcalculaction()
-        {
-        }
-        private int D;
-        private double logD;
-        public void dfChanged(string word, int newDf)
-        {
-            this[word].LogDF = Math.Log10(newDf);    
-        }
+
+        #endregion Properties
+
+        #region Methods
+
         public void calculateIDF()
         {
             logD = Math.Log10(D);
@@ -459,31 +527,53 @@ namespace DocumentClassification.DCUpdate
                 data.calculateIDF(logD);
             }
         }
+
         public double calculateIDF(string word)
         {
             return this[word].calculateIDF(logD);
         }
-    
+
+        public void dfChanged(string word, int newDf)
+        {
+            this[word].LogDF = Math.Log10(newDf);
+        }
+
         public void setNumberOfCases(int D)
         {
             this.D = D;
             logD = Math.Log10(D);
         }
+
+        #endregion Methods
     }
-    public class IDFData
+
+    private class IDFData
     {
+        #region Fields
+
         private double idf;
         private double logdf;
+
+        #endregion Fields
+
+        #region Constructors
+
         public IDFData(double idf, double logdf)
         {
             this.idf = idf;
             this.logdf = logdf;
         }
+
         public IDFData(double df)
         {
             idf = 0;
             logdf = Math.Log10(df);
         }
+
+        #endregion Constructors
+
+        #region Properties
+
         public double IDF
         {
             get
@@ -495,6 +585,7 @@ namespace DocumentClassification.DCUpdate
                 idf = value;
             }
         }
+
         public double LogDF
         {
             get
@@ -506,9 +597,16 @@ namespace DocumentClassification.DCUpdate
                 logdf = value;
             }
         }
+
+        #endregion Properties
+
+        #region Methods
+
         public double calculateIDF(double logD)
         {
             return idf = logD - logdf;
         }
+
+        #endregion Methods
     }
-} 
+}

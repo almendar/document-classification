@@ -1,42 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DocumentClassification.Representation;
-
-namespace DocumentClassification.BagOfWords
+﻿namespace DocumentClassification.BagOfWords
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
+    using DocumentClassification.Representation;
+
     /// <summary>
     /// Singleton instance of classificator based on bag-of-words paradigm
     /// </summary>
-   public class BagOfWordsTextClassifier
+    public class BagOfWordsTextClassifier
     {
-        #region Singleton stuff
-        static readonly BagOfWordsTextClassifier instance = new BagOfWordsTextClassifier();
-        public static BagOfWordsTextClassifier Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
-
-        static BagOfWordsTextClassifier()
-        {
-        }
-        #endregion
-        
-        #region fields
-        private int NumberOfCases;
-        private DBRepresentation DBRepresentation = null;
-        private AllCases AllCases = null;
-        private AllProcedures AllProcedures = null;
-        private AllDecisionsStatus AllDecisionsPhase = null;
-        private AllDecisionsPeople AllDecisionsPeople = null;
+        #region Fields
 
         /// <summary>
         /// Maximum percentage of cases in which word can appear to be take into consideration
         /// </summary>
         private const double MaximumFrequency = 0.9;
+
+        static readonly BagOfWordsTextClassifier instance = new BagOfWordsTextClassifier();
+
+        private AllCases AllCases = null;
+        private AllDecisionsPeople AllDecisionsPeople = null;
+        private AllDecisionsStatus AllDecisionsPhase = null;
+        private AllProcedures AllProcedures = null;
+        private DBRepresentation DBRepresentation = null;
+        private Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToRowsSet = null;
+        private int[,,] MapRowColumnToNextPersonId = null;
+        private int[] MapRowToNextPhaseId = null;
+
+        /// <summary>
+        /// Table maps row of the <see cref="ProcedureMatrix"/> to correspondent procedure id 
+        /// in the database.
+        /// </summary>
+        private int[] MapRowToProcedureId = null;
+
+        /// <summary>
+        /// Maps word to column number.
+        /// Take into consideration that not evey word is present because of the threashold.
+        /// Only words that appeare in less than <see cref="MaximumFrequency"/> percentage of documents
+        /// will be taken into consideration
+        /// </summary>
+        private Dictionary<String, int> MapWordToColumn = null;
+        private int NumberOfCases;
 
         /// <summary>
         /// How many words are being used in computation
@@ -48,6 +54,20 @@ namespace DocumentClassification.BagOfWords
         /// </summary>
         private int numberOfProcedures;
 
+        //**********************************************************************//
+        private double[,,,] PeopleMatrix = null;
+
+        //TODO
+        //**********************************************************************//
+        private double[][] PhaseMatrix = null;
+
+        //**********************************************************************//
+        /// <summary>
+        /// Rows of this matrix represents procedures, columns are words <see cref="MapWordToColumn"/>.
+        /// Values of this matrix are TFIDF of words in procedures.
+        /// </summary>
+        private double[][] ProcedureMatrix = null;
+
         /// <summary>
         /// Threashold above which words are not taken into consideration.
         /// When wors appears in more documents that trheashold stand for
@@ -55,81 +75,65 @@ namespace DocumentClassification.BagOfWords
         /// </summary>
         private int wordThreshold = int.MaxValue;
 
-        /// <summary>
-        /// Maps word to column number.
-        /// Take into consideration that not evey word is present because of the threashold.
-        /// Only words that appeare in less than <see cref="MaximumFrequency"/> percentage of documents
-        /// will be taken into consideration
-        /// </summary>
-        private Dictionary<String, int> MapWordToColumn = null;
+        #endregion Fields
 
-        //**********************************************************************//
-        /// <summary>
-        /// Rows of this matrix represents procedures, columns are words <see cref="MapWordToColumn"/>.
-        /// Values of this matrix are TFIDF of words in procedures.
-        /// </summary>
-        private double[][] ProcedureMatrix  = null;
-        
-        /// <summary>
-        /// Table maps row of the <see cref="ProcedureMatrix"/> to correspondent procedure id 
-        /// in the database.
-        /// </summary>
-        private int[] MapRowToProcedureId = null;
-        
+        #region Constructors
 
-        //TODO
-        //**********************************************************************//
-        private double[][] PhaseMatrix = null;
-        private Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToRowsSet = null;
-        private int [] MapRowToNextPhaseId = null;
-
-        //**********************************************************************//
-        private double[,,,] PeopleMatrix     = null;
-        private int[,,] MapRowColumnToNextPersonId = null;
-
-
-        
-#endregion
-        
+        static BagOfWordsTextClassifier()
+        {
+        }
 
         private BagOfWordsTextClassifier()
         {
-
             ReadDataBase();
             FetchMeaningfulWords();
             ComputeStatisticParams();
             CreateDataMatrices();
         }
 
-        private void ComputeStatisticParams()
+        #endregion Constructors
+
+        #region Properties
+
+        public static BagOfWordsTextClassifier Instance
         {
-            this.numberOfProcedures = AllProcedures.Keys.Count;
-            this.NumberOfMeaningfulWords = MapWordToColumn.Keys.Count; //vector length
+            get
+            {
+                return instance;
+            }
         }
 
+        #endregion Properties
 
+        #region Methods
 
-        private void CreateDataMatrices()
+        public int[] NextPersonPrediction(int procedurId, int phaseId, string text)
         {
-            ProcedureMatrixBuild();
-            
-            //Not ready yet
-            NextPhaseMatrixBuild();
-            //NextPersonMatrixBuild();
+            throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Reads serialized objects from database that will be base for building matrices
-        /// </summary>
-        private void ReadDataBase()
+        public int[] NextPhasePrediciton(int procedurId, int phaseId, string text)
         {
-            DCDbTools.Instance.loadData();
-            this.DBRepresentation = Data.Instance.DBRepresentation;
-            this.AllCases = Data.Instance.AllCases;
-            this.AllProcedures = Data.Instance.AllProcedures;
-            this.AllDecisionsPhase = Data.Instance.AllDecisionsStatus;
+            String[] textTokens = TextExtraction.GetTextTokens(text);
+            double[] textVector = CreateVectorFromText(textTokens);
+            int nrOfDecisions = PhaseMatrix.Length;
+            int bestDecisionIndice = int.MinValue;
+            double bestSimilarity = double.PositiveInfinity;
+            List<int> rowSet = MapProcIdPhasIdToRowsSet[procedurId][phaseId];
+            for (int i = 0; i < rowSet.Count; i++)
+            {
+                double[] checkedVector = PhaseMatrix[rowSet[i]];
+                double similarity = (1-VectorOperations.VectorsConsine(checkedVector,textVector));
+                if (similarity < bestSimilarity)
+                {
+                    bestSimilarity = similarity;
+                    bestDecisionIndice = rowSet[i];
+                }
+            }
+            int bestNextPhaseId = MapRowToNextPhaseId[bestDecisionIndice];
+            int[] ret = new int[] { bestNextPhaseId };
+            return ret;
         }
-
 
         /// <summary>
         /// Based on text tries to find right procedures for given text.
@@ -158,35 +162,21 @@ namespace DocumentClassification.BagOfWords
             int bestProcedureId = MapRowToProcedureId[bestProcedureIndice];
             int[] ret = new int[] { bestProcedureId };
             return ret;
-          }
-
-        public int[] NextPhasePrediciton(int procedurId, int phaseId, string text)
-        {
-            String[] textTokens = TextExtraction.GetTextTokens(text);
-            double[] textVector = CreateVectorFromText(textTokens);
-            int nrOfDecisions = PhaseMatrix.Length;
-            int bestDecisionIndice = int.MinValue;
-            double bestSimilarity = double.PositiveInfinity;
-            List<int> rowSet = MapProcIdPhasIdToRowsSet[procedurId][phaseId];
-            for (int i = 0; i < rowSet.Count; i++)
-            {
-                double[] checkedVector = PhaseMatrix[rowSet[i]];
-                double similarity = (1-VectorOperations.VectorsConsine(checkedVector,textVector));
-                if (similarity < bestSimilarity)
-                {
-                    bestSimilarity = similarity;
-                    bestDecisionIndice = rowSet[i];
-                }
-            }
-            int bestNextPhaseId = MapRowToNextPhaseId[bestDecisionIndice];
-            int[] ret = new int[] { bestNextPhaseId };
-            return ret;
         }
 
-
-        public int[] NextPersonPrediction(int procedurId, int phaseId, string text)
+        private void ComputeStatisticParams()
         {
-            throw new NotImplementedException();
+            this.numberOfProcedures = AllProcedures.Keys.Count;
+            this.NumberOfMeaningfulWords = MapWordToColumn.Keys.Count; //vector length
+        }
+
+        private void CreateDataMatrices()
+        {
+            ProcedureMatrixBuild();
+
+            //Not ready yet
+            NextPhaseMatrixBuild();
+            //NextPersonMatrixBuild();
         }
 
         /// <summary>
@@ -207,101 +197,6 @@ namespace DocumentClassification.BagOfWords
                 vectorRep[indice] += 1.0d;
             }
             return vectorRep;
-        }
-
-
-
-
-        /// <summary>
-        /// Builds the <see cref="ProcedureMatrix"/> out of <see cref="AllProcedures"/> for words
-        /// that are listed in <see cref="MapWordToColumn"/>
-        /// </summary>
-        private void ProcedureMatrixBuild()
-        {
-
-            //int nrOfProcedures = ProceduresSet.Keys.Count;
-            ProcedureMatrix = new double[numberOfProcedures][];
-            MapRowToProcedureId = new int[numberOfProcedures];
-            for (int h = 0; h < numberOfProcedures; h++)
-            {
-                ProcedureMatrix[h] = new double[NumberOfMeaningfulWords];
-            }
-            int procedurIndex = 0;
-            foreach (KeyValuePair<int, Procedure> kvp in AllProcedures)
-            {
-                int procedurId = kvp.Key;
-                Procedure currentProcedure = kvp.Value;
-                MapRowToProcedureId[procedurIndex] = procedurId;
-                foreach (KeyValuePair<string, double> textStatistic in currentProcedure)
-                {
-                    string word = textStatistic.Key;
-                    double TFIDF = textStatistic.Value;
-                    
-                    //Means word is not meaningful, and is not take into consideration.
-                    if (!MapWordToColumn.ContainsKey(word))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        int wordIndex = MapWordToColumn[word]; //Find what is this word place in vector
-                        ProcedureMatrix[procedurIndex][wordIndex] = TFIDF;
-                    }
-                }
-                ++procedurIndex; //increment procedure indice
-            }
-
-            
-        }
-
-        private void NextPhaseMatrixBuild()
-        {
-            MapProcIdPhasIdToRowsSet = new Dictionary<int, Dictionary<int, List<int>>>();
-            int nrOfDecisions = AllDecisionsPhase.GetNrOfDecisions();
-            PhaseMatrix = new double[nrOfDecisions][];
-            for(int i=0; i < nrOfDecisions; i++)
-            {
-                PhaseMatrix[i] = new double[NumberOfMeaningfulWords];
-            }
-            
-            MapRowToNextPhaseId = new int[nrOfDecisions];
-            int indexer = 0;
-            foreach (int procId in AllDecisionsPhase.Keys)
-            {
-                MapProcIdPhasIdToRowsSet[procId] = new Dictionary<int, List<int>>();
-                foreach (int phaseId in AllDecisionsPhase[procId].Keys)
-                {
-                    MapProcIdPhasIdToRowsSet[procId][phaseId] = new List<int>();
-                    foreach (int nextPhasId in AllDecisionsPhase[procId][phaseId].Keys)
-                    {
-                        Dictionary<string, double> textRepresentation = AllDecisionsPhase[procId][phaseId][nextPhasId];
-                        foreach (KeyValuePair<string, double> kvp in textRepresentation)
-                        {
-
-                            if (!MapWordToColumn.ContainsKey(kvp.Key))
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                String word = kvp.Key;
-                                double TFIDF = kvp.Value;
-                                int indice = MapWordToColumn[word];
-                                PhaseMatrix[indexer][indice]= TFIDF;
-                            }
-                        }
-                        
-                        MapProcIdPhasIdToRowsSet[procId][phaseId].Add(indexer);
-                        MapRowToNextPhaseId[indexer] = nextPhasId;
-                        indexer += 1;
-                    }
-                }
-            }
-        }
-
-        private void NextPersonMatrixBuild()
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -328,39 +223,157 @@ namespace DocumentClassification.BagOfWords
                 }
             }
         }
-        
+
+        private void NextPersonMatrixBuild()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void NextPhaseMatrixBuild()
+        {
+            MapProcIdPhasIdToRowsSet = new Dictionary<int, Dictionary<int, List<int>>>();
+            int nrOfDecisions = AllDecisionsPhase.GetNrOfDecisions();
+            PhaseMatrix = new double[nrOfDecisions][];
+            for(int i=0; i < nrOfDecisions; i++)
+            {
+                PhaseMatrix[i] = new double[NumberOfMeaningfulWords];
+            }
+
+            MapRowToNextPhaseId = new int[nrOfDecisions];
+            int indexer = 0;
+            foreach (int procId in AllDecisionsPhase.Keys)
+            {
+                MapProcIdPhasIdToRowsSet[procId] = new Dictionary<int, List<int>>();
+                foreach (int phaseId in AllDecisionsPhase[procId].Keys)
+                {
+                    MapProcIdPhasIdToRowsSet[procId][phaseId] = new List<int>();
+                    foreach (int nextPhasId in AllDecisionsPhase[procId][phaseId].Keys)
+                    {
+                        Dictionary<string, double> textRepresentation = AllDecisionsPhase[procId][phaseId][nextPhasId];
+                        foreach (KeyValuePair<string, double> kvp in textRepresentation)
+                        {
+
+                            if (!MapWordToColumn.ContainsKey(kvp.Key))
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                String word = kvp.Key;
+                                double TFIDF = kvp.Value;
+                                int indice = MapWordToColumn[word];
+                                PhaseMatrix[indexer][indice]= TFIDF;
+                            }
+                        }
+
+                        MapProcIdPhasIdToRowsSet[procId][phaseId].Add(indexer);
+                        MapRowToNextPhaseId[indexer] = nextPhasId;
+                        indexer += 1;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Builds the <see cref="ProcedureMatrix"/> out of <see cref="AllProcedures"/> for words
+        /// that are listed in <see cref="MapWordToColumn"/>
+        /// </summary>
+        private void ProcedureMatrixBuild()
+        {
+            //int nrOfProcedures = ProceduresSet.Keys.Count;
+            ProcedureMatrix = new double[numberOfProcedures][];
+            MapRowToProcedureId = new int[numberOfProcedures];
+            for (int h = 0; h < numberOfProcedures; h++)
+            {
+                ProcedureMatrix[h] = new double[NumberOfMeaningfulWords];
+            }
+            int procedurIndex = 0;
+            foreach (KeyValuePair<int, Procedure> kvp in AllProcedures)
+            {
+                int procedurId = kvp.Key;
+                Procedure currentProcedure = kvp.Value;
+                MapRowToProcedureId[procedurIndex] = procedurId;
+                foreach (KeyValuePair<string, double> textStatistic in currentProcedure)
+                {
+                    string word = textStatistic.Key;
+                    double TFIDF = textStatistic.Value;
+
+                    //Means word is not meaningful, and is not take into consideration.
+                    if (!MapWordToColumn.ContainsKey(word))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        int wordIndex = MapWordToColumn[word]; //Find what is this word place in vector
+                        ProcedureMatrix[procedurIndex][wordIndex] = TFIDF;
+                    }
+                }
+                ++procedurIndex; //increment procedure indice
+            }
+        }
+
+        /// <summary>
+        /// Reads serialized objects from database that will be base for building matrices
+        /// </summary>
+        private void ReadDataBase()
+        {
+            DCDbTools.Instance.loadData();
+            this.DBRepresentation = Data.Instance.DBRepresentation;
+            this.AllCases = Data.Instance.AllCases;
+            this.AllProcedures = Data.Instance.AllProcedures;
+            this.AllDecisionsPhase = Data.Instance.AllDecisionsStatus;
+        }
+
+        #endregion Methods
     }
 
-   public class ClassificationResult : IComparable<ClassificationResult>
-   {
-       private readonly int id;
-       private readonly double similarity;
+    public class ClassificationResult : IComparable<ClassificationResult>
+    {
+        #region Fields
 
-       public int CompareTo(ClassificationResult other)
-       {
-           return this.Similarity.CompareTo(other.Similarity);
-       }
+        private readonly int id;
+        private readonly double similarity;
 
-       public ClassificationResult(int id, double similarity)
-       {
-           this.id = id;
-           this.similarity = similarity;
-       }
+        #endregion Fields
 
-      public int Id
-       {
-           get
-           {
+        #region Constructors
+
+        public ClassificationResult(int id, double similarity)
+        {
+            this.id = id;
+               this.similarity = similarity;
+        }
+
+        #endregion Constructors
+
+        #region Properties
+
+        public int Id
+        {
+            get
+               {
                return id;
-           }
-       }
+               }
+        }
 
-       public double Similarity
-       {
-           get
-           {
+        public double Similarity
+        {
+            get
+               {
                return similarity;
-           }
-       }
-   }
+               }
+        }
+
+        #endregion Properties
+
+        #region Methods
+
+        public int CompareTo(ClassificationResult other)
+        {
+            return this.Similarity.CompareTo(other.Similarity);
+        }
+
+        #endregion Methods
+    }
 }

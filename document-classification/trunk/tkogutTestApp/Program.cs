@@ -1,12 +1,18 @@
-﻿using System.IO;
-using DocumentClassification.BagOfWords;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using System.IO;
+
+using DocumentClassification.BagOfWords;
 
 public class TestApp
 {
+    #region Fields
 
     private string textFile = null;
+
+    #endregion Fields
+
+    #region Properties
 
     public string TextFile
     {
@@ -21,21 +27,9 @@ public class TestApp
         }
     }
 
+    #endregion Properties
 
-    void ReadTextFromFile(string fileName)
-    {
-        TextReader tr = new StreamReader(fileName);
-        TextFile = tr.ReadToEnd();
-    }
-
-    static void Main()
-    {
-
-        ProcedureRecognitionTest();
-       // FindBestREsult();
-        Console.ReadKey();
-       
-    }
+    #region Methods
 
     private static void FindBestREsult()
     {
@@ -51,7 +45,6 @@ public class TestApp
         {
             bestData.AddLast(new ClassificationResult(0, Double.MaxValue));
         }
-
 
         foreach (ClassificationResult testNode in testData)
         {
@@ -89,22 +82,26 @@ public class TestApp
                     break;
                 }
 
-
             }
 
         }
 
-
         foreach (ClassificationResult cr in bestData)
         {
             Console.WriteLine("{0}", cr.Similarity);
-
 
             /* testData.Sort();
              Console.WriteLine("!!!!!!!!!");
              Console.WriteLine("{0}\n{1}\n{2}", testData[0].Similarity, testData[1].Similarity, testData[2].Similarity);
              */
         }
+    }
+
+    static void Main()
+    {
+        ProcedureRecognitionTest();
+           // FindBestREsult();
+        Console.ReadKey();
     }
 
     private static void ProcedureRecognitionTest()
@@ -120,4 +117,12 @@ public class TestApp
         }
         System.Console.ReadLine();
     }
+
+    void ReadTextFromFile(string fileName)
+    {
+        TextReader tr = new StreamReader(fileName);
+        TextFile = tr.ReadToEnd();
+    }
+
+    #endregion Methods
 }
