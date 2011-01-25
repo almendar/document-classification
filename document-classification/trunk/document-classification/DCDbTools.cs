@@ -141,7 +141,7 @@
                 BinaryFormatter bf = new BinaryFormatter();
                 System.IO.MemoryStream mem =
                     new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
-                Data.Instance.AllDecisionsPeople = (AllDecisionsPeople)bf.Deserialize(mem);
+                Data.Instance.AllDecisionsPeople = (AllDecisionsNextPerson)bf.Deserialize(mem);
             }
             rdr.Close();
         }
@@ -156,7 +156,7 @@
                 BinaryFormatter bf = new BinaryFormatter();
                 System.IO.MemoryStream mem =
                     new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
-                Data.Instance.AllDecisionsStatus = (AllDecisionsStatus)bf.Deserialize(mem);
+                Data.Instance.AllDecisionsStatus = (AllDecisionsNextStage)bf.Deserialize(mem);
             }
             rdr.Close();
         }

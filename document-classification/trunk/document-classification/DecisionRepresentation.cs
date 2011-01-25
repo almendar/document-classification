@@ -9,16 +9,16 @@
     /// ProcedurID,PersonId,nextPersonId
     /// </summary>
     [Serializable]
-    public class AllDecisionsPeople : Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationPeople>>>
+    public class AllDecisionsNextPerson : Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationNextPerson>>>
     {
         #region Constructors
 
-        public AllDecisionsPeople()
+        public AllDecisionsNextPerson()
             : base()
         {
         }
 
-        public AllDecisionsPeople(SerializationInfo info, StreamingContext context)
+        public AllDecisionsNextPerson(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
@@ -46,16 +46,16 @@
     /// ProcedurID,PersonId,nextStageId
     /// </summary>
     [Serializable]
-    public class AllDecisionsStatus : Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationStatus>>>
+    public class AllDecisionsNextStage : Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationNextStage>>>
     {
         #region Constructors
 
-        public AllDecisionsStatus()
+        public AllDecisionsNextStage()
             : base()
         {
         }
 
-        public AllDecisionsStatus(SerializationInfo info, StreamingContext context)
+        public AllDecisionsNextStage(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
@@ -80,7 +80,7 @@
     }
 
     [Serializable]
-    public class DecisionRepresentationPeople : Dictionary<string, double>
+    public class DecisionRepresentationNextPerson : Dictionary<string, double>
     {
         #region Fields
 
@@ -90,17 +90,17 @@
 
         #region Constructors
 
-        public DecisionRepresentationPeople()
+        public DecisionRepresentationNextPerson()
             : base()
         {
         }
 
-        public DecisionRepresentationPeople(SerializationInfo info, StreamingContext context)
+        public DecisionRepresentationNextPerson(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
-        public DecisionRepresentationPeople(Case p)
+        public DecisionRepresentationNextPerson(Case p)
         {
             // TODO: Complete member initialization
             this.p = p;
@@ -110,21 +110,21 @@
     }
 
     [Serializable]
-    public class DecisionRepresentationStatus : Dictionary<string, double>
+    public class DecisionRepresentationNextStage : Dictionary<string, double>
     {
         #region Constructors
 
-        public DecisionRepresentationStatus()
+        public DecisionRepresentationNextStage()
             : base()
         {
         }
 
-        public DecisionRepresentationStatus(Dictionary<string, double> dict)
+        public DecisionRepresentationNextStage(Dictionary<string, double> dict)
             : base(dict)
         {
         }
 
-        public DecisionRepresentationStatus(SerializationInfo info, StreamingContext context)
+        public DecisionRepresentationNextStage(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
