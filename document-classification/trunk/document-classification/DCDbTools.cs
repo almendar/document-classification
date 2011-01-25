@@ -12,7 +12,7 @@
     {
         #region Fields
 
-        private const string connectionString = "Server=localhost;Database=dc;Uid=root;Pwd=1207pegazo;";
+        private const string connectionString = "Server=localhost;Database=dc;Uid=root;Pwd=riva87;";
 
         private static readonly DCDbTools instance = new DCDbTools();
 
