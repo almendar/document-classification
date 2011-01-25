@@ -1,10 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.Serialization;
-
-namespace DocumentClassification.Representation
+﻿namespace DocumentClassification.Representation
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Runtime.Serialization;
+    using System.Text;
+
+    /// <summary>
+    /// Represent all known procedures in the DB.
+    /// Keys are IDs of the procedures stored in the DB.
+    /// </summary>
+    [Serializable]
+    public class AllProcedures : Dictionary<int, Procedure>
+    {
+        #region Constructors
+
+        public AllProcedures()
+            : base()
+        {
+        }
+
+        public AllProcedures(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        #endregion Constructors
+
+        #region Methods
+
+        public void rebuild(AllCases allCases)
+        {
+            this.Clear();
+            foreach (Case tempCase in allCases.Values)
+            {
+                if (!this.ContainsKey(tempCase.ProcedureId))
+                {
+                    Add(tempCase.ProcedureId, new Procedure(tempCase.ProcedureId));
+                }
+                this[tempCase.ProcedureId].addCase(tempCase);
+            }
+        }
+
+        #endregion Methods
+    }
+
     /// <summary>
     /// Represent a procedure.
     /// Procedure assigns to words TF-IDF measure sumed over all associated Cases with this procedure.
@@ -12,11 +51,36 @@ namespace DocumentClassification.Representation
     [Serializable]
     public class Procedure : Dictionary<string, double>
     {
+        #region Fields
 
         /// <summary>
         /// This procedure id from DB
         /// </summary>
         private readonly int procedureId;
+
+        #endregion Fields
+
+        #region Constructors
+
+        public Procedure(int procedureId)
+            : base()
+        {
+            this.procedureId = procedureId;
+        }
+
+        public Procedure()
+            : base()
+        {
+        }
+
+        public Procedure(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        #endregion Constructors
+
+        #region Properties
 
         public int ProcedureId
         {
@@ -24,19 +88,11 @@ namespace DocumentClassification.Representation
             {
                 return procedureId;
             }
-
         }
 
-        public Procedure(int procedureId) : base()
-        {
-            this.procedureId = procedureId;
-        }
-        public Procedure() : base()
-        {
-        }
-        public Procedure(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+        #endregion Properties
+
+        #region Methods
 
         /// <summary>
         /// Takes case and insert its key-value to the procedure.
@@ -70,32 +126,7 @@ namespace DocumentClassification.Representation
                 }
             }
         }
-    }
 
-    /// <summary>
-    /// Represent all known procedures in the DB.
-    /// Keys are IDs of the procedures stored in the DB.
-    /// </summary>
-    [Serializable]
-    public class AllProcedures : Dictionary<int, Procedure>
-    {
-        public AllProcedures() : base()
-        {
-        }
-        public AllProcedures(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
-        public void rebuild(AllCases allCases)
-        {
-            this.Clear();
-            foreach (Case tempCase in allCases.Values)
-            {
-                if (!this.ContainsKey(tempCase.ProcedureId))
-                {
-                    Add(tempCase.ProcedureId, new Procedure(tempCase.ProcedureId));
-                }
-                this[tempCase.ProcedureId].addCase(tempCase);
-            }
-        }
+        #endregion Methods
     }
 }

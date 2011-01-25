@@ -1,13 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DocumentClassification.Representation;
-using DocumentClassification.DCUpdate;
-
-namespace TestApp
+﻿namespace TestApp
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
+    using DocumentClassification.DCUpdate;
+    using DocumentClassification.Representation;
+
     class Program
     {
+        #region Methods
+
         static void Main(string[] args)
         {
             //AmodDBTools.Instance.update();
@@ -23,5 +26,7 @@ namespace TestApp
             int i = Data.Instance.AllCases.Count;
             */
         }
+
+        #endregion Methods
     }
 }

@@ -1,21 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DocumentClassification.Representation
+﻿namespace DocumentClassification.Representation
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
     public class Data
     {
-        private static readonly Data instance = new Data();
-        public static Data Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
+        #region Fields
 
-        static Data() { }
+        private static readonly Data instance = new Data();
+
+        private AllCases allCases;
+        private AllDecisionsPeople allDecisionsPeople;
+        private AllDecisionsStatus allDecisionsStatus;
+        private AllProcedures allProcedures;
+        private DBRepresentation dbRepresentation;
+
+        #endregion Fields
+
+        #region Constructors
+
+        static Data()
+        {
+        }
 
         private Data()
         {
@@ -23,14 +30,20 @@ namespace DocumentClassification.Representation
             dbRepresentation = new DBRepresentation();
             allProcedures = new AllProcedures();
             allDecisionsStatus = new AllDecisionsStatus();
-            allDecisionsPeople = new AllDecisionsPeople(); 
+            allDecisionsPeople = new AllDecisionsPeople();
         }
 
-        private AllCases allCases;
-        private DBRepresentation dbRepresentation;
-        private AllProcedures allProcedures;
-        private AllDecisionsStatus allDecisionsStatus;
-        private AllDecisionsPeople allDecisionsPeople;
+        #endregion Constructors
+
+        #region Properties
+
+        public static Data Instance
+        {
+            get
+            {
+                return instance;
+            }
+        }
 
         public AllCases AllCases
         {
@@ -43,17 +56,7 @@ namespace DocumentClassification.Representation
                 allCases = value;
             }
         }
-        public AllDecisionsStatus AllDecisionsStatus
-        {
-            get
-            {
-                return allDecisionsStatus;
-            }
-            set
-            {
-                allDecisionsStatus = value;
-            }
-        }
+
         public AllDecisionsPeople AllDecisionsPeople
         {
             get
@@ -65,17 +68,19 @@ namespace DocumentClassification.Representation
                 allDecisionsPeople = value;
             }
         }
-        public DBRepresentation DBRepresentation
+
+        public AllDecisionsStatus AllDecisionsStatus
         {
             get
             {
-                return dbRepresentation;
+                return allDecisionsStatus;
             }
             set
             {
-                dbRepresentation = value;
+                allDecisionsStatus = value;
             }
         }
+
         public AllProcedures AllProcedures
         {
             get
@@ -87,5 +92,19 @@ namespace DocumentClassification.Representation
                 allProcedures = value;
             }
         }
+
+        public DBRepresentation DBRepresentation
+        {
+            get
+            {
+                return dbRepresentation;
+            }
+            set
+            {
+                dbRepresentation = value;
+            }
+        }
+
+        #endregion Properties
     }
 }
