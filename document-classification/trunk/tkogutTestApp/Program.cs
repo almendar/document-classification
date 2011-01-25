@@ -107,13 +107,13 @@ public class TestApp
     private static void ProcedureRecognitionTest()
     {
         TestApp app = new TestApp();
-        app.ReadTextFromFile(@"C:\Users\karol.galazka\Documents\test.txt");
+        app.ReadTextFromFile(@"d:\test.txt");
 
         BagOfWordsTextClassifier classifier = BagOfWordsTextClassifier.Instance;
         int [] resutl = classifier.NextPhasePrediciton(19, 338, app.TextFile);
         foreach (int a in resutl)
         {
-            System.Console.WriteLine("Best procedures: {0}", a);
+            System.Console.WriteLine("Best next phase id: {0}", a);
         }
         System.Console.ReadLine();
     }
