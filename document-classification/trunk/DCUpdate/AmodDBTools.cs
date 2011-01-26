@@ -244,7 +244,7 @@
         private int getProcedureId(int caseId)
         {
             MySqlConnection connection = new MySqlConnection();
-            connection.ConnectionString = connectionString;
+            connection.ConnectionString = getConnectionString();
             connection.Open();
 
             string checkProcedureQuery = @"select caseProcedureId

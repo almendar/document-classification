@@ -63,7 +63,7 @@
         {
             connect();
             createNewVersion();
-            startTransation();
+            startTransaction();
             sendAllCases();
             sendAllDecisionsPeople();
             sendAllDecisionsStatus();
@@ -103,9 +103,9 @@
             conn.Close();
         }
 
-        private void executeNonQuery(String query)
+        private void executeNonQuery(String nonQuery)
         {
-            DbCommand cmd = new MySqlCommand(query, conn);
+            DbCommand cmd = new MySqlCommand(nonQuery, conn);
             cmd.ExecuteNonQuery();
         }
 
@@ -266,7 +266,7 @@
             rdr.Close();
         }
 
-        private void startTransation()
+        private void startTransaction()
         {
             string Query = "START TRANSACTION;";
             executeNonQuery(Query);
