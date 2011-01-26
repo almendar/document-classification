@@ -148,13 +148,13 @@
         /// <returns>Procedures IDs table</returns>
         public int[] ProcedureRecognition(string text)
         {
-            String [] textTokens = TextExtraction.GetTextTokens(text);
+            String[] textTokens = TextExtraction.GetTextTokens(text);
             double[] textVector = CreateVectorFromText(textTokens);
             int bestProcedureIndice = int.MinValue;
             double bestSimilarity = double.PositiveInfinity;
             for (int i = 0; i < numberOfProcedures; i++)
             {
-                double [] checkedVector = ProcedureMatrix[i];
+                double[] checkedVector = ProcedureMatrix[i];
                 //Cosine is 1 when 0 degree angel is between vectors
                 //so similarity will be 0 when vectors will have the same sense
                 double similarity = (1 - VectorOperations.VectorsConsine(checkedVector, textVector));
@@ -214,7 +214,7 @@
         /// <returns>Vector with document TF of words</returns>
         private double[] CreateVectorFromText(string[] textTokens)
         {
-            double [] vectorRep = new double[numberOfMeaningfulWords];
+            double[] vectorRep = new double[numberOfMeaningfulWords];
             foreach (String word in textTokens)
             {
                 if (!MapWordToColumn.ContainsKey(word))
@@ -232,10 +232,10 @@
         private void FetchMeaningfulWords()
         {
             this.numberOfCases = AllCases.Count;
-            this.wordThreshold = (int) Math.Floor((numberOfCases * MaximumFrequency));
+            this.wordThreshold = (int)Math.Floor((numberOfCases * MaximumFrequency));
             int vectorIndice = 0;
             MapWordToColumn = new Dictionary<string, int>();
-            foreach(KeyValuePair<string, int> kvp in DBRepresentation)
+            foreach (KeyValuePair<string, int> kvp in DBRepresentation)
             {
                 int documentFrequency = kvp.Value;
                 string word = kvp.Key;
@@ -325,7 +325,7 @@
             MapProcIdPhasIdToNextStageRowsSet = new Dictionary<int, Dictionary<int, List<int>>>();
             int nrOfDecisions = CountPastDecisionsNextStage(AllDecisionsNextPhase);
             NextStageMatrix = new double[nrOfDecisions][];
-            for(int i=0; i < nrOfDecisions; i++)
+            for (int i = 0; i < nrOfDecisions; i++)
             {
                 NextStageMatrix[i] = new double[numberOfMeaningfulWords];
             }
@@ -353,7 +353,7 @@
                                 String word = kvp.Key;
                                 double TFIDF = kvp.Value;
                                 int indice = MapWordToColumn[word];
-                                NextStageMatrix[indexer][indice]= TFIDF;
+                                NextStageMatrix[indexer][indice] = TFIDF;
                             }
                         }
 
@@ -419,52 +419,4 @@
         #endregion Methods
     }
 
-    public class ClassificationResult : IComparable<ClassificationResult>
-    {
-        #region Fields
-
-        private readonly int id;
-        private readonly double similarity;
-
-        #endregion Fields
-
-        #region Constructors
-
-        public ClassificationResult(int id, double similarity)
-        {
-            this.id = id;
-               this.similarity = similarity;
-        }
-
-        #endregion Constructors
-
-        #region Properties
-
-        public int Id
-        {
-            get
-               {
-               return id;
-               }
-        }
-
-        public double Similarity
-        {
-            get
-               {
-               return similarity;
-               }
-        }
-
-        #endregion Properties
-
-        #region Methods
-
-        public int CompareTo(ClassificationResult other)
-        {
-            return this.Similarity.CompareTo(other.Similarity);
-        }
-
-        #endregion Methods
-    }
 }
