@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using DocumentClassification.BagOfWords;
-using BagOfWordsClassifier;
+using DocumentClassification.BagOfWordsClassifier.Decisions;
 
 public class TestApp
 {
@@ -126,7 +126,7 @@ public class TestApp
                 Console.WriteLine("{Found new best result}");
         }
 
-        foreach(ClassificationResult cr1 in bdr.GetBestResults())
+        foreach(ClassificationResult cr1 in bdr.BestResults())
         {
             Console.WriteLine("{0}", cr1.Similarity);
         }
