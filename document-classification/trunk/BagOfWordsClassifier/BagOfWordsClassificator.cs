@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Text;
-
+    using DocumentClassification.BagOfWordsClassifier.Decisions;
     using DocumentClassification.Representation;
 
     /// <summary>
@@ -17,6 +17,7 @@
         /// Maximum percentage of cases in which word can appear to be take into consideration
         /// </summary>
         private const double MaximumFrequency = 0.9;
+        private const int NrOfBestDecisionsReturned = 4;
 
         static readonly BagOfWordsTextClassifier instance = new BagOfWordsTextClassifier();
 
@@ -146,27 +147,22 @@
         /// </summary>
         /// <param name="text">Text of document</param>
         /// <returns>Procedures IDs table</returns>
-        public int[] ProcedureRecognition(string text)
+        public ClassificationResult[] ProcedureRecognition(string text)
         {
+            BestDecisionResult BDR = new BestDecisionResult(NrOfBestDecisionsReturned);
             String[] textTokens = TextExtraction.GetTextTokens(text);
             double[] textVector = CreateVectorFromText(textTokens);
-            int bestProcedureIndice = int.MinValue;
-            double bestSimilarity = double.PositiveInfinity;
             for (int i = 0; i < numberOfProcedures; i++)
             {
                 double[] checkedVector = ProcedureMatrix[i];
                 //Cosine is 1 when 0 degree angel is between vectors
                 //so similarity will be 0 when vectors will have the same sense
                 double similarity = (1 - VectorOperations.VectorsConsine(checkedVector, textVector));
-                if (similarity < bestSimilarity)
-                {
-                    bestSimilarity = similarity;
-                    bestProcedureIndice = i;
-                }
+                int bestProcedureId = MapRowToProcedureId[i];
+                ClassificationResult result = new ClassificationResult(bestProcedureId, similarity);
+                BDR.addResult(result);
             }
-            int bestProcedureId = MapRowToProcedureId[bestProcedureIndice];
-            int[] ret = new int[] { bestProcedureId };
-            return ret;
+            return BDR.BestResults();
         }
 
         private void ComputeStatisticParams()
@@ -251,28 +247,26 @@
             }
         }
 
-        private int[] GenericPredictor(double[][] dataMatrix, int[] bestRowToDecisionIdMapping,
+        private ClassificationResult[] GenericPredictor(double[][] dataMatrix, int[] bestRowToDecisionIdMapping,
             Dictionary<int, Dictionary<int, List<int>>> ProcIdPhaseIdToRowsMapping, int procedurId, int phaseId, string text)
         {
+            BestDecisionResult BDR = new BestDecisionResult(NrOfBestDecisionsReturned);
             String[] textTokens = TextExtraction.GetTextTokens(text);
             double[] textVector = CreateVectorFromText(textTokens);
             int nrOfDecisions = dataMatrix.Length;
-            int bestDecisionIndice = int.MinValue;
-            double bestSimilarity = double.PositiveInfinity;
             List<int> rowSet = ProcIdPhaseIdToRowsMapping[procedurId][phaseId];
             for (int i = 0; i < rowSet.Count; i++)
             {
                 double[] checkedVector = dataMatrix[rowSet[i]];
                 double similarity = (1 - VectorOperations.VectorsConsine(checkedVector, textVector));
-                if (similarity < bestSimilarity)
-                {
-                    bestSimilarity = similarity;
-                    bestDecisionIndice = rowSet[i];
-                }
+                int bestNextDecisionId = bestRowToDecisionIdMapping[rowSet[i]];
+                ClassificationResult result = new ClassificationResult(bestNextDecisionId, similarity);
+                bool isBetter = BDR.addResult(result);
+                if (isBetter)
+                    ;//send an event
+                    
             }
-            int bestNextDecisionId = bestRowToDecisionIdMapping[bestDecisionIndice];
-            int[] ret = new int[] { bestNextDecisionId };
-            return ret;
+            return BDR.BestResults();
         }
 
         private void NextPersonMatrixBuild()
