@@ -25,9 +25,16 @@
         private AllDecisionsNextStage AllDecisionsNextPhase = null;
         private AllProcedures AllProcedures = null;
         private DBRepresentation DBRepresentation = null;
+        private Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToNextPersonRowsSet = null;
+        private Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToNextStageRowsSet = null;
+        private int[] MapRowToNextPersonId = null;
+        private int[] MapRowToNextStageId = null;
 
-
-
+        /// <summary>
+        /// Table maps row of the <see cref="ProcedureMatrix"/> to correspondent procedure id 
+        /// in the database.
+        /// </summary>
+        private int[] MapRowToProcedureId = null;
 
         /// <summary>
         /// Maps word to column number.
@@ -36,6 +43,13 @@
         /// will be taken into consideration
         /// </summary>
         private Dictionary<String, int> MapWordToColumn = null;
+
+        //**********************************************************************//
+        private double[][] NextPersonMatrix = null;
+
+        //TODO
+        //**********************************************************************//
+        private double[][] NextStageMatrix = null;
         private int numberOfCases;
 
         /// <summary>
@@ -49,27 +63,11 @@
         private int numberOfProcedures;
 
         //**********************************************************************//
-        private double[][] NextPersonMatrix = null;
-        private Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToNextPersonRowsSet = null;
-        private int[] MapRowToNextPersonId = null;
-
-        //TODO
-        //**********************************************************************//
-        private double[][] NextStageMatrix = null;
-        private Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToNextStageRowsSet = null;
-        private int[] MapRowToNextStageId = null;
-
-        //**********************************************************************//
         /// <summary>
         /// Rows of this matrix represents procedures, columns are words <see cref="MapWordToColumn"/>.
         /// Values of this matrix are TFIDF of words in procedures.
         /// </summary>
         private double[][] ProcedureMatrix = null;
-        /// <summary>
-        /// Table maps row of the <see cref="ProcedureMatrix"/> to correspondent procedure id 
-        /// in the database.
-        /// </summary>
-        private int[] MapRowToProcedureId = null;
 
         /// <summary>
         /// Threashold above which words are not taken into consideration.
@@ -110,41 +108,15 @@
 
         #region Methods
 
-
-        private int[] GenericPredictor(double[][] dataMatrix, int[] bestRowToDecisionIdMapping,
-            Dictionary<int, Dictionary<int, List<int>>> ProcIdPhaseIdToRowsMapping, int procedurId, int phaseId, string text)
-        {
-            String[] textTokens = TextExtraction.GetTextTokens(text);
-            double[] textVector = CreateVectorFromText(textTokens);
-            int nrOfDecisions = dataMatrix.Length;
-            int bestDecisionIndice = int.MinValue;
-            double bestSimilarity = double.PositiveInfinity;
-            List<int> rowSet = ProcIdPhaseIdToRowsMapping[procedurId][phaseId];
-            for (int i = 0; i < rowSet.Count; i++)
-            {
-                double[] checkedVector = dataMatrix[rowSet[i]];
-                double similarity = (1 - VectorOperations.VectorsConsine(checkedVector, textVector));
-                if (similarity < bestSimilarity)
-                {
-                    bestSimilarity = similarity;
-                    bestDecisionIndice = rowSet[i];
-                }
-            }
-            int bestNextDecisionId = bestRowToDecisionIdMapping[bestDecisionIndice];
-            int[] ret = new int[] { bestNextDecisionId };
-            return ret;
-        }
-
         public int[] NextPersonPrediction(int procedurId, int phaseId, string text)
         {
-            return GenericPredictor(NextPersonMatrix, MapRowToNextPersonId, 
+            return GenericPredictor(NextPersonMatrix, MapRowToNextPersonId,
                 MapProcIdPhasIdToNextPersonRowsSet, procedurId, phaseId, text);
         }
 
         public int[] NextPhasePrediciton(int procedurId, int phaseId, string text)
         {
-
-            return GenericPredictor(NextStageMatrix, MapRowToNextStageId, 
+            return GenericPredictor(NextStageMatrix, MapRowToNextStageId,
                 MapProcIdPhasIdToNextStageRowsSet, procedurId, phaseId, text);
 
             //String[] textTokens = TextExtraction.GetTextTokens(text);
@@ -203,6 +175,30 @@
             this.numberOfMeaningfulWords = MapWordToColumn.Keys.Count; //vector length
         }
 
+        private int CountPastDecisions<T>(ref Dictionary<int, Dictionary<int, Dictionary<int, T>>> pastData)
+        {
+            int nrRet = 0;
+            foreach (int i in pastData.Keys)
+                foreach (int j in pastData[i].Keys)
+                    foreach (int k in pastData[i][j].Keys)
+                    {
+                        nrRet += 1;
+                    }
+            return nrRet;
+        }
+
+        private int CountPastDecisionsNextPerson(AllDecisionsNextPerson AllDecisionsNextPerson)
+        {
+            Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationNextPerson>>> data = AllDecisionsNextPerson;
+            return this.CountPastDecisions(ref data);
+        }
+
+        private int CountPastDecisionsNextStage(AllDecisionsNextStage AllDecisionsPhase)
+        {
+            Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationNextStage>>> data = AllDecisionsPhase;
+            return this.CountPastDecisions(ref data);
+        }
+
         private void CreateDataMatrices()
         {
             ProcedureMatrixBuild();
@@ -255,6 +251,30 @@
             }
         }
 
+        private int[] GenericPredictor(double[][] dataMatrix, int[] bestRowToDecisionIdMapping,
+            Dictionary<int, Dictionary<int, List<int>>> ProcIdPhaseIdToRowsMapping, int procedurId, int phaseId, string text)
+        {
+            String[] textTokens = TextExtraction.GetTextTokens(text);
+            double[] textVector = CreateVectorFromText(textTokens);
+            int nrOfDecisions = dataMatrix.Length;
+            int bestDecisionIndice = int.MinValue;
+            double bestSimilarity = double.PositiveInfinity;
+            List<int> rowSet = ProcIdPhaseIdToRowsMapping[procedurId][phaseId];
+            for (int i = 0; i < rowSet.Count; i++)
+            {
+                double[] checkedVector = dataMatrix[rowSet[i]];
+                double similarity = (1 - VectorOperations.VectorsConsine(checkedVector, textVector));
+                if (similarity < bestSimilarity)
+                {
+                    bestSimilarity = similarity;
+                    bestDecisionIndice = rowSet[i];
+                }
+            }
+            int bestNextDecisionId = bestRowToDecisionIdMapping[bestDecisionIndice];
+            int[] ret = new int[] { bestNextDecisionId };
+            return ret;
+        }
+
         private void NextPersonMatrixBuild()
         {
             MapProcIdPhasIdToNextPersonRowsSet = new Dictionary<int, Dictionary<int, List<int>>>();
@@ -300,8 +320,6 @@
             }
         }
 
-  
-
         private void NextStageMatrixBuild()
         {
             MapProcIdPhasIdToNextStageRowsSet = new Dictionary<int, Dictionary<int, List<int>>>();
@@ -346,10 +364,6 @@
                 }
             }
         }
-
-
-
- 
 
         /// <summary>
         /// Builds the <see cref="ProcedureMatrix"/> out of <see cref="AllProcedures"/> for words
@@ -400,31 +414,6 @@
             this.AllCases = Data.Instance.AllCases;
             this.AllProcedures = Data.Instance.AllProcedures;
             this.AllDecisionsNextPhase = Data.Instance.AllDecisionsStatus;
-        }
-
-        private int CountPastDecisionsNextStage(AllDecisionsNextStage AllDecisionsPhase)
-        {
-            Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationNextStage>>> data = AllDecisionsPhase;
-            return this.CountPastDecisions(ref data);
-        }
-
-
-        private int CountPastDecisionsNextPerson(AllDecisionsNextPerson AllDecisionsNextPerson)
-        {
-            Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationNextPerson>>> data = AllDecisionsNextPerson;
-            return this.CountPastDecisions(ref data);
-        }
-
-        private int CountPastDecisions<T>(ref Dictionary<int, Dictionary<int, Dictionary<int, T>>> pastData)
-        {
-            int nrRet = 0;
-            foreach (int i in pastData.Keys)
-                foreach (int j in pastData[i].Keys)
-                    foreach (int k in pastData[i][j].Keys)
-                    {
-                        nrRet += 1;
-                    }
-            return nrRet;
         }
 
         #endregion Methods

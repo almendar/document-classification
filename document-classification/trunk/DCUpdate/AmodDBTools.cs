@@ -16,13 +16,16 @@
     {
         #region Fields
 
-        private const string connectionString = "Server=localhost;Database=amod;Uid=root;Pwd=1207pegazo;";
+        private const string database = "amod";
+        private const string pwd = "1207pegazo";
+        private const string server = "localhost";
+        private const string uid = "root";
 
         static readonly AmodDBTools instance = new AmodDBTools();
 
         private MySqlConnection conn;
-        private string lastRecord;
-        private string lastUpdate;
+        private string currentUpdateDate;
+        private string lastUpdateDate;
 
         #endregion Fields
 
@@ -54,52 +57,29 @@
 
         #region Methods
 
+        public void rebuild()
+        {
+            lastUpdateDate = "1900-12-31 23:59:59";
+            update();
+        }
+
         public void update()
         {
             connect();
-            DbDataReader rdr = getNewData(lastUpdate);
-            Dictionary<int, Dictionary<string, int> > data = createDictionaryFromReader(rdr);
+
+            currentUpdateDate = System.DateTime.Now.ToString();
+            DbDataReader rdr = getFtsearchdata(lastUpdateDate, currentUpdateDate);
+            Dictionary<int, Dictionary<string, int> > data = transformFtsearchDataToDictionary(rdr);
             rdr.Close();
 
+            //#region updating_allcases
             // splitting data and updating AllCases structure
             List<string> newWords = new List<string>();
             Dictionary<int, Dictionary<string, int>> newCases = new Dictionary<int, Dictionary<string, int>>();
             Dictionary<int, Dictionary<string, int>> oldCasesNewWords = new Dictionary<int, Dictionary<string, int>>();
             Dictionary<int, Dictionary<string, int>> oldCasesOldWords = new Dictionary<int, Dictionary<string, int>>();
-            foreach (int caseId in data.Keys)
-            {
-                if (CasesTF.Instance.ContainsKey(caseId))
-                {
-                    oldCasesOldWords.Add(caseId, new Dictionary<string, int> ());
-                    oldCasesNewWords.Add(caseId, new Dictionary<string, int> ());
-                    foreach (string word in data[caseId].Keys)
-                    {
-                        if (CasesTF.Instance[caseId].ContainsKey(word))
-                        {
-                            oldCasesOldWords[caseId].Add(word, data[caseId][word]);
-                            CasesTF.Instance[caseId].Add(word, oldCasesOldWords[caseId][word]);
-                        }
-                        else
-                        {
-                            oldCasesNewWords[caseId].Add(word, data[caseId][word]);
-                            CasesTF.Instance[caseId].Add(word, oldCasesNewWords[caseId][word]);
-                            Data.Instance.AllCases[caseId].Add(word, 0);
-                            if (!newWords.Contains(word))
-                                newWords.Add(word);
-                        }
-                    }
-                }
-                else
-                {
-                    Data.Instance.AllCases.Add(caseId, new Case(getProcedureId(caseId), caseId));
-                    foreach (string word in data[caseId].Keys)
-                    {
-                        Data.Instance.AllCases[caseId].Add(word, 0);
-                    }
-                    newCases.Add(caseId, data[caseId]);
-                    CasesTF.Instance.Add(caseId, data[caseId]);
-                }
-            }
+            updateAllCases(data, newWords, newCases, oldCasesNewWords, oldCasesOldWords);
+            //#endregion updating_allcases
 
             // updating DBRepresentation and IDFCaclulaction structure
             updateDBRepresentation(newCases);
@@ -107,48 +87,23 @@
 
             // recalculate TF-IDF
             // if new cases appeared recalculate all
+            #region TF_IDF
             if (newCases.Count != 0)
             {
-                // recalculating IDF
+                // setting number of cases
                 IDFcalculaction.Instance.setNumberOfCases(Data.Instance.AllCases.getNumberOfCasesInDB() + newCases.Count);
-                IDFcalculaction.Instance.calculateIDF();
-                foreach (Case tempCase in Data.Instance.AllCases.Values)
-                {
-                    List<string> tempList = new List<string>(tempCase.Keys);
-                    foreach(string word in tempList)
-                    {
-                        tempCase[word] = calculateTFIDF(tempCase.CaseId, word);
-                    }
-                }
+                recalculateAllTFIDF();
             }
             else
-            {
-                // old words - recalculate only TF-IDF in this document
-                foreach (int caseId in oldCasesOldWords.Keys)
-                {
-                    foreach (string word in oldCasesOldWords[caseId].Keys)
-                    {
-                        Data.Instance.AllCases[caseId][word] += IDFcalculaction.Instance[word].IDF;
-                    }
-                }
-
-                // for new words - recalculate all words that appeared in all cases
-                foreach (string word in newWords)
-                {
-                    IDFcalculaction.Instance.calculateIDF(word);
-                    foreach (int caseId in Data.Instance.AllCases.Keys)
-                    {
-                        if (Data.Instance.AllCases[caseId].ContainsKey(word))
-                        {
-                            Data.Instance.AllCases[caseId][word] = calculateTFIDF(caseId, word);
-                        }
-                    }
-                }
-            }
+                recalculateTFIDFFofSelectedRecords(newWords, oldCasesOldWords);
+            #endregion TF_IDF
             rdr.Close();
+
             updateAllDecisionsStatus();
             updateAllDecisionsPeople();
             Data.Instance.AllProcedures.rebuild(Data.Instance.AllCases);
+
+            lastUpdateDate = currentUpdateDate;
             disconnect();
         }
 
@@ -221,22 +176,8 @@
         {
             if(conn == null)
                 conn = new MySqlConnection();
-            conn.ConnectionString = connectionString;
+            conn.ConnectionString = getConnectionString();
             conn.Open();
-        }
-
-        private Dictionary<int, Dictionary<string, int>> createDictionaryFromReader(DbDataReader rdr)
-        {
-            Dictionary<int, Dictionary<string, int>> data = new Dictionary<int, Dictionary<string, int>>();
-            while (rdr.Read())
-            {
-                if (!data.ContainsKey((int)rdr["ftsCaseId"]))
-                    data.Add((int)rdr["ftsCaseId"], extractDocument((string)rdr["ftsText"]));
-                else
-                    extractDocument((string)rdr["ftsText"], data[(int)rdr["ftsCaseId"]]);
-                lastRecord = rdr["ftsModified"].ToString();
-            }
-            return data;
         }
 
         private void disconnect()
@@ -275,21 +216,28 @@
             return extractedDoc;
         }
 
-        private DbDataReader getData()
+        private string getConnectionString()
         {
-            string ftsQuery = @"select *
-                               from amod.ftsearchdata
-                                 order by ftsModified;";
-            return executeQuery(ftsQuery);
+            return "Server=" + server + ";Database=" + database + ";Uid=" + uid + ";Pwd=" + pwd + ";";
         }
 
-        private DbDataReader getNewData(String lastRecordDate)
+        private DbDataReader getFtsearchdata(String beginDate, String endDate)
         {
-            string ftsQueryNewData = @"select *
+            string ftsQueryData = @"select *
                                 from amod.ftsearchdata
-                                where ftsModified > '" + lastRecordDate +
+                                where ftsModified > '" + beginDate +
+                                "' AND ftsModified < '" + endDate +
                                 "' order by ftsModified;";
-            return executeQuery(ftsQueryNewData);
+            return executeQuery(ftsQueryData);
+        }
+
+        private DbDataReader getFtsearchdata(String endDate)
+        {
+            string ftsQueryData = @"select *
+                                from amod.ftsearchdata
+                                where ftsModified < '" + endDate +
+                                "' order by ftsModified;";
+            return executeQuery(ftsQueryData);
         }
 
         /** return procedure Id for particular case */
@@ -317,12 +265,104 @@
             return result;
         }
 
+        private void recalculateAllTFIDF()
+        {
+            IDFcalculaction.Instance.calculateIDF();
+            foreach (Case tempCase in Data.Instance.AllCases.Values)
+            {
+                List<string> tempList = new List<string>(tempCase.Keys);
+                foreach (string word in tempList)
+                {
+                    tempCase[word] = calculateTFIDF(tempCase.CaseId, word);
+                }
+            }
+        }
+
+        private void recalculateTFIDFFofSelectedRecords(List<string> newWords, Dictionary<int, Dictionary<string, int>> oldCasesOldWords)
+        {
+            // old words - recalculate only TF-IDF in this document
+            foreach (int caseId in oldCasesOldWords.Keys)
+            {
+                foreach (string word in oldCasesOldWords[caseId].Keys)
+                {
+                    Data.Instance.AllCases[caseId][word] += IDFcalculaction.Instance[word].IDF;
+                }
+            }
+
+            // for new words - recalculate all words that appeared in all cases
+            foreach (string word in newWords)
+            {
+                IDFcalculaction.Instance.calculateIDF(word);
+                foreach (int caseId in Data.Instance.AllCases.Keys)
+                {
+                    if (Data.Instance.AllCases[caseId].ContainsKey(word))
+                    {
+                        Data.Instance.AllCases[caseId][word] = calculateTFIDF(caseId, word);
+                    }
+                }
+            }
+        }
+
+        private Dictionary<int, Dictionary<string, int>> transformFtsearchDataToDictionary(DbDataReader rdr)
+        {
+            Dictionary<int, Dictionary<string, int>> data = new Dictionary<int, Dictionary<string, int>>();
+            while (rdr.Read())
+            {
+                if (!data.ContainsKey((int)rdr["ftsCaseId"]))
+                    data.Add((int)rdr["ftsCaseId"], extractDocument((string)rdr["ftsText"]));
+                else
+                    extractDocument((string)rdr["ftsText"], data[(int)rdr["ftsCaseId"]]);
+                currentUpdateDate = rdr["ftsModified"].ToString();
+            }
+            return data;
+        }
+
+        private void updateAllCases(Dictionary<int, Dictionary<string, int>> data, List<string> newWords, Dictionary<int, Dictionary<string, int>> newCases, Dictionary<int, Dictionary<string, int>> oldCasesNewWords, Dictionary<int, Dictionary<string, int>> oldCasesOldWords)
+        {
+            foreach (int caseId in data.Keys)
+            {
+                if (CasesTF.Instance.ContainsKey(caseId))
+                {
+                    oldCasesOldWords.Add(caseId, new Dictionary<string, int>());
+                    oldCasesNewWords.Add(caseId, new Dictionary<string, int>());
+                    foreach (string word in data[caseId].Keys)
+                    {
+                        if (CasesTF.Instance[caseId].ContainsKey(word))
+                        {
+                            oldCasesOldWords[caseId].Add(word, data[caseId][word]);
+                            CasesTF.Instance[caseId].Add(word, oldCasesOldWords[caseId][word]);
+                        }
+                        else
+                        {
+                            oldCasesNewWords[caseId].Add(word, data[caseId][word]);
+                            CasesTF.Instance[caseId].Add(word, oldCasesNewWords[caseId][word]);
+                            Data.Instance.AllCases[caseId].Add(word, 0);
+                            if (!newWords.Contains(word))
+                                newWords.Add(word);
+                        }
+                    }
+                }
+                else
+                {
+                    Data.Instance.AllCases.Add(caseId, new Case(getProcedureId(caseId), caseId));
+                    foreach (string word in data[caseId].Keys)
+                    {
+                        Data.Instance.AllCases[caseId].Add(word, 0);
+                    }
+                    newCases.Add(caseId, data[caseId]);
+                    CasesTF.Instance.Add(caseId, data[caseId]);
+                }
+            }
+        }
+
         private void updateAllDecisionsPeople()
         {
             string Query = @"SELECT `caseId`, `caseVersion`, `caseOwnerId`, `caseModified`, `casePrevOwnerId`, `caseNextOwnerId`
                             FROM `amod`.`casehistory`
                             WHERE `caseNextOwnerId` IS NOT NULL AND `caseNextOwnerId` <> `caseOwnerId`
-                            ORDER BY `caseOwnerId`, `caseVersion`;";
+                            AND caseModified > '" + lastUpdateDate +
+                           "' AND caseModified < '" + currentUpdateDate +
+                           "' ORDER BY `caseOwnerId`, `caseVersion`;";
             DbDataReader rdr = executeQuery(Query);
 
             int caseId = -1;
@@ -374,7 +414,9 @@
             string Query = @"SELECT `caseId`, `caseVersion`, `caseStatusId`, `caseModified`, `casePrevStatusId`, `caseNextStatusId`
                             FROM `amod`.`casehistory`
                             WHERE `caseNextStatusId` IS NOT NULL AND `caseNextStatusId` <> `caseStatusId`
-                            ORDER BY `caseId`, `caseVersion`;";
+                            AND caseModified > '" + lastUpdateDate +
+                           "' AND caseModified < '" + currentUpdateDate +
+                           "' ORDER BY `caseId`, `caseVersion`;";
             DbDataReader rdr = executeQuery(Query);
 
             int caseId = -1;
