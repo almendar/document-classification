@@ -12,7 +12,10 @@
     {
         #region Fields
 
-        private const string connectionString = "Server=localhost;Database=dc;Uid=root;Pwd=riva87;";
+        private const string database = "dc";
+        private const string pwd = "1207pegazo";
+        private const string server = "localhost";
+        private const string uid = "root";
 
         private static readonly DCDbTools instance = new DCDbTools();
 
@@ -83,7 +86,7 @@
         {
             if (conn == null)
                 conn = new MySqlConnection();
-            conn.ConnectionString = connectionString;
+            conn.ConnectionString = getConnectionString();
             conn.Open();
         }
 
@@ -174,6 +177,11 @@
                 Data.Instance.AllProcedures = (AllProcedures)bf.Deserialize(mem);
             }
             rdr.Close();
+        }
+
+        private string getConnectionString()
+        {
+            return "Server=" + server + ";Database=" + database + ";Uid=" + uid + ";Pwd=" + pwd + ";";
         }
 
         private void getDBRepresentation()
