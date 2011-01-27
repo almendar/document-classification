@@ -109,17 +109,46 @@
 
         #region Methods
 
-        public int[] NextPersonPrediction(int procedurId, int phaseId, string text)
+        public void reloadData()
+        {
+            ResetAllValues();
+            ReadDataBase();
+            FetchMeaningfulWords();
+            ComputeStatisticParams();
+            CreateDataMatrices();
+        }
+
+        private void ResetAllValues()
+        {
+            AllCases = null;
+            AllDecisionsNextPerson = null;
+            AllDecisionsNextPhase = null;
+            AllProcedures = null;
+            DBRepresentation = null;
+            MapProcIdPhasIdToNextPersonRowsSet = null;
+            MapProcIdPhasIdToNextStageRowsSet = null;
+            MapRowToNextPersonId = null;
+            MapRowToNextStageId = null;
+            MapRowToProcedureId = null;
+            MapWordToColumn = null;
+            NextPersonMatrix = null;
+            NextStageMatrix = null;
+            ProcedureMatrix = null;
+        }
+
+        public ClassificationResult[] NextPersonPrediction(int procedurId, int phaseId, string text)
         {
             return GenericPredictor(NextPersonMatrix, MapRowToNextPersonId,
                 MapProcIdPhasIdToNextPersonRowsSet, procedurId, phaseId, text);
         }
 
-        public int[] NextPhasePrediciton(int procedurId, int phaseId, string text)
+        public ClassificationResult[] NextStagePrediciton(int procedurId, int phaseId, string text)
         {
             return GenericPredictor(NextStageMatrix, MapRowToNextStageId,
                 MapProcIdPhasIdToNextStageRowsSet, procedurId, phaseId, text);
 
+
+            //Orginal metod below!!!
             //String[] textTokens = TextExtraction.GetTextTokens(text);
             //double[] textVector = CreateVectorFromText(textTokens);
             //int nrOfDecisions = PhaseMatrix.Length;
