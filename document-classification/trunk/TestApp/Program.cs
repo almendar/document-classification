@@ -13,7 +13,8 @@
 
         static void Main(string[] args)
         {
-            //AmodDBTools.Instance.rebuild();
+            AmodDBTools.Instance.rebuild();
+            AmodDBTools.Instance.update();
             //DCDbTools.Instance.sendData();
             DCDbTools.Instance.loadData();
             int i = Data.Instance.AllDecisionsStatus.Count;
