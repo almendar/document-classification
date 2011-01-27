@@ -69,40 +69,46 @@
 
             currentUpdateDate = System.DateTime.Now.ToString();
             DbDataReader rdr = getFtsearchdata(lastUpdateDate, currentUpdateDate);
-            Dictionary<int, Dictionary<string, int> > data = transformFtsearchDataToDictionary(rdr);
-            rdr.Close();
-
-            //#region updating_allcases
-            // splitting data and updating AllCases structure
-            List<string> newWords = new List<string>();
-            Dictionary<int, Dictionary<string, int>> newCases = new Dictionary<int, Dictionary<string, int>>();
-            Dictionary<int, Dictionary<string, int>> oldCasesNewWords = new Dictionary<int, Dictionary<string, int>>();
-            Dictionary<int, Dictionary<string, int>> oldCasesOldWords = new Dictionary<int, Dictionary<string, int>>();
-            updateAllCases(data, newWords, newCases, oldCasesNewWords, oldCasesOldWords);
-            //#endregion updating_allcases
-
-            // updating DBRepresentation and IDFCaclulaction structure
-            updateDBRepresentation(newCases);
-            updateDBRepresentation(oldCasesNewWords);
-
-            // recalculate TF-IDF
-            // if new cases appeared recalculate all
-            #region TF_IDF
-            if (newCases.Count != 0)
+            if (rdr.HasRows)
             {
-                // setting number of cases
-                IDFcalculaction.Instance.setNumberOfCases(Data.Instance.AllCases.getNumberOfCasesInDB() + newCases.Count);
-                recalculateAllTFIDF();
+                lock (Data.Instance)
+                {
+                    Dictionary<int, Dictionary<string, int>> data = transformFtsearchDataToDictionary(rdr);
+                    rdr.Close();
+
+                    //#region updating_allcases
+                    // splitting data and updating AllCases structure
+                    List<string> newWords = new List<string>();
+                    Dictionary<int, Dictionary<string, int>> newCases = new Dictionary<int, Dictionary<string, int>>();
+                    Dictionary<int, Dictionary<string, int>> oldCasesNewWords = new Dictionary<int, Dictionary<string, int>>();
+                    Dictionary<int, Dictionary<string, int>> oldCasesOldWords = new Dictionary<int, Dictionary<string, int>>();
+                    updateAllCases(data, newWords, newCases, oldCasesNewWords, oldCasesOldWords);
+                    //#endregion updating_allcases
+
+                    // updating DBRepresentation and IDFCaclulaction structure
+                    updateDBRepresentation(newCases);
+                    updateDBRepresentation(oldCasesNewWords);
+
+                    // recalculate TF-IDF
+                    // if new cases appeared recalculate all
+                    #region TF_IDF
+                    if (newCases.Count != 0)
+                    {
+                        // setting number of cases
+                        IDFcalculaction.Instance.setNumberOfCases(Data.Instance.AllCases.getNumberOfCasesInDB() + newCases.Count);
+                        recalculateAllTFIDF();
+                    }
+                    else
+                        recalculateTFIDFFofSelectedRecords(newWords, oldCasesOldWords);
+                    #endregion TF_IDF
+                    rdr.Close();
+
+                    updateAllDecisionsStatus();
+                    updateAllDecisionsPeople();
+                    Data.Instance.AllProcedures.rebuild(Data.Instance.AllCases);
+
+                }
             }
-            else
-                recalculateTFIDFFofSelectedRecords(newWords, oldCasesOldWords);
-            #endregion TF_IDF
-            rdr.Close();
-
-            updateAllDecisionsStatus();
-            updateAllDecisionsPeople();
-            Data.Instance.AllProcedures.rebuild(Data.Instance.AllCases);
-
             lastUpdateDate = currentUpdateDate;
             disconnect();
         }
@@ -137,7 +143,7 @@
             }
         }
 
-        private void addPeopleConnection(int caseId,int procedureId,int currentOwner,int nextOwner)
+        private void addPeopleConnection(int caseId, int procedureId, int currentOwner, int nextOwner)
         {
             if (!Data.Instance.AllDecisionsPeople[procedureId].ContainsKey(currentOwner))
             {
@@ -174,7 +180,7 @@
 
         private void connect()
         {
-            if(conn == null)
+            if (conn == null)
                 conn = new MySqlConnection();
             conn.ConnectionString = getConnectionString();
             conn.Open();
@@ -193,7 +199,7 @@
         private DbDataReader executeQuery(string checkProcedureQuery, MySqlConnection connection)
         {
             DbCommand cmd = new MySqlCommand(checkProcedureQuery, connection);
-            return(cmd.ExecuteReader());
+            return (cmd.ExecuteReader());
         }
 
         private Dictionary<string, int> extractDocument(String doc)
@@ -206,7 +212,7 @@
             char[] delimiterChars = { ' ', ',', '.', ':', '\t' };
             string[] words = doc.Split(delimiterChars);
 
-            foreach(string s in words)
+            foreach (string s in words)
             {
                 if (extractedDoc.ContainsKey(s))
                     extractedDoc[s]++;
@@ -463,13 +469,13 @@
             rdr.Close();
         }
 
-        private void updateDBRepresentation(Dictionary<int, Dictionary<string, int> > data)
+        private void updateDBRepresentation(Dictionary<int, Dictionary<string, int>> data)
         {
-            foreach(Dictionary<string, int> tempCase in data.Values)
+            foreach (Dictionary<string, int> tempCase in data.Values)
             {
-                foreach(string word in tempCase.Keys)
+                foreach (string word in tempCase.Keys)
                 {
-                    if(Data.Instance.DBRepresentation.ContainsKey(word))
+                    if (Data.Instance.DBRepresentation.ContainsKey(word))
                     {
                         Data.Instance.DBRepresentation[word]++;
                         IDFcalculaction.Instance.dfChanged(word, Data.Instance.DBRepresentation[word]);
@@ -516,9 +522,9 @@
 
         #region Methods
 
-        public void Add(Dictionary<int, Dictionary<string, int> > data)
+        public void Add(Dictionary<int, Dictionary<string, int>> data)
         {
-            foreach(int caseId in data.Keys)
+            foreach (int caseId in data.Keys)
             {
                 Add(caseId, data[caseId]);
             }

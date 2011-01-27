@@ -52,28 +52,34 @@
 
         public void loadData()
         {
-            connect();
-            setCurrentVersion();
-            getDBRepresentation();
-            getAllCases();
-            getAllDecisionsStatus();
-            getAllProcedures();
-            getAllDecisionsPeople();
-            disconnect();
+            lock (Data.Instance)
+            {
+                connect();
+                setCurrentVersion();
+                getDBRepresentation();
+                getAllCases();
+                getAllDecisionsStatus();
+                getAllProcedures();
+                getAllDecisionsPeople();
+                disconnect();
+            }
         }
 
         public void sendData()
         {
-            connect();
-            createNewVersion();
-            startTransaction();
-            sendAllCases();
-            sendAllDecisionsPeople();
-            sendAllDecisionsStatus();
-            sendAllProcedures();
-            sendDBRepresentation();
-            commit();
-            disconnect();
+            lock (Data.Instance)
+            {
+                connect();
+                createNewVersion();
+                startTransaction();
+                sendAllCases();
+                sendAllDecisionsPeople();
+                sendAllDecisionsStatus();
+                sendAllProcedures();
+                sendDBRepresentation();
+                commit();
+                disconnect();
+            }
         }
 
         private void commit()
