@@ -200,7 +200,7 @@
             this.numberOfMeaningfulWords = MapWordToColumn.Keys.Count; //vector length
         }
 
-        private int CountPastDecisions<T>(ref Dictionary<int, Dictionary<int, Dictionary<int, T>>> pastData)
+        private int CountPastDecisionsNextPerson(AllDecisionsNextPerson pastData)
         {
             int nrRet = 0;
             foreach (int i in pastData.Keys)
@@ -212,16 +212,16 @@
             return nrRet;
         }
 
-        private int CountPastDecisionsNextPerson(AllDecisionsNextPerson AllDecisionsNextPerson)
+        private int CountPastDecisionsNextStage(AllDecisionsNextStage pastData)
         {
-            Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationNextPerson>>> data = AllDecisionsNextPerson;
-            return this.CountPastDecisions(ref data);
-        }
-
-        private int CountPastDecisionsNextStage(AllDecisionsNextStage AllDecisionsPhase)
-        {
-            Dictionary<int, Dictionary<int, Dictionary<int, DecisionRepresentationNextStage>>> data = AllDecisionsPhase;
-            return this.CountPastDecisions(ref data);
+            int nrRet = 0;
+            foreach (int i in pastData.Keys)
+                foreach (int j in pastData[i].Keys)
+                    foreach (int k in pastData[i][j].Keys)
+                    {
+                        nrRet += 1;
+                    }
+            return nrRet;
         }
 
         private void CreateDataMatrices()
