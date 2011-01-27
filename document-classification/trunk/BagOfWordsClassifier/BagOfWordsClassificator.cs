@@ -312,10 +312,10 @@
             int indexer = 0;
             foreach (int procId in AllDecisionsNextPerson.Keys)
             {
-                MapProcIdPhasIdToNextStageRowsSet[procId] = new Dictionary<int, List<int>>();
+                MapProcIdPhasIdToNextPersonRowsSet[procId] = new Dictionary<int, List<int>>();
                 foreach (int phaseId in AllDecisionsNextPerson[procId].Keys)
                 {
-                    MapProcIdPhasIdToNextStageRowsSet[procId][phaseId] = new List<int>();
+                    MapProcIdPhasIdToNextPersonRowsSet[procId][phaseId] = new List<int>();
                     foreach (int nextPhasId in AllDecisionsNextPerson[procId][phaseId].Keys)
                     {
                         DecisionRepresentationNextPerson textRepresentation = AllDecisionsNextPerson[procId][phaseId][nextPhasId];
