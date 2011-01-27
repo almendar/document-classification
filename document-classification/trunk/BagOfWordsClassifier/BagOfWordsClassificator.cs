@@ -437,6 +437,7 @@
             this.AllCases = Data.Instance.AllCases;
             this.AllProcedures = Data.Instance.AllProcedures;
             this.AllDecisionsNextPhase = Data.Instance.AllDecisionsStatus;
+            this.AllDecisionsNextPerson = Data.Instance.AllDecisionsPeople;
         }
 
         #endregion Methods
