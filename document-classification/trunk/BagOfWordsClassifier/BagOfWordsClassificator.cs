@@ -283,6 +283,16 @@
             String[] textTokens = TextExtraction.GetTextTokens(text);
             double[] textVector = CreateVectorFromText(textTokens);
             int nrOfDecisions = dataMatrix.Length;
+            if(!ProcIdPhaseIdToRowsMapping.ContainsKey(procedurId))
+            {
+                throw new KeyNotFoundException("Procedure ID " + procedurId + " not found");
+            }
+
+            if (!ProcIdPhaseIdToRowsMapping[procedurId].ContainsKey(phaseId))
+            {
+                throw new KeyNotFoundException("Phase ID " + phaseId + " in procedure ID " + procedurId + " not found");
+            }
+
             List<int> rowSet = ProcIdPhaseIdToRowsMapping[procedurId][phaseId];
             for (int i = 0; i < rowSet.Count; i++)
             {
