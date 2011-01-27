@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using DocumentClassification.BagOfWords;
 using DocumentClassification.BagOfWordsClassifier.Decisions;
+using DocumentClassification.BagOfWordsClassifier.LiveSearch;
 
 public class TestApp
 {
     #region Fields
 
     private string textFile = null;
-
+    public string appName;
     #endregion Fields
 
     #region Properties
@@ -31,129 +32,94 @@ public class TestApp
 
     #region Methods
 
-    private static void FindBestREsult()
-    {
-        List<ClassificationResult> testData = new List<ClassificationResult>();
-        LinkedList<ClassificationResult> resultData = new LinkedList<ClassificationResult>();
-        Random rand = new Random(DateTime.Now.Second);
-        for (int i = 0; i < 1000; i++)
-        {
-            ClassificationResult cr = new ClassificationResult(rand.Next(), rand.NextDouble() * 1000);
-            testData.Add(cr);
-        }
-        for (int i = 0; i < 3; i++)
-        {
-            resultData.AddLast(new ClassificationResult(0, Double.MaxValue));
-        }
 
-        foreach (ClassificationResult testNode in testData)
-        {
-
-            LinkedListNode<ClassificationResult> bestListNode = resultData.Last;
-            //iterate from end to front
-            while (bestListNode != null)
-            {
-                if (bestListNode.Value.Similarity < testNode.Similarity && bestListNode == resultData.Last)
-                {
-                    //Console.WriteLine("Worst then the worstes");
-                    bestListNode = bestListNode.Previous;
-                    break;
-
-                }
-                else if (bestListNode.Value.Similarity < testNode.Similarity)
-                {
-                    resultData.AddAfter(bestListNode, testNode);
-                    //Console.WriteLine("Insert in middle: {0} -> {1}", bestListNode.Value.Similarity, testNode.Similarity);
-                    resultData.RemoveLast();
-                    bestListNode = bestListNode.Previous;
-                    break;
-                }
-                else if (bestListNode.Value.Similarity >= testNode.Similarity && bestListNode != resultData.First)
-                {
-                    bestListNode = bestListNode.Previous;
-                    continue;
-                }
-                else
-                {
-                    resultData.AddFirst(testNode);
-                    //Console.WriteLine("Insert at beginging");
-                    resultData.RemoveLast();
-                    bestListNode = bestListNode.Previous;
-                    break;
-                }
-
-            }
-
-        }
-
-        foreach (ClassificationResult cr in resultData)
-        {
-            Console.WriteLine("{0}", cr.Similarity);
-
-             testData.Sort();
-             Console.WriteLine("!!!!!!!!!");
-             Console.WriteLine("{0}\n{1}\n{2}", testData[0].Similarity, testData[1].Similarity, testData[2].Similarity);
-             
-        }
-    }
 
     static void Main()
     {
-       // ProcedureRecognitionTest();
-        //FindBestREsult();
-        FindBestResult2();
 
-
+        ProcedureRecognitionTest(@"d:\test.txt");
+        //NextPersonRecognitionTest(@"path", 1, 2); //Tutaj sa testy :)
+        //NextStageRecognitionTest(@"path", 2, 3);
         Console.ReadKey();
     }
 
-    private static void FindBestResult2()
+    private static void NextPersonRecognitionTest(string filePath, int procId, int phaseId)
     {
-        List<ClassificationResult> testData = new List<ClassificationResult>();
-        BestDecisionResult bdr = new BestDecisionResult(2);
-        Random rand = new Random((int)DateTime.Now.Ticks);
-        for (int i = 0; i < 3; i++)
-        {
-            ClassificationResult cr = new ClassificationResult(rand.Next(), rand.NextDouble() * 1000);
-            testData.Add(cr);
-            
-        }
+        TestApp app;
+        BagOfWordsTextClassifier classifier;
+        PrepareForClassification(filePath, out app, out classifier);
+        ClassificationResult[] result = classifier.NextPersonPrediction(procId, phaseId, app.TextFile);
+        WriteResults(result, "Next person id");
 
-        foreach (ClassificationResult cr in testData)
-        {
-            bool foundNewBestResult = bdr.addResult(cr);
-            if (foundNewBestResult)
-                Console.WriteLine("{Found new best result}");
-        }
-
-        foreach(ClassificationResult cr1 in bdr.BestResults())
-        {
-            Console.WriteLine("{0}", cr1.Similarity);
-        }
-        testData.Sort();
-        Console.WriteLine("!!!!!!!!!");
-        Console.WriteLine("{0}\n{1}\n{2}", testData[0].Similarity, testData[1].Similarity, testData[2].Similarity);
-            
     }
 
-    private static void ProcedureRecognitionTest()
+    private static void NextStageRecognitionTest(string filePath, int procId, int phaseId)
     {
-        TestApp app = new TestApp();
-        app.ReadTextFromFile(@"d:\test.txt");
+        TestApp app;
+        BagOfWordsTextClassifier classifier;
+        PrepareForClassification(filePath, out app, out classifier);
+        ClassificationResult[] result = classifier.NextStagePrediciton(procId, phaseId,app.TextFile);
+        WriteResults(result, "Next stage id:");
+    }
 
-        BagOfWordsTextClassifier classifier = BagOfWordsTextClassifier.Instance;
-        int [] resutl = classifier.NextPhasePrediciton(19, 338, app.TextFile);
-        foreach (int a in resutl)
+    private static void ProcedureRecognitionTest(string filePath)
+    {
+        TestApp app;
+        BagOfWordsTextClassifier classifier;
+        PrepareForClassification(filePath, out app, out classifier);
+        ClassificationResult [] resutl = classifier.NextStagePrediciton(19, 338, app.TextFile);
+        WriteResults(resutl, "Procedure id:");
+    }
+
+    private static void WriteResults(ClassificationResult[] resutl, string classifiedType)
+    {
+        foreach (ClassificationResult a in resutl)
         {
-            System.Console.WriteLine("Best next phase id: {0}", a);
+            System.Console.WriteLine(classifiedType + "{0} similarity: {1}", a.Id, a.Similarity);
         }
         System.Console.ReadLine();
+    }
+
+    private static void PrepareForClassification(string filePath, out TestApp app, out BagOfWordsTextClassifier classifier)
+    {
+        app = new TestApp();
+        app.ReadTextFromFile(filePath);
+        classifier = BagOfWordsTextClassifier.Instance;
     }
 
     void ReadTextFromFile(string fileName)
     {
         TextReader tr = new StreamReader(fileName);
         TextFile = tr.ReadToEnd();
+
+
+
+    }
+
+
+    
+
+    public void TestLiveSearch(object sender, SearchNotificationEventArgs sne)
+    {
+        while (false)
+        {
+            Console.WriteLine(this.appName + " "  +sne.ID + " " + sne.Similarity);
+            System.Threading.Thread.Sleep(300);
+        }
+    }
+
+    public static void TestLiveSearch()
+    {
+        TestApp app = new TestApp();
+        app.appName = "dadada";
+        LiveSearchNotification lsn = new LiveSearchNotification();
+        lsn.newResult += new LiveSearchNotification.NewResultHandler(app.TestLiveSearch);
+        lsn.NotifyAboutNewResult(new ClassificationResult(1,0.01));
+        while (true)
+        {
+            Console.WriteLine("AAA");
+            System.Threading.Thread.Sleep(300);
+        }
     }
 
     #endregion Methods
