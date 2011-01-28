@@ -10,7 +10,7 @@
     /// Keys are id of the case in the DB.
     /// </summary>
     [Serializable]
-    public class AllCases : Dictionary<int, Case>
+    public class AllCases : Dictionary<int, TextRepresentation>
     {
         #region Constructors
 
@@ -41,7 +41,7 @@
     /// Assign to all words that case contains TF-IDF measure
     /// </summary>
     [Serializable]
-    public class Case : Dictionary<String, double>
+    public class TextRepresentation : Dictionary<String, double>
     {
         #region Fields
 
@@ -51,20 +51,35 @@
         /// Procedure id to which this Case is associated to.
         /// </summary>
         private readonly int procedureId;
+        private TextRepresentation textRepresentation;
 
         #endregion Fields
 
         #region Constructors
 
-        public Case(int procedureId, int caseId)
+        public TextRepresentation(int procedureId, int caseId)
         {
             this.procedureId = procedureId;
             this.caseId = caseId;
         }
 
-        public Case(SerializationInfo info, StreamingContext context)
+        public void add(TextRepresentation tr)
+        {
+            foreach (string key in tr.Keys)
+            {
+                this[key] += tr[key];
+            }
+        }
+
+        public TextRepresentation(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+        }
+
+        public TextRepresentation(TextRepresentation textRepresentation)
+        {
+            // TODO: Complete member initialization
+            this.textRepresentation = textRepresentation;
         }
 
         #endregion Constructors

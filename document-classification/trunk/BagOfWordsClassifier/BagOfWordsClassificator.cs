@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Text;
     using DocumentClassification.BagOfWordsClassifier.Decisions;
+    using DocumentClassification.BagOfWordsClassifier.Matrices;
     using DocumentClassification.Representation;
 
     /// <summary>
@@ -22,9 +23,9 @@
         static readonly BagOfWordsTextClassifier instance = new BagOfWordsTextClassifier();
 
         private AllCases AllCases = null;
-        private AllDecisionsNextPerson AllDecisionsNextPerson = null;
-        private AllDecisionsNextStage AllDecisionsNextPhase = null;
         private AllProcedures AllProcedures = null;
+        private AllDecisions AllDecisionsNextPerson = null;
+        private AllDecisions AllDecisionsNextPhase = null;
         private DBRepresentation DBRepresentation = null;
         private Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToNextPersonRowsSet = null;
         private Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToNextStageRowsSet = null;
@@ -111,30 +112,14 @@
 
         public void reloadData()
         {
-            ResetAllValues();
+           // ResetAllValues();
             ReadDataBase();
             FetchMeaningfulWords();
             ComputeStatisticParams();
             CreateDataMatrices();
         }
 
-        private void ResetAllValues()
-        {
-            AllCases = null;
-            AllDecisionsNextPerson = null;
-            AllDecisionsNextPhase = null;
-            AllProcedures = null;
-            DBRepresentation = null;
-            MapProcIdPhasIdToNextPersonRowsSet = null;
-            MapProcIdPhasIdToNextStageRowsSet = null;
-            MapRowToNextPersonId = null;
-            MapRowToNextStageId = null;
-            MapRowToProcedureId = null;
-            MapWordToColumn = null;
-            NextPersonMatrix = null;
-            NextStageMatrix = null;
-            ProcedureMatrix = null;
-        }
+
 
         public ClassificationResult[] NextPersonPrediction(int procedurId, int phaseId, string text)
         {
@@ -200,35 +185,13 @@
             this.numberOfMeaningfulWords = MapWordToColumn.Keys.Count; //vector length
         }
 
-        private int CountPastDecisionsNextPerson(AllDecisionsNextPerson pastData)
-        {
-            int nrRet = 0;
-            foreach (int i in pastData.Keys)
-                foreach (int j in pastData[i].Keys)
-                    foreach (int k in pastData[i][j].Keys)
-                    {
-                        nrRet += 1;
-                    }
-            return nrRet;
-        }
 
-        private int CountPastDecisionsNextStage(AllDecisionsNextStage pastData)
-        {
-            int nrRet = 0;
-            foreach (int i in pastData.Keys)
-                foreach (int j in pastData[i].Keys)
-                    foreach (int k in pastData[i][j].Keys)
-                    {
-                        nrRet += 1;
-                    }
-            return nrRet;
-        }
 
         private void CreateDataMatrices()
         {
-            ProcedureMatrixBuild();
-            NextStageMatrixBuild();
-            NextPersonMatrixBuild();
+            //ProcedureMatrixBuild();
+            //NextStageMatrixBuild();
+            //NextPersonMatrixBuild();
         }
 
         /// <summary>
@@ -300,143 +263,12 @@
                 double similarity = (1 - VectorOperations.VectorsConsine(checkedVector, textVector));
                 int bestNextDecisionId = bestRowToDecisionIdMapping[rowSet[i]];
                 ClassificationResult result = new ClassificationResult(bestNextDecisionId, similarity);
-                bool isBetter = BDR.addResult(result);
-                if (isBetter)
-                    ;//send an event
-                    
+                BDR.addResult(result);
             }
             return BDR.BestResults();
         }
 
-        private void NextPersonMatrixBuild()
-        {
-            MapProcIdPhasIdToNextPersonRowsSet = new Dictionary<int, Dictionary<int, List<int>>>();
-            int nrOfDecisions = CountPastDecisionsNextPerson(AllDecisionsNextPerson);
-            NextPersonMatrix = new double[nrOfDecisions][];
-            for (int i = 0; i < nrOfDecisions; i++)
-            {
-                NextPersonMatrix[i] = new double[numberOfMeaningfulWords];
-            }
-
-            MapRowToNextPersonId = new int[nrOfDecisions];
-            int indexer = 0;
-            foreach (int procId in AllDecisionsNextPerson.Keys)
-            {
-                MapProcIdPhasIdToNextPersonRowsSet[procId] = new Dictionary<int, List<int>>();
-                foreach (int phaseId in AllDecisionsNextPerson[procId].Keys)
-                {
-                    MapProcIdPhasIdToNextPersonRowsSet[procId][phaseId] = new List<int>();
-                    foreach (int nextPhasId in AllDecisionsNextPerson[procId][phaseId].Keys)
-                    {
-                        DecisionRepresentationNextPerson textRepresentation = AllDecisionsNextPerson[procId][phaseId][nextPhasId];
-                        foreach (KeyValuePair<string, double> kvp in textRepresentation)
-                        {
-
-                            if (!MapWordToColumn.ContainsKey(kvp.Key))
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                String word = kvp.Key;
-                                double TFIDF = kvp.Value;
-                                int indice = MapWordToColumn[word];
-                                NextPersonMatrix[indexer][indice] = TFIDF;
-                            }
-                        }
-
-                        MapProcIdPhasIdToNextPersonRowsSet[procId][phaseId].Add(indexer);
-                        MapRowToNextPersonId[indexer] = nextPhasId;
-                        indexer += 1;
-                    }
-                }
-            }
-        }
-
-        private void NextStageMatrixBuild()
-        {
-            MapProcIdPhasIdToNextStageRowsSet = new Dictionary<int, Dictionary<int, List<int>>>();
-            int nrOfDecisions = CountPastDecisionsNextStage(AllDecisionsNextPhase);
-            NextStageMatrix = new double[nrOfDecisions][];
-            for (int i = 0; i < nrOfDecisions; i++)
-            {
-                NextStageMatrix[i] = new double[numberOfMeaningfulWords];
-            }
-
-            MapRowToNextStageId = new int[nrOfDecisions];
-            int indexer = 0;
-            foreach (int procId in AllDecisionsNextPhase.Keys)
-            {
-                MapProcIdPhasIdToNextStageRowsSet[procId] = new Dictionary<int, List<int>>();
-                foreach (int phaseId in AllDecisionsNextPhase[procId].Keys)
-                {
-                    MapProcIdPhasIdToNextStageRowsSet[procId][phaseId] = new List<int>();
-                    foreach (int nextPhasId in AllDecisionsNextPhase[procId][phaseId].Keys)
-                    {
-                        DecisionRepresentationNextStage textRepresentation = AllDecisionsNextPhase[procId][phaseId][nextPhasId];
-                        foreach (KeyValuePair<string, double> kvp in textRepresentation)
-                        {
-
-                            if (!MapWordToColumn.ContainsKey(kvp.Key))
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                String word = kvp.Key;
-                                double TFIDF = kvp.Value;
-                                int indice = MapWordToColumn[word];
-                                NextStageMatrix[indexer][indice] = TFIDF;
-                            }
-                        }
-
-                        MapProcIdPhasIdToNextStageRowsSet[procId][phaseId].Add(indexer);
-                        MapRowToNextStageId[indexer] = nextPhasId;
-                        indexer += 1;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Builds the <see cref="ProcedureMatrix"/> out of <see cref="AllProcedures"/> for words
-        /// that are listed in <see cref="MapWordToColumn"/>
-        /// </summary>
-        private void ProcedureMatrixBuild()
-        {
-            //int nrOfProcedures = ProceduresSet.Keys.Count;
-            ProcedureMatrix = new double[numberOfProcedures][];
-            MapRowToProcedureId = new int[numberOfProcedures];
-            for (int h = 0; h < numberOfProcedures; h++)
-            {
-                ProcedureMatrix[h] = new double[numberOfMeaningfulWords];
-            }
-            int procedurIndex = 0;
-            foreach (KeyValuePair<int, Procedure> kvp in AllProcedures)
-            {
-                int procedurId = kvp.Key;
-                Procedure currentProcedure = kvp.Value;
-                MapRowToProcedureId[procedurIndex] = procedurId;
-                foreach (KeyValuePair<string, double> textStatistic in currentProcedure)
-                {
-                    string word = textStatistic.Key;
-                    double TFIDF = textStatistic.Value;
-
-                    //Means word is not meaningful, and is not take into consideration.
-                    if (!MapWordToColumn.ContainsKey(word))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        int wordIndex = MapWordToColumn[word]; //Find what is this word place in vector
-                        ProcedureMatrix[procedurIndex][wordIndex] = TFIDF;
-                    }
-                }
-                ++procedurIndex; //increment procedure indice
-            }
-        }
-
+     
         /// <summary>
         /// Reads serialized objects from database that will be base for building matrices
         /// </summary>
@@ -453,4 +285,6 @@
         #endregion Methods
     }
 
+
+   
 }
