@@ -117,14 +117,14 @@
         {
             if (!Data.Instance.AllDecisionsStatus[procedureId].ContainsKey(currentStatus))
             {
-                Data.Instance.AllDecisionsStatus[procedureId].Add(currentStatus, new Dictionary<int, DecisionRepresentationNextStage>());
-                Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new DecisionRepresentationNextStage(Data.Instance.AllCases[caseId]));
+                Data.Instance.AllDecisionsStatus[procedureId].Add(currentStatus, new Dictionary<int, TextRepresentation>());
+                Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new TextRepresentation(Data.Instance.AllCases[caseId]));
             }
             else
             {
                 if (!Data.Instance.AllDecisionsStatus[procedureId][currentStatus].ContainsKey(nextStatus))
                 {
-                    Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new DecisionRepresentationNextStage(Data.Instance.AllCases[caseId]));
+                    Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new TextRepresentation(Data.Instance.AllCases[caseId]));
                 }
                 else
                 {
@@ -147,14 +147,14 @@
         {
             if (!Data.Instance.AllDecisionsPeople[procedureId].ContainsKey(currentOwner))
             {
-                Data.Instance.AllDecisionsPeople[procedureId].Add(currentOwner, new Dictionary<int, DecisionRepresentationNextPerson>());
-                Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextOwner, new DecisionRepresentationNextPerson(Data.Instance.AllCases[caseId]));
+                Data.Instance.AllDecisionsPeople[procedureId].Add(currentOwner, new Dictionary<int, TextRepresentation>());
+                Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextOwner, new TextRepresentation(Data.Instance.AllCases[caseId]));
             }
             else
             {
                 if (!Data.Instance.AllDecisionsPeople[procedureId][currentOwner].ContainsKey(nextOwner))
                 {
-                    Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextOwner, new DecisionRepresentationNextPerson(Data.Instance.AllCases[caseId]));
+                    Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextOwner, new TextRepresentation(Data.Instance.AllCases[caseId]));
                 }
                 else
                 {
@@ -274,7 +274,7 @@
         private void recalculateAllTFIDF()
         {
             IDFcalculaction.Instance.calculateIDF();
-            foreach (Case tempCase in Data.Instance.AllCases.Values)
+            foreach (TextRepresentation tempCase in Data.Instance.AllCases.Values)
             {
                 List<string> tempList = new List<string>(tempCase.Keys);
                 foreach (string word in tempList)
@@ -350,7 +350,7 @@
                 }
                 else
                 {
-                    Data.Instance.AllCases.Add(caseId, new Case(getProcedureId(caseId), caseId));
+                    Data.Instance.AllCases.Add(caseId, new TextRepresentation(getProcedureId(caseId), caseId));
                     foreach (string word in data[caseId].Keys)
                     {
                         Data.Instance.AllCases[caseId].Add(word, 0);
@@ -387,11 +387,11 @@
                     Int32 nextStatus = rdr.GetInt32(5);
                     if (!Data.Instance.AllDecisionsPeople.ContainsKey(procedureId))
                     {
-                        Data.Instance.AllDecisionsPeople.Add(procedureId, new Dictionary<int, Dictionary<int, DecisionRepresentationNextPerson>>());
+                        Data.Instance.AllDecisionsPeople.Add(procedureId, new Dictionary<int, Dictionary<int, TextRepresentation>>());
                         if (prevOwner == null)
                         {
-                            Data.Instance.AllDecisionsPeople[procedureId].Add(currentOwner, new Dictionary<int, DecisionRepresentationNextPerson>());
-                            Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextStatus, new DecisionRepresentationNextPerson(Data.Instance.AllCases[caseId]));
+                            Data.Instance.AllDecisionsPeople[procedureId].Add(currentOwner, new Dictionary<int, TextRepresentation>());
+                            Data.Instance.AllDecisionsPeople[procedureId][currentOwner].Add(nextStatus, new TextRepresentation(Data.Instance.AllCases[caseId]));
                         }
                     }
                     else
@@ -441,11 +441,11 @@
                     Int32 nextStatus = rdr.GetInt32(5);
                     if (!Data.Instance.AllDecisionsStatus.ContainsKey(procedureId))
                     {
-                        Data.Instance.AllDecisionsStatus.Add(procedureId, new Dictionary<int, Dictionary<int, DecisionRepresentationNextStage>>());
+                        Data.Instance.AllDecisionsStatus.Add(procedureId, new Dictionary<int, Dictionary<int, TextRepresentation>>());
                         if (prevStatus == null)
                         {
-                            Data.Instance.AllDecisionsStatus[procedureId].Add(currentStatus, new Dictionary<int, DecisionRepresentationNextStage>());
-                            Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new DecisionRepresentationNextStage(Data.Instance.AllCases[caseId]));
+                            Data.Instance.AllDecisionsStatus[procedureId].Add(currentStatus, new Dictionary<int, TextRepresentation>());
+                            Data.Instance.AllDecisionsStatus[procedureId][currentStatus].Add(nextStatus, new TextRepresentation(Data.Instance.AllCases[caseId]));
                         }
                     }
                     else

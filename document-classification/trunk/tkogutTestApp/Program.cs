@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using DocumentClassification.BagOfWords;
 using DocumentClassification.BagOfWordsClassifier.Decisions;
-using DocumentClassification.BagOfWordsClassifier.LiveSearch;
+
 
 public class TestApp
 {
@@ -67,7 +67,7 @@ public class TestApp
         TestApp app;
         BagOfWordsTextClassifier classifier;
         PrepareForClassification(filePath, out app, out classifier);
-        ClassificationResult [] resutl = classifier.NextStagePrediciton(19, 338, app.TextFile);
+        ClassificationResult [] resutl = classifier.ProcedureRecognition(app.TextFile);
         WriteResults(resutl, "Procedure id:");
     }
 
@@ -96,31 +96,6 @@ public class TestApp
 
     }
 
-
-    
-
-    public void TestLiveSearch(object sender, SearchNotificationEventArgs sne)
-    {
-        while (false)
-        {
-            Console.WriteLine(this.appName + " "  +sne.ID + " " + sne.Similarity);
-            System.Threading.Thread.Sleep(300);
-        }
-    }
-
-    public static void TestLiveSearch()
-    {
-        TestApp app = new TestApp();
-        app.appName = "dadada";
-        LiveSearchNotification lsn = new LiveSearchNotification();
-        lsn.newResult += new LiveSearchNotification.NewResultHandler(app.TestLiveSearch);
-        lsn.NotifyAboutNewResult(new ClassificationResult(1,0.01));
-        while (true)
-        {
-            Console.WriteLine("AAA");
-            System.Threading.Thread.Sleep(300);
-        }
-    }
 
     #endregion Methods
 }

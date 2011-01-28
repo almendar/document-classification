@@ -11,9 +11,9 @@
         private static readonly Data instance = new Data();
 
         private AllCases allCases;
-        private AllDecisionsNextPerson allDecisionsPeople;
-        private AllDecisionsNextStage allDecisionsStatus;
         private AllProcedures allProcedures;
+        private AllDecisions allDecisionsPeople;
+        private AllDecisions allDecisionsStatus;
         private DBRepresentation dbRepresentation;
 
         #endregion Fields
@@ -29,8 +29,8 @@
             allCases = new AllCases();
             dbRepresentation = new DBRepresentation();
             allProcedures = new AllProcedures();
-            allDecisionsStatus = new AllDecisionsNextStage();
-            allDecisionsPeople = new AllDecisionsNextPerson();
+            allDecisionsStatus = new AllDecisions();
+            allDecisionsPeople = new AllDecisions();
         }
 
         #endregion Constructors
@@ -57,7 +57,7 @@
             }
         }
 
-        public AllDecisionsNextPerson AllDecisionsPeople
+        public AllDecisions AllDecisionsPeople
         {
             get
             {
@@ -69,7 +69,7 @@
             }
         }
 
-        public AllDecisionsNextStage AllDecisionsStatus
+        public AllDecisions AllDecisionsStatus
         {
             get
             {
