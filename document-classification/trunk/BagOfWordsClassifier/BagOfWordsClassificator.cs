@@ -6,7 +6,7 @@
     using DocumentClassification.BagOfWordsClassifier.Decisions;
     using DocumentClassification.BagOfWordsClassifier.Matrices;
     using DocumentClassification.Representation;
-   
+
 
     /// <summary>
     /// Singleton instance of classificator based on bag-of-words paradigm
@@ -16,30 +16,20 @@
         #region Fields
         static readonly BagOfWordsTextClassifier instance = new BagOfWordsTextClassifier();
         private int nrOfBestDecisionsReturned = 4;
-        private double maxFrequency = 0.9;
-        private Dictionary<string, int> MapWordToColumn;
+        private Dictionary<string, int> mapWordToColumn = null;    
         #endregion Fields
 
         #region Constructors
-
         static BagOfWordsTextClassifier()
         {
-            
-        }
 
+        }
         private BagOfWordsTextClassifier()
         {
         }
-
-        private void ReadDatabaseObjects()
-        {
-            throw new NotImplementedException();
-        }
-
         #endregion Constructors
 
         #region Properties
-
         public static BagOfWordsTextClassifier Instance
         {
             get
@@ -47,45 +37,19 @@
                 return instance;
             }
         }
-
+        public int NrOfBestDecisionsReturned
+        {
+            get { return nrOfBestDecisionsReturned; }
+            set { nrOfBestDecisionsReturned = value; }
+        }
+        public Dictionary<string, int> MapWordToColumn
+        {
+            get { return mapWordToColumn; }
+            set { mapWordToColumn = value; }
+        }
         #endregion Properties
 
         #region Methods
-
-
-        public ClassificationResult[] NextStagePrediciton(int procedurId, int phaseId, string text)
-        {
-
-            NextDecisionMatrices nextDecisionMatrices = null;
-            
-            BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned);
-            String[] textTokens = TextExtraction.GetTextTokens(text);
-            double[] textVector = TextExtraction.CreateVectorFromText(textTokens, MapWordToColumn);
-            int nrOfDecisions = nextDecisionMatrices.NumberOfDecisions;
-            if (!nextDecisionMatrices.MapProcIdPhasIdToRowsSet.ContainsKey(procedurId))
-            {
-                throw new KeyNotFoundException("Procedure ID " + procedurId + " not found");
-            }
-
-            if (!nextDecisionMatrices.MapProcIdPhasIdToRowsSet[procedurId].ContainsKey(phaseId))
-            {
-                throw new KeyNotFoundException("Phase ID " + phaseId + " in procedure ID " + procedurId + " not found");
-            }
-
-            List<int> rowSet = nextDecisionMatrices.MapProcIdPhasIdToRowsSet[procedurId][phaseId];
-            for (int i = 0; i < rowSet.Count; i++)
-            {
-                double[] checkedVector = nextDecisionMatrices.DataMatrix[rowSet[i]];
-                double similarity = (1 - VectorOperations.VectorsConsine(checkedVector, textVector));
-                int bestNextDecisionId = nextDecisionMatrices.MapRowToNextId[rowSet[i]];
-                ClassificationResult result = new ClassificationResult(bestNextDecisionId, similarity);
-                BDR.addResult(result);
-            }
-            return BDR.BestResults();
-
-           
-        }
-
         /// <summary>
         /// Based on text tries to find right procedures for given text.
         /// Now returns only the best procedure ID.
@@ -95,12 +59,12 @@
         public ClassificationResult[] ProcedureRecognition(string text)
         {
             //jakims cudem mam to miec z cache przeglądarki
-            ProcedureMatrices procedureMatrix = new ProcedureMatrices(null,null);
+            ProcedureMatrices procedureMatrix = new ProcedureMatrices(null, null);
             //
 
             BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned);
             String[] textTokens = TextExtraction.GetTextTokens(text);
-            double[] textVector = TextExtraction.CreateVectorFromText(textTokens, MapWordToColumn);
+            double[] textVector = TextExtraction.CreateVectorFromText(textTokens, mapWordToColumn);
             for (int i = 0; i < procedureMatrix.NrOfProcedures; i++)
             {
                 double[] checkedVector = procedureMatrix.DataMatrix[i];
@@ -113,6 +77,48 @@
             }
             return BDR.BestResults();
         }
+        public ClassificationResult[] NextPersonPrediction(int procId, int phaseId, string p)
+        {
+            NextDecisionMatrices dataMatrices = null;
+            return NextDecisionPrediciton(procId, phaseId, dataMatrices, p);
+        }
+        public ClassificationResult[] NextStagePrediciton(int procId, int phaseId, string p)
+        {
+            NextDecisionMatrices dataMatrices = null;
+            return NextDecisionPrediciton(procId, phaseId, dataMatrices, p);
+        }
+        private ClassificationResult[] NextDecisionPrediciton(int procedurId, int phaseId, NextDecisionMatrices nextDecisionsMatrices, string text)
+        {
+
+            NextDecisionMatrices decisionMatrices = nextDecisionsMatrices;
+            BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned);
+            String[] textTokens = TextExtraction.GetTextTokens(text);
+            double[] textVector = TextExtraction.CreateVectorFromText(textTokens, mapWordToColumn);
+            int nrOfDecisions = decisionMatrices.NumberOfDecisions;
+            if (!decisionMatrices.MapProcIdPhasIdToRowsSet.ContainsKey(procedurId))
+            {
+                throw new KeyNotFoundException("Procedure ID " + procedurId + " not found");
+            }
+
+            if (!decisionMatrices.MapProcIdPhasIdToRowsSet[procedurId].ContainsKey(phaseId))
+            {
+                throw new KeyNotFoundException("Phase ID " + phaseId + " in procedure ID " + procedurId + " not found");
+            }
+
+            List<int> rowSet = decisionMatrices.MapProcIdPhasIdToRowsSet[procedurId][phaseId];
+            for (int i = 0; i < rowSet.Count; i++)
+            {
+                double[] checkedVector = decisionMatrices.DataMatrix[rowSet[i]];
+                double similarity = (1 - VectorOperations.VectorsConsine(checkedVector, textVector));
+                int bestNextDecisionId = decisionMatrices.MapRowToNextId[rowSet[i]];
+                ClassificationResult result = new ClassificationResult(bestNextDecisionId, similarity);
+                BDR.addResult(result);
+            }
+            return BDR.BestResults();
+
+
+        }
         #endregion Methods
+
     }
 }
