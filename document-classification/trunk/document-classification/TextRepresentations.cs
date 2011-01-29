@@ -36,6 +36,49 @@
         #endregion Methods
     }
 
+
+
+    [Serializable]
+    public class DBRepresentation : Dictionary<string, int>, ISerializable
+    {
+        #region Constructors
+
+        public DBRepresentation()
+            : base()
+        {
+        }
+
+        public DBRepresentation(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        #endregion Constructors
+    }
+
+
+    /// <summary>
+    /// ProcedurID,PersonId,nextStageId
+    /// </summary>
+    [Serializable]
+    public class AllDecisions : Dictionary<int, Dictionary<int, Dictionary<int, TextRepresentation>>>
+    {
+        #region Constructors
+
+        public AllDecisions()
+            : base()
+        {
+        }
+
+        public AllDecisions(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        #endregion Constructors
+    }
+
+
     /// <summary>
     /// Represens a case in the flow.
     /// Assign to all words that case contains TF-IDF measure
@@ -104,4 +147,44 @@
 
         #endregion Properties
     }
+
+    /// <summary>
+    /// Represent all known procedures in the DB.
+    /// Keys are IDs of the procedures stored in the DB.
+    /// </summary>
+    [Serializable]
+    public class AllProcedures : Dictionary<int, TextRepresentation>
+    {
+        #region Constructors
+
+        public AllProcedures()
+            : base()
+        {
+        }
+
+        public AllProcedures(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        #endregion Constructors
+
+        #region Methods
+
+        public void rebuild(AllCases allCases)
+        {
+            this.Clear();
+            foreach (TextRepresentation tempCase in allCases.Values)
+            {
+                if (!this.ContainsKey(tempCase.ProcedureId))
+                {
+                    Add(tempCase.ProcedureId, new TextRepresentation(tempCase.ProcedureId, tempCase.CaseId));
+                }
+                this[tempCase.ProcedureId].add(tempCase);
+            }
+        }
+
+        #endregion Methods
+    }
+
 }

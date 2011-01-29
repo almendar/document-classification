@@ -61,12 +61,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Case.cs" />
+    <Compile Include="TextRepresentations.cs" />
     <Compile Include="Data.cs" />
-    <Compile Include="DBRepresentation.cs" />
     <Compile Include="DCDbTools.cs" />
-    <Compile Include="DecisionRepresentation.cs" />
-    <Compile Include="Procedure.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
