@@ -31,6 +31,27 @@
                return tokens;
         }
 
+        /// <summary>
+        /// Takes table of strings and count frequency of words in vector
+        /// that are listed in <see cref="MapWordToColumn"/>
+        /// </summary>
+        /// <param name="textTokens">Tokens from text</param>
+        /// <returns>Vector with document TF of words</returns>
+        public static double[] CreateVectorFromText(string[] textTokens, Dictionary<string, int> MapWordToColumn)
+        {
+            int numberOfMeaningfulWords = MapWordToColumn.Count;
+            double[] vectorRep = new double[numberOfMeaningfulWords];
+            foreach (String word in textTokens)
+            {
+                if (!MapWordToColumn.ContainsKey(word))
+                    continue;
+
+                int indice = MapWordToColumn[word];
+                vectorRep[indice] += 1.0d;
+            }
+            return vectorRep;
+        }
+
         #endregion Methods
     }
 }

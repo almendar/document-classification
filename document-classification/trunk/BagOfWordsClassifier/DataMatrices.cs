@@ -7,6 +7,11 @@ namespace DocumentClassification.BagOfWordsClassifier.Matrices
 {
     public class ProcedureMatrices
     {
+        private double[][] dataMatrix;
+        private int[] mapRowToId;
+        private AllProcedures allProcedures;
+        private Dictionary<string, int> mapWordToColumn;
+
         public ProcedureMatrices(AllProcedures allProcedures,
             Dictionary<String, int> mapWordToColumn)
         {
@@ -22,6 +27,22 @@ namespace DocumentClassification.BagOfWordsClassifier.Matrices
             for (int i = 0; i < nrOfProcedures; i++)
             {
                 dataMatrix[i] = new double[nrOfMeaningfulWords];
+            }
+        }
+
+        public int NrOfProcedures
+        {
+            get
+            {
+                return this.allProcedures.Count;
+            }
+        }
+
+        public int NumberOfMeaningfullWords
+        {
+            get
+            {
+                return mapWordToColumn.Count;
             }
         }
 
@@ -57,11 +78,6 @@ namespace DocumentClassification.BagOfWordsClassifier.Matrices
             }
         }
 
-        private double[][] dataMatrix;
-        private int[] mapRowToId;
-        private AllProcedures allProcedures;
-        private Dictionary<string, int> mapWordToColumn;
-
 
         public double[][] DataMatrix
         {
@@ -77,8 +93,6 @@ namespace DocumentClassification.BagOfWordsClassifier.Matrices
     }
     public class NextDecisionMatrices
     {
-        private int numberOfDecisions;
-        private int numberOfMeaningfulWords;
         private double[][] dataMatrix = null;
         private int[] mapRowToNextId = null;
         private Dictionary<int, Dictionary<int, List<int>>> mapProcIdPhasIdToRowsSet = null;
@@ -165,6 +179,53 @@ namespace DocumentClassification.BagOfWordsClassifier.Matrices
         {
             get { return dataMatrix; }
             set { dataMatrix = value; }
+        }
+
+        public int NumberOfDecisions
+        {
+            get
+            {
+                return dataMatrix.Length;
+            }
+        }
+
+
+    }
+    public class WordPicker
+    {
+        private AllCases allCases;
+        private double maximumFrequency;
+        private DBRepresentation dbRepresentation;
+
+
+        public WordPicker(AllCases allCases, DBRepresentation dbRepresentation, double maxFrequency)
+        {
+            this.allCases = allCases;
+            this.maximumFrequency = maxFrequency;
+            this.dbRepresentation = dbRepresentation;
+        }
+
+        public Dictionary<string, int> FetchMeaningfulWords()
+        {
+            int numberOfCases = allCases.Count;
+            int wordThreshold = (int)Math.Floor((numberOfCases * maximumFrequency));
+            int vectorIndice = 0;
+            Dictionary<string, int> mapWordToColumn = new Dictionary<string, int>();
+            foreach (KeyValuePair<string, int> kvp in dbRepresentation)
+            {
+                int documentFrequency = kvp.Value;
+                string word = kvp.Key;
+                if (documentFrequency > wordThreshold)
+                {
+                    continue;
+                }
+                else
+                {
+                    mapWordToColumn[word] = vectorIndice;
+                    vectorIndice += 1;
+                }
+            }
+            return mapWordToColumn;
         }
     }
 }
