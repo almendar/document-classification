@@ -56,15 +56,20 @@
         /// </summary>
         /// <param name="text">Text of document</param>
         /// <returns>Procedures IDs table</returns>
-        public ClassificationResult[] ProcedureRecognition(string text)
+        public ClassificationResult[] ProcedureRecognition(List<int> attachmentsIdList)
         {
             //jakims cudem mam to miec z cache przeglądarki
             ProcedureMatrices procedureMatrix = new ProcedureMatrices(null, null);
             //
 
+            //
+            //Z attachmentsIdList wyciągną tekst, który mam sprawnie poszatkować.
+            String text = null;
+
+
+
             BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned);
-            String[] textTokens = TextExtraction.GetTextTokens(text);
-            double[] textVector = TextExtraction.CreateVectorFromText(textTokens, mapWordToColumn);
+            double[] textVector = CreateVectorFromText(text);
             for (int i = 0; i < procedureMatrix.NrOfProcedures; i++)
             {
                 double[] checkedVector = procedureMatrix.DataMatrix[i];
@@ -77,23 +82,30 @@
             }
             return BDR.BestResults();
         }
+
+        
         public ClassificationResult[] NextPersonPrediction(int procId, int phaseId, string p)
         {
-            NextDecisionMatrices dataMatrices = null;
-            return NextDecisionPrediciton(procId, phaseId, dataMatrices, p);
+            NextDecisionMatrices dataMatrices = null; //Z http contexu trzeba to wyciągnąć
+            return NextDecisionPrediciton(dataMatrices, procId, phaseId, p);
         }
         public ClassificationResult[] NextStagePrediciton(int procId, int phaseId, string p)
         {
-            NextDecisionMatrices dataMatrices = null;
-            return NextDecisionPrediciton(procId, phaseId, dataMatrices, p);
+            NextDecisionMatrices dataMatrices = null; //Z http contexu trzeba to wyciągnąć
+            return NextDecisionPrediciton(dataMatrices, procId, phaseId, p);
         }
-        private ClassificationResult[] NextDecisionPrediciton(int procedurId, int phaseId, NextDecisionMatrices nextDecisionsMatrices, string text)
+        private double[] CreateVectorFromText(String text)
+        {
+            String[] textTokens = TextExtraction.GetTextTokens(text);
+            double[] textVector = TextExtraction.CreateVectorFromText(textTokens, mapWordToColumn);
+            return textVector;
+        }
+        private ClassificationResult[] NextDecisionPrediciton(NextDecisionMatrices nextDecisionsMatrices, int procedurId, int phaseId, string text)
         {
 
             NextDecisionMatrices decisionMatrices = nextDecisionsMatrices;
             BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned);
-            String[] textTokens = TextExtraction.GetTextTokens(text);
-            double[] textVector = TextExtraction.CreateVectorFromText(textTokens, mapWordToColumn);
+            double[] textVector = CreateVectorFromText(text);
             int nrOfDecisions = decisionMatrices.NumberOfDecisions;
             if (!decisionMatrices.MapProcIdPhasIdToRowsSet.ContainsKey(procedurId))
             {
