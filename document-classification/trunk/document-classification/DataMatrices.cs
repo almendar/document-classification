@@ -6,6 +6,111 @@
 
     using DocumentClassification.Representation;
 
+    public class DataMatrices
+    {
+        #region Fields
+
+        private static DataMatrices instance = new DataMatrices();
+
+        private NextDecisionMatrices nextPersonMatrices;
+        private NextDecisionMatrices nextStageMatrices;
+        private ProcedureMatrices procedureMatrices;
+        private WordPicker wordPicker;
+
+        #endregion Fields
+
+        #region Constructors
+
+        private DataMatrices()
+        {
+        }
+
+        #endregion Constructors
+
+        #region Properties
+
+        public static DataMatrices Instance
+        {
+            get
+            {
+                return instance;
+            }
+        }
+
+        public NextDecisionMatrices NextPersonMatrices
+        {
+            get
+            {
+                return nextPersonMatrices;
+            }
+            set
+            {
+                nextPersonMatrices = value;
+            }
+        }
+
+        public NextDecisionMatrices NextStageMatrices
+        {
+            get
+            {
+                return nextStageMatrices;
+            }
+            set
+            {
+                nextStageMatrices = value;
+            }
+        }
+
+        public ProcedureMatrices ProcedureMatrices
+        {
+            get
+            {
+                return procedureMatrices;
+            }
+            set
+            {
+                procedureMatrices = value;
+            }
+        }
+
+        public WordPicker WordPicker
+        {
+            get
+            {
+                return wordPicker;
+            }
+            set
+            {
+                wordPicker = value;
+            }
+        }
+
+        #endregion Properties
+
+        #region Methods
+
+        public void loadDataMatricesFromDb()
+        {
+            DCDbTools.Instance.loadMatricesFromDb();
+        }
+
+        public void rebuildDataMatrices()
+        {
+            wordPicker = new WordPicker(Data.Instance.AllCases, Data.Instance.DBRepresentation, 0.9);
+            Dictionary<string, int> mapWordToColumn = wordPicker.FetchMeaningfulWords();
+            procedureMatrices = new ProcedureMatrices(Data.Instance.AllProcedures, mapWordToColumn);
+            nextPersonMatrices = new NextDecisionMatrices(Data.Instance.AllDecisionsPeople, mapWordToColumn);
+            nextStageMatrices = new NextDecisionMatrices(Data.Instance.AllDecisionsStatus, mapWordToColumn);
+        }
+
+        public void sendDataMatricesToDb()
+        {
+            DCDbTools.Instance.sendDataMatricesToDb();
+        }
+
+        #endregion Methods
+    }
+
     public class NextDecisionMatrices
     {
         #region Fields
