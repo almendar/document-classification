@@ -1,107 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DocumentClassification.Representation;
-
-namespace DocumentClassification.BagOfWordsClassifier.Matrices
+﻿namespace DocumentClassification.BagOfWordsClassifier.Matrices
 {
-    public class ProcedureMatrices
-    {
-        private double[][] dataMatrix;
-        private int[] mapRowToId;
-        private AllProcedures allProcedures;
-        private Dictionary<string, int> mapWordToColumn;
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
 
-        public ProcedureMatrices(AllProcedures allProcedures,
-            Dictionary<String, int> mapWordToColumn)
-        {
+    using DocumentClassification.Representation;
 
-            this.allProcedures = allProcedures;
-            this.mapWordToColumn = mapWordToColumn;
-
-            int nrOfProcedures = allProcedures.Count;
-            int nrOfMeaningfulWords = mapWordToColumn.Count;
-
-            int[] MapRowToProcedureId = new int[nrOfProcedures];
-            dataMatrix = new double[nrOfProcedures][];
-            for (int i = 0; i < nrOfProcedures; i++)
-            {
-                dataMatrix[i] = new double[nrOfMeaningfulWords];
-            }
-        }
-
-        public int NrOfProcedures
-        {
-            get
-            {
-                return this.allProcedures.Count;
-            }
-        }
-
-        public int NumberOfMeaningfullWords
-        {
-            get
-            {
-                return mapWordToColumn.Count;
-            }
-        }
-
-        /// <summary>
-        /// Builds the <see cref="ProcedureMatrices"/> out of <see cref="AllProcedures"/> for words
-        /// that are listed in <see cref="MapWordToColumn"/>
-        /// </summary>
-        public void build()
-        {
-            int procedurIndex = 0;
-            foreach (KeyValuePair<int, TextRepresentation> kvp in allProcedures)
-            {
-                int procedurId = kvp.Key;
-                TextRepresentation currentProcedure = kvp.Value;
-                MapRowToId[procedurIndex] = procedurId;
-                foreach (KeyValuePair<string, double> textStatistic in currentProcedure)
-                {
-                    string word = textStatistic.Key;
-                    double TFIDF = textStatistic.Value;
-
-                    //Means word is not meaningful, and is not take into consideration.
-                    if (!mapWordToColumn.ContainsKey(word))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        int wordIndex = mapWordToColumn[word]; //Find what is this word place in vector
-                        DataMatrix[procedurIndex][wordIndex] = TFIDF;
-                    }
-                }
-                ++procedurIndex; //increment procedure indice
-            }
-        }
-
-
-        public double[][] DataMatrix
-        {
-            get { return dataMatrix; }
-            set { dataMatrix = value; }
-        }
-        public int[] MapRowToId
-        {
-            get { return mapRowToId; }
-            set { mapRowToId = value; }
-        }
-
-    }
     public class NextDecisionMatrices
     {
-        private double[][] dataMatrix = null;
-        private int[] mapRowToNextId = null;
-        private Dictionary<int, Dictionary<int, List<int>>> mapProcIdPhasIdToRowsSet = null;
+        #region Fields
+
         private AllDecisions allDecisions;
+        private double[][] dataMatrix = null;
+        private Dictionary<int, Dictionary<int, List<int>>> mapProcIdPhasIdToRowsSet = null;
+        private int[] mapRowToNextId = null;
         private Dictionary<string, int> mapWordToColumn;
 
+        #endregion Fields
+
+        #region Constructors
 
         public NextDecisionMatrices(AllDecisions allDecisions,
-           Dictionary<String, int> mapWordToColumn)
+            Dictionary<String, int> mapWordToColumn)
         {
             this.allDecisions = allDecisions;
             this.mapWordToColumn = mapWordToColumn;
@@ -114,8 +34,42 @@ namespace DocumentClassification.BagOfWordsClassifier.Matrices
                 dataMatrix[i] = new double[nrOfMeaningfulWords];
             }
             mapRowToNextId = new int[nrOfDecisions];
-
         }
+
+        #endregion Constructors
+
+        #region Properties
+
+        public double[][] DataMatrix
+        {
+            get { return dataMatrix; }
+            set { dataMatrix = value; }
+        }
+
+        public Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToRowsSet
+        {
+            get { return mapProcIdPhasIdToRowsSet; }
+            set { mapProcIdPhasIdToRowsSet = value; }
+        }
+
+        public int[] MapRowToNextId
+        {
+            get { return mapRowToNextId; }
+            set { mapRowToNextId = value; }
+        }
+
+        public int NumberOfDecisions
+        {
+            get
+            {
+                return dataMatrix.Length;
+            }
+        }
+
+        #endregion Properties
+
+        #region Methods
+
         public void build()
         {
             int indexer = 0;
@@ -152,6 +106,7 @@ namespace DocumentClassification.BagOfWordsClassifier.Matrices
                 }
             }
         }
+
         private int CountPastDecisions()
         {
             int nrRet = 0;
@@ -164,39 +119,121 @@ namespace DocumentClassification.BagOfWordsClassifier.Matrices
             return nrRet;
         }
 
+        #endregion Methods
+    }
 
-        public Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToRowsSet
+    public class ProcedureMatrices
+    {
+        #region Fields
+
+        private AllProcedures allProcedures;
+        private double[][] dataMatrix;
+        private int[] mapRowToId;
+        private Dictionary<string, int> mapWordToColumn;
+
+        #endregion Fields
+
+        #region Constructors
+
+        public ProcedureMatrices(AllProcedures allProcedures,
+            Dictionary<String, int> mapWordToColumn)
         {
-            get { return mapProcIdPhasIdToRowsSet; }
-            set { mapProcIdPhasIdToRowsSet = value; }
+            this.allProcedures = allProcedures;
+            this.mapWordToColumn = mapWordToColumn;
+
+            int nrOfProcedures = allProcedures.Count;
+            int nrOfMeaningfulWords = mapWordToColumn.Count;
+
+            int[] MapRowToProcedureId = new int[nrOfProcedures];
+            dataMatrix = new double[nrOfProcedures][];
+            for (int i = 0; i < nrOfProcedures; i++)
+            {
+                dataMatrix[i] = new double[nrOfMeaningfulWords];
+            }
         }
-        public int[] MapRowToNextId
-        {
-            get { return mapRowToNextId; }
-            set { mapRowToNextId = value; }
-        }
+
+        #endregion Constructors
+
+        #region Properties
+
         public double[][] DataMatrix
         {
             get { return dataMatrix; }
             set { dataMatrix = value; }
         }
 
-        public int NumberOfDecisions
+        public int[] MapRowToId
+        {
+            get { return mapRowToId; }
+            set { mapRowToId = value; }
+        }
+
+        public int NrOfProcedures
         {
             get
             {
-                return dataMatrix.Length;
+                return this.allProcedures.Count;
             }
         }
 
+        public int NumberOfMeaningfullWords
+        {
+            get
+            {
+                return mapWordToColumn.Count;
+            }
+        }
 
+        #endregion Properties
+
+        #region Methods
+
+        /// <summary>
+        /// Builds the <see cref="ProcedureMatrices"/> out of <see cref="AllProcedures"/> for words
+        /// that are listed in <see cref="MapWordToColumn"/>
+        /// </summary>
+        public void build()
+        {
+            int procedurIndex = 0;
+            foreach (KeyValuePair<int, TextRepresentation> kvp in allProcedures)
+            {
+                int procedurId = kvp.Key;
+                TextRepresentation currentProcedure = kvp.Value;
+                MapRowToId[procedurIndex] = procedurId;
+                foreach (KeyValuePair<string, double> textStatistic in currentProcedure)
+                {
+                    string word = textStatistic.Key;
+                    double TFIDF = textStatistic.Value;
+
+                    //Means word is not meaningful, and is not take into consideration.
+                    if (!mapWordToColumn.ContainsKey(word))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        int wordIndex = mapWordToColumn[word]; //Find what is this word place in vector
+                        DataMatrix[procedurIndex][wordIndex] = TFIDF;
+                    }
+                }
+                ++procedurIndex; //increment procedure indice
+            }
+        }
+
+        #endregion Methods
     }
+
     public class WordPicker
     {
-        private AllCases allCases;
-        private double maximumFrequency;
-        private DBRepresentation dbRepresentation;
+        #region Fields
 
+        private AllCases allCases;
+        private DBRepresentation dbRepresentation;
+        private double maximumFrequency;
+
+        #endregion Fields
+
+        #region Constructors
 
         public WordPicker(AllCases allCases, DBRepresentation dbRepresentation, double maxFrequency)
         {
@@ -204,6 +241,10 @@ namespace DocumentClassification.BagOfWordsClassifier.Matrices
             this.maximumFrequency = maxFrequency;
             this.dbRepresentation = dbRepresentation;
         }
+
+        #endregion Constructors
+
+        #region Methods
 
         public Dictionary<string, int> FetchMeaningfulWords()
         {
@@ -227,5 +268,7 @@ namespace DocumentClassification.BagOfWordsClassifier.Matrices
             }
             return mapWordToColumn;
         }
+
+        #endregion Methods
     }
 }

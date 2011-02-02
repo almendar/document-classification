@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DocumentClassification.BagOfWordsClassifier.Decisions
+﻿namespace DocumentClassification.BagOfWordsClassifier.Decisions
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
 
     /// <summary>
     /// Class stores best classification result.
@@ -11,16 +10,22 @@ namespace DocumentClassification.BagOfWordsClassifier.Decisions
     /// </summary>
     public class BestDecisionResult
     {
-        /// <summary>
-        /// List of best results
-        /// </summary>
-        private LinkedList<ClassificationResult> resultData;
+        #region Fields
 
         /// <summary>
         /// How many result were added to best result since 
         /// creation of this object
         /// </summary>
         private int actualNrOfResultsAdded;
+
+        /// <summary>
+        /// List of best results
+        /// </summary>
+        private LinkedList<ClassificationResult> resultData;
+
+        #endregion Fields
+
+        #region Constructors
 
         /// <summary>
         /// Creates this object
@@ -35,6 +40,10 @@ namespace DocumentClassification.BagOfWordsClassifier.Decisions
                 resultData.AddLast(new ClassificationResult(0, Double.MaxValue));
             }
         }
+
+        #endregion Constructors
+
+        #region Properties
 
         /// <summary>
         /// Returns how many decisions may be taken
@@ -70,26 +79,9 @@ namespace DocumentClassification.BagOfWordsClassifier.Decisions
             }
         }
 
-        /// <summary>
-        /// Returns a table with best results. 
-        /// This table maybe smaller from the <see cref="MaximumNumberOfBestDecisions"/>
-        /// if less number of result were checked.
-        /// </summary>
-        /// <returns>Table with all best results</returns>
-        public ClassificationResult [] BestResults()
-        {
+        #endregion Properties
 
-            int nrOfResultToReturn = NrOfDecisionsClassified;
-            if (nrOfResultToReturn == 0)
-                return null;
-            ClassificationResult[] ret = new ClassificationResult[nrOfResultToReturn];
-            LinkedListNode<ClassificationResult> node = resultData.First;
-            for (int i = 0; i < nrOfResultToReturn; i++, node = node.Next)
-            {
-                ret[i] = new ClassificationResult(node.Value);
-            }
-            return ret;
-        }
+        #region Methods
 
         /// <summary>
         /// Adds a new result and classifies it. 
@@ -102,7 +94,7 @@ namespace DocumentClassification.BagOfWordsClassifier.Decisions
         {
             bool ret = false;
 
-            LinkedListNode<ClassificationResult> bestListNode 
+            LinkedListNode<ClassificationResult> bestListNode
                 = resultData.Last;
 
             while (bestListNode != null)
@@ -124,7 +116,7 @@ namespace DocumentClassification.BagOfWordsClassifier.Decisions
                     ret = true;
                     break;
                 }
-                else if (bestListNode.Value.Similarity >= resultToAdd.Similarity && 
+                else if (bestListNode.Value.Similarity >= resultToAdd.Similarity &&
                     bestListNode != resultData.First)
                 {
                     //Console.WriteLine("Moving forward");
@@ -146,8 +138,29 @@ namespace DocumentClassification.BagOfWordsClassifier.Decisions
             }
             return ret;
         }
-    }
 
+        /// <summary>
+        /// Returns a table with best results. 
+        /// This table maybe smaller from the <see cref="MaximumNumberOfBestDecisions"/>
+        /// if less number of result were checked.
+        /// </summary>
+        /// <returns>Table with all best results</returns>
+        public ClassificationResult[] BestResults()
+        {
+            int nrOfResultToReturn = NrOfDecisionsClassified;
+            if (nrOfResultToReturn == 0)
+                return null;
+            ClassificationResult[] ret = new ClassificationResult[nrOfResultToReturn];
+            LinkedListNode<ClassificationResult> node = resultData.First;
+            for (int i = 0; i < nrOfResultToReturn; i++, node = node.Next)
+            {
+                ret[i] = new ClassificationResult(node.Value);
+            }
+            return ret;
+        }
+
+        #endregion Methods
+    }
 
     /// <summary>
     /// Represens classification result
@@ -162,7 +175,6 @@ namespace DocumentClassification.BagOfWordsClassifier.Decisions
         #endregion Fields
 
         #region Constructors
-
 
         /// <summary>
         /// Constructs a classification result
@@ -179,7 +191,8 @@ namespace DocumentClassification.BagOfWordsClassifier.Decisions
         /// Constructs a copy of the classification result.
         /// </summary>
         /// <param name="copy"></param>
-        public ClassificationResult(ClassificationResult copy) : this(copy.Id, copy.Similarity)
+        public ClassificationResult(ClassificationResult copy)
+            : this(copy.Id, copy.Similarity)
         {
         }
 
@@ -226,4 +239,3 @@ namespace DocumentClassification.BagOfWordsClassifier.Decisions
         #endregion Methods
     }
 }
-

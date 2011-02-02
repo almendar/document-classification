@@ -11,9 +11,9 @@
         private static readonly Data instance = new Data();
 
         private AllCases allCases;
-        private AllProcedures allProcedures;
         private AllDecisions allDecisionsPeople;
         private AllDecisions allDecisionsStatus;
+        private AllProcedures allProcedures;
         private DBRepresentation dbRepresentation;
 
         #endregion Fields
