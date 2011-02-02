@@ -54,34 +54,12 @@
 
         public CasesTF getCasesTF()
         {
-            string Query = @"SELECT * FROM dc.casestf
-                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
-            DbDataReader rdr = executeQuery(Query);
-            if (rdr.Read())
-            {
-                BinaryFormatter bf = new BinaryFormatter();
-                System.IO.MemoryStream mem =
-                new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
-                return (CasesTF)bf.Deserialize(mem);
-            }
-            rdr.Close();
-            return null;
+            return (CasesTF)getObject("casestf");
         }
 
         public IDFcalculation getIDFcalculation()
         {
-            string Query = @"SELECT * FROM dc.idfcalculation
-                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
-            DbDataReader rdr = executeQuery(Query);
-            if (rdr.Read())
-            {
-                BinaryFormatter bf = new BinaryFormatter();
-                System.IO.MemoryStream mem =
-                new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
-                return (IDFcalculation)bf.Deserialize(mem);
-            }
-            rdr.Close();
-            return null;
+            return (IDFcalculation)getObject("idfcalculation");
         }
 
         public void loadData()
@@ -103,6 +81,10 @@
         {
             connect();
             setCurrentVersion();
+            getNextPersonMatrices();
+            getNextStageMatrices();
+            getProcedureMatrices();
+            getWordPicker();
             disconnect();
         }
 
@@ -129,7 +111,10 @@
         {
             connect();
             startTransaction();
-
+            sendNextPersonMatrices();
+            sendNextStageMatrices();
+            sendProceduresMatrices();
+            sendWordPicker();
             commit();
             disconnect();
         }
