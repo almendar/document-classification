@@ -3,62 +3,6 @@
     using System;
     using System.Collections.Generic;
 
-    public class IDFcalculationHelper
-    {
-        #region Fields
-
-        private CasesTF casesTF;
-        private IDFcalculation idfCalculation;
-        private static IDFcalculationHelper instance = new IDFcalculationHelper();
-
-        #endregion Fields
-
-        #region Constructors
-
-        private IDFcalculationHelper()
-        {
-            casesTF = DCDbTools.Instance.getCasesTF();
-            idfCalculation = DCDbTools.Instance.getIDFcalculation();
-        }
-
-        #endregion Constructors
-
-        #region Properties
-        public static IDFcalculationHelper Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
-
-        public CasesTF CasesTF
-        {
-            get
-            {
-                return casesTF;
-            }
-            set
-            {
-                casesTF = value;
-            }
-        }
-
-        public IDFcalculation IDFcalculation
-        {
-            get
-            {
-                return idfCalculation;
-            }
-            set
-            {
-            idfCalculation = value;
-            }
-        }
-
-        #endregion Properties
-    }
-
     public class CasesTF : Dictionary<int, Dictionary<string, int>>
     {
         #region Constructors
@@ -128,6 +72,64 @@
         }
 
         #endregion Methods
+    }
+
+    public class IDFcalculationHelper
+    {
+        #region Fields
+
+        private static IDFcalculationHelper instance = new IDFcalculationHelper();
+
+        private CasesTF casesTF;
+        private IDFcalculation idfCalculation;
+
+        #endregion Fields
+
+        #region Constructors
+
+        private IDFcalculationHelper()
+        {
+            casesTF = DCDbTools.Instance.getCasesTF();
+            idfCalculation = DCDbTools.Instance.getIDFcalculation();
+        }
+
+        #endregion Constructors
+
+        #region Properties
+
+        public static IDFcalculationHelper Instance
+        {
+            get
+            {
+                return instance;
+            }
+        }
+
+        public CasesTF CasesTF
+        {
+            get
+            {
+                return casesTF;
+            }
+            set
+            {
+                casesTF = value;
+            }
+        }
+
+        public IDFcalculation IDFcalculation
+        {
+            get
+            {
+                return idfCalculation;
+            }
+            set
+            {
+            idfCalculation = value;
+            }
+        }
+
+        #endregion Properties
     }
 
     public class IDFData

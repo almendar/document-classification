@@ -6,6 +6,8 @@
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Text;
 
+    using DocumentClassification.BagOfWordsClassifier.Matrices;
+
     using MySql.Data.MySqlClient;
 
     public class DCDbTools
@@ -97,6 +99,13 @@
             }
         }
 
+        public void loadMatricesFromDb()
+        {
+            connect();
+            setCurrentVersion();
+            disconnect();
+        }
+
         public void sendData()
         {
             lock (Data.Instance)
@@ -114,6 +123,15 @@
                 commit();
                 disconnect();
             }
+        }
+
+        public void sendDataMatricesToDb()
+        {
+            connect();
+            startTransaction();
+
+            commit();
+            disconnect();
         }
 
         private void commit()
@@ -160,63 +178,22 @@
 
         private void getAllCases()
         {
-            string Query = @"SELECT * FROM dc.allcases
-                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
-            DbDataReader rdr = executeQuery(Query);
-            if (rdr.Read())
-            {
-                BinaryFormatter bf = new BinaryFormatter();
-
-                System.IO.MemoryStream mem =
-                    new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
-                Data.Instance.AllCases = (AllCases)bf.Deserialize(mem);
-            }
-            rdr.Close();
+            Data.Instance.AllCases = (AllCases)getObject("allcases");
         }
 
         private void getAllDecisionsPeople()
         {
-            string Query = @"SELECT * FROM dc.alldecisionspeople
-                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
-            DbDataReader rdr = executeQuery(Query);
-            if (rdr.Read())
-            {
-                BinaryFormatter bf = new BinaryFormatter();
-                System.IO.MemoryStream mem =
-                    new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
-                Data.Instance.AllDecisionsPeople = (AllDecisions)bf.Deserialize(mem);
-            }
-            rdr.Close();
+            Data.Instance.AllDecisionsPeople = (AllDecisions)getObject("alldecisionspeople");
         }
 
         private void getAllDecisionsStatus()
         {
-            string Query = @"SELECT * FROM dc.alldecisionsstatus
-                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
-            DbDataReader rdr = executeQuery(Query);
-            if (rdr.Read())
-            {
-                BinaryFormatter bf = new BinaryFormatter();
-                System.IO.MemoryStream mem =
-                    new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
-                Data.Instance.AllDecisionsStatus = (AllDecisions)bf.Deserialize(mem);
-            }
-            rdr.Close();
+            Data.Instance.AllDecisionsStatus = (AllDecisions)getObject("alldecisionsstatus");
         }
 
         private void getAllProcedures()
         {
-            string Query = @"SELECT * FROM dc.allprocedures
-                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
-            DbDataReader rdr = executeQuery(Query);
-            if (rdr.Read())
-            {
-                BinaryFormatter bf = new BinaryFormatter();
-                System.IO.MemoryStream mem =
-                    new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
-                Data.Instance.AllProcedures = (AllProcedures)bf.Deserialize(mem);
-            }
-            rdr.Close();
+            Data.Instance.AllProcedures = (AllProcedures)getObject("allprocedures");
         }
 
         private string getConnectionString()
@@ -226,109 +203,113 @@
 
         private void getDBRepresentation()
         {
-            string Query = @"SELECT * FROM dc.dbrepresentation
-                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
+            Data.Instance.DBRepresentation = (DBRepresentation)getObject("dbrepresentation");
+        }
+
+        private void getNextPersonMatrices()
+        {
+            DataMatrices.Instance.NextPersonMatrices = (NextDecisionMatrices)getObject("nextpersonmatrices");
+        }
+
+        private void getNextStageMatrices()
+        {
+            DataMatrices.Instance.NextStageMatrices = (NextDecisionMatrices)getObject("nextstagematrices");
+        }
+
+        private object getObject(string tableName)
+        {
+            string Query = "SELECT * FROM dc." + tableName +
+                           "where versionhistory_idversionHistory = " + CurrentVersion + ";";
             DbDataReader rdr = executeQuery(Query);
+            object result = null;
             if (rdr.Read())
             {
                 BinaryFormatter bf = new BinaryFormatter();
                 System.IO.MemoryStream mem =
                 new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
-                Data.Instance.DBRepresentation = (DBRepresentation)bf.Deserialize(mem);
+                result = bf.Deserialize(mem);
             }
             rdr.Close();
+            return result;
+        }
+
+        private void getProcedureMatrices()
+        {
+            DataMatrices.Instance.ProcedureMatrices = (ProcedureMatrices)getObject("procedurematrices");
+        }
+
+        private void getWordPicker()
+        {
+            DataMatrices.Instance.WordPicker = (WordPicker)getObject("wordpicker");
         }
 
         private void sendAllCases()
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            System.IO.MemoryStream mem = new System.IO.MemoryStream();
-            mem.Position = 0;
-            bf.Serialize(mem, Data.Instance.AllCases);
-            String str = Convert.ToBase64String(mem.ToArray());
-
-            string Query = "INSERT INTO dc.allcases(base64BinaryData,versionhistory_idversionHistory) values" +
-             "('" + str + "'," + CurrentVersion + ");";
-
-            executeNonQuery(Query);
+            sendObject("allcases",  Data.Instance.AllCases);
         }
 
         private void sendAllDecisionsPeople()
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            System.IO.MemoryStream mem = new System.IO.MemoryStream();
-            bf.Serialize(mem, Data.Instance.AllDecisionsPeople);
-            String str = Convert.ToBase64String(mem.ToArray());
-
-            string Query = "INSERT INTO dc.alldecisionspeople(base64BinaryData,versionhistory_idversionHistory) values" +
-             "('" + str + "'," + CurrentVersion + ");";
-
-            executeNonQuery(Query);
+            sendObject("alldecisionspeople", Data.Instance.AllDecisionsPeople);
         }
 
         private void sendAllDecisionsStatus()
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            System.IO.MemoryStream mem = new System.IO.MemoryStream();
-            bf.Serialize(mem, Data.Instance.AllDecisionsStatus);
-            String str = Convert.ToBase64String(mem.ToArray());
-
-            string Query = "INSERT INTO dc.alldecisionsstatus(base64BinaryData,versionhistory_idversionHistory) values" +
-             "('" + str + "'," + CurrentVersion + ");";
-
-            executeNonQuery(Query);
+            sendObject("alldecisionsstatus",Data.Instance.AllDecisionsStatus);
         }
 
         private void sendAllProcedures()
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            System.IO.MemoryStream mem = new System.IO.MemoryStream();
-            bf.Serialize(mem, Data.Instance.AllProcedures);
-            String str = Convert.ToBase64String(mem.ToArray());
-
-            string Query = "INSERT INTO dc.allprocedures(base64BinaryData,versionhistory_idversionHistory) values" +
-             "('" + str + "'," + CurrentVersion + ");";
-
-            executeNonQuery(Query);
+            sendObject("allprocedures", Data.Instance.AllProcedures);
         }
 
         private void sendCasesTF()
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            System.IO.MemoryStream mem = new System.IO.MemoryStream();
-            bf.Serialize(mem, Data.Instance);
-            String str = Convert.ToBase64String(mem.ToArray());
-
-            string Query = "INSERT INTO dc.casestf(base64BinaryData,versionhistory_idversionHistory) values" +
-             "('" + str + "'," + CurrentVersion + ");";
-
-            executeNonQuery(Query);
+            sendObject("casestf", IDFcalculationHelper.Instance.CasesTF);
         }
 
         private void sendDBRepresentation()
         {
+            sendObject("dbrepresentation", Data.Instance.DBRepresentation);
+        }
+
+        private void sendIDFcalculation()
+        {
+            sendObject("idfcalculation", IDFcalculationHelper.Instance.IDFcalculation);
+        }
+
+        private void sendNextPersonMatrices()
+        {
+            sendObject("nextpersonmatrices", DataMatrices.Instance.NextPersonMatrices);
+        }
+
+        private void sendNextStageMatrices()
+        {
+            sendObject("nextstagematrices", DataMatrices.Instance.NextStageMatrices);
+        }
+
+        private void sendObject(string tableName, object obj)
+        {
             BinaryFormatter bf = new BinaryFormatter();
             System.IO.MemoryStream mem = new System.IO.MemoryStream();
-            bf.Serialize(mem, Data.Instance.DBRepresentation);
+            bf.Serialize(mem, obj);
             String str = Convert.ToBase64String(mem.ToArray());
 
-            string Query = "INSERT INTO dc.dbrepresentation(base64BinaryData,versionhistory_idversionHistory) values" +
+            string Query = "INSERT INTO dc." + tableName +
+                "(base64BinaryData,versionhistory_idversionHistory) values" +
              "('" + str + "'," + CurrentVersion + ");";
 
             executeNonQuery(Query);
         }
 
-        private void sendIDFcalculation()
+        private void sendProceduresMatrices()
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            System.IO.MemoryStream mem = new System.IO.MemoryStream();
-            bf.Serialize(mem, Data.Instance);
-            String str = Convert.ToBase64String(mem.ToArray());
+            sendObject("proceduresmatrices", DataMatrices.Instance.ProcedureMatrices);
+        }
 
-            string Query = "INSERT INTO dc.idfcalculation(base64BinaryData,versionhistory_idversionHistory) values" +
-             "('" + str + "'," + CurrentVersion + ");";
-
-            executeNonQuery(Query);
+        private void sendWordPicker()
+        {
+            sendObject("wordpicker", DataMatrices.Instance.WordPicker);
         }
 
         private void setCurrentVersion()
