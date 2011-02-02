@@ -95,7 +95,7 @@
                     if (newCases.Count != 0)
                     {
                         // setting number of cases
-                        IDFcalculaction.Instance.setNumberOfCases(Data.Instance.AllCases.getNumberOfCasesInDB() + newCases.Count);
+                        IDFcalculationHelper.Instance.IDFcalculation.setNumberOfCases(Data.Instance.AllCases.getNumberOfCasesInDB() + newCases.Count);
                         recalculateAllTFIDF();
                     }
                     else
@@ -175,7 +175,7 @@
 
         private double calculateTFIDF(int caseId, string word)
         {
-            return (double)CasesTF.Instance[caseId][word] * IDFcalculaction.Instance[word].IDF;
+            return (double)IDFcalculationHelper.Instance.CasesTF[caseId][word] * IDFcalculationHelper.Instance.IDFcalculation[word].IDF;
         }
 
         private void connect()
@@ -273,7 +273,7 @@
 
         private void recalculateAllTFIDF()
         {
-            IDFcalculaction.Instance.calculateIDF();
+            IDFcalculationHelper.Instance.IDFcalculation.calculateIDF();
             foreach (TextRepresentation tempCase in Data.Instance.AllCases.Values)
             {
                 List<string> tempList = new List<string>(tempCase.Keys);
@@ -291,14 +291,14 @@
             {
                 foreach (string word in oldCasesOldWords[caseId].Keys)
                 {
-                    Data.Instance.AllCases[caseId][word] += IDFcalculaction.Instance[word].IDF;
+                    Data.Instance.AllCases[caseId][word] += IDFcalculationHelper.Instance.IDFcalculation[word].IDF;
                 }
             }
 
             // for new words - recalculate all words that appeared in all cases
             foreach (string word in newWords)
             {
-                IDFcalculaction.Instance.calculateIDF(word);
+                IDFcalculationHelper.Instance.IDFcalculation.calculateIDF(word);
                 foreach (int caseId in Data.Instance.AllCases.Keys)
                 {
                     if (Data.Instance.AllCases[caseId].ContainsKey(word))
@@ -327,21 +327,21 @@
         {
             foreach (int caseId in data.Keys)
             {
-                if (CasesTF.Instance.ContainsKey(caseId))
+                if (IDFcalculationHelper.Instance.CasesTF.ContainsKey(caseId))
                 {
                     oldCasesOldWords.Add(caseId, new Dictionary<string, int>());
                     oldCasesNewWords.Add(caseId, new Dictionary<string, int>());
                     foreach (string word in data[caseId].Keys)
                     {
-                        if (CasesTF.Instance[caseId].ContainsKey(word))
+                        if (IDFcalculationHelper.Instance.CasesTF[caseId].ContainsKey(word))
                         {
                             oldCasesOldWords[caseId].Add(word, data[caseId][word]);
-                            CasesTF.Instance[caseId].Add(word, oldCasesOldWords[caseId][word]);
+                            IDFcalculationHelper.Instance.CasesTF[caseId].Add(word, oldCasesOldWords[caseId][word]);
                         }
                         else
                         {
                             oldCasesNewWords[caseId].Add(word, data[caseId][word]);
-                            CasesTF.Instance[caseId].Add(word, oldCasesNewWords[caseId][word]);
+                            IDFcalculationHelper.Instance.CasesTF[caseId].Add(word, oldCasesNewWords[caseId][word]);
                             Data.Instance.AllCases[caseId].Add(word, 0);
                             if (!newWords.Contains(word))
                                 newWords.Add(word);
@@ -356,7 +356,7 @@
                         Data.Instance.AllCases[caseId].Add(word, 0);
                     }
                     newCases.Add(caseId, data[caseId]);
-                    CasesTF.Instance.Add(caseId, data[caseId]);
+                    IDFcalculationHelper.Instance.CasesTF.Add(caseId, data[caseId]);
                 }
             }
         }
@@ -478,12 +478,12 @@
                     if (Data.Instance.DBRepresentation.ContainsKey(word))
                     {
                         Data.Instance.DBRepresentation[word]++;
-                        IDFcalculaction.Instance.dfChanged(word, Data.Instance.DBRepresentation[word]);
+                        IDFcalculationHelper.Instance.IDFcalculation.dfChanged(word, Data.Instance.DBRepresentation[word]);
                     }
                     else
                     {
                         Data.Instance.DBRepresentation.Add(word, 1);
-                        IDFcalculaction.Instance.Add(word, new IDFData(1));
+                        IDFcalculationHelper.Instance.IDFcalculation.Add(word, new IDFData(1));
                     }
                 }
             }
@@ -492,169 +492,4 @@
         #endregion Methods
     }
 
-    class CasesTF : Dictionary<int, Dictionary<string, int>>
-    {
-        #region Fields
-
-        static readonly CasesTF instance = new CasesTF();
-
-        #endregion Fields
-
-        #region Constructors
-
-        private CasesTF()
-        {
-        }
-
-        #endregion Constructors
-
-        #region Properties
-
-        public static CasesTF Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
-
-        #endregion Properties
-
-        #region Methods
-
-        public void Add(Dictionary<int, Dictionary<string, int>> data)
-        {
-            foreach (int caseId in data.Keys)
-            {
-                Add(caseId, data[caseId]);
-            }
-        }
-
-        #endregion Methods
-    }
-
-    class IDFcalculaction : Dictionary<string, IDFData>
-    {
-        #region Fields
-
-        private static IDFcalculaction instance = new IDFcalculaction();
-
-        private int D;
-        private double logD;
-
-        #endregion Fields
-
-        #region Constructors
-
-        private IDFcalculaction()
-        {
-        }
-
-        #endregion Constructors
-
-        #region Properties
-
-        public static IDFcalculaction Instance
-        {
-            get
-            {
-                return instance;
-            }
-        }
-
-        #endregion Properties
-
-        #region Methods
-
-        public void calculateIDF()
-        {
-            logD = Math.Log10(D);
-
-            foreach (IDFData data in this.Values)
-            {
-                data.calculateIDF(logD);
-            }
-        }
-
-        public double calculateIDF(string word)
-        {
-            return this[word].calculateIDF(logD);
-        }
-
-        public void dfChanged(string word, int newDf)
-        {
-            this[word].LogDF = Math.Log10(newDf);
-        }
-
-        public void setNumberOfCases(int D)
-        {
-            this.D = D;
-            logD = Math.Log10(D);
-        }
-
-        #endregion Methods
-    }
-
-    class IDFData
-    {
-        #region Fields
-
-        private double idf;
-        private double logdf;
-
-        #endregion Fields
-
-        #region Constructors
-
-        public IDFData(double idf, double logdf)
-        {
-            this.idf = idf;
-            this.logdf = logdf;
-        }
-
-        public IDFData(double df)
-        {
-            idf = 0;
-            logdf = Math.Log10(df);
-        }
-
-        #endregion Constructors
-
-        #region Properties
-
-        public double IDF
-        {
-            get
-            {
-                return idf;
-            }
-            set
-            {
-                idf = value;
-            }
-        }
-
-        public double LogDF
-        {
-            get
-            {
-                return logdf;
-            }
-            set
-            {
-                logdf = value;
-            }
-        }
-
-        #endregion Properties
-
-        #region Methods
-
-        public double calculateIDF(double logD)
-        {
-            return idf = logD - logdf;
-        }
-
-        #endregion Methods
-    }
 }

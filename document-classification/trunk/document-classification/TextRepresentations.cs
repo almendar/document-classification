@@ -36,27 +36,6 @@
         #endregion Methods
     }
 
-
-
-    [Serializable]
-    public class DBRepresentation : Dictionary<string, int>, ISerializable
-    {
-        #region Constructors
-
-        public DBRepresentation()
-            : base()
-        {
-        }
-
-        public DBRepresentation(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        #endregion Constructors
-    }
-
-
     /// <summary>
     /// ProcedurID,PersonId,nextStageId
     /// </summary>
@@ -76,76 +55,6 @@
         }
 
         #endregion Constructors
-    }
-
-
-    /// <summary>
-    /// Represens a case in the flow.
-    /// Assign to all words that case contains TF-IDF measure
-    /// </summary>
-    [Serializable]
-    public class TextRepresentation : Dictionary<String, double>
-    {
-        #region Fields
-
-        private readonly int caseId;
-
-        /// <summary>
-        /// Procedure id to which this Case is associated to.
-        /// </summary>
-        private readonly int procedureId;
-        private TextRepresentation textRepresentation;
-
-        #endregion Fields
-
-        #region Constructors
-
-        public TextRepresentation(int procedureId, int caseId)
-        {
-            this.procedureId = procedureId;
-            this.caseId = caseId;
-        }
-
-        public void add(TextRepresentation tr)
-        {
-            foreach (string key in tr.Keys)
-            {
-                this[key] += tr[key];
-            }
-        }
-
-        public TextRepresentation(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        public TextRepresentation(TextRepresentation textRepresentation)
-        {
-            // TODO: Complete member initialization
-            this.textRepresentation = textRepresentation;
-        }
-
-        #endregion Constructors
-
-        #region Properties
-
-        public int CaseId
-        {
-            get
-            {
-                return caseId;
-            }
-        }
-
-        public int ProcedureId
-        {
-            get
-            {
-                return procedureId;
-            }
-        }
-
-        #endregion Properties
     }
 
     /// <summary>
@@ -187,4 +96,95 @@
         #endregion Methods
     }
 
+    [Serializable]
+    public class DBRepresentation : Dictionary<string, int>, ISerializable
+    {
+        #region Constructors
+
+        public DBRepresentation()
+            : base()
+        {
+        }
+
+        public DBRepresentation(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        #endregion Constructors
+    }
+
+    /// <summary>
+    /// Represens a case in the flow.
+    /// Assign to all words that case contains TF-IDF measure
+    /// </summary>
+    [Serializable]
+    public class TextRepresentation : Dictionary<String, double>
+    {
+        #region Fields
+
+        private readonly int caseId;
+
+        /// <summary>
+        /// Procedure id to which this Case is associated to.
+        /// </summary>
+        private readonly int procedureId;
+
+        private TextRepresentation textRepresentation;
+
+        #endregion Fields
+
+        #region Constructors
+
+        public TextRepresentation(int procedureId, int caseId)
+        {
+            this.procedureId = procedureId;
+            this.caseId = caseId;
+        }
+
+        public TextRepresentation(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        public TextRepresentation(TextRepresentation textRepresentation)
+        {
+            // TODO: Complete member initialization
+            this.textRepresentation = textRepresentation;
+        }
+
+        #endregion Constructors
+
+        #region Properties
+
+        public int CaseId
+        {
+            get
+            {
+                return caseId;
+            }
+        }
+
+        public int ProcedureId
+        {
+            get
+            {
+                return procedureId;
+            }
+        }
+
+        #endregion Properties
+
+        #region Methods
+
+        public void add(TextRepresentation tr)
+        {
+            foreach (string key in tr.Keys)
+            {
+                this[key] += tr[key];
+            }
+        }
+
+        #endregion Methods
+    }
 }

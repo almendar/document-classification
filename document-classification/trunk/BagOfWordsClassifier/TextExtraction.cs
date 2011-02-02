@@ -24,13 +24,6 @@
 
         #region Methods
 
-        public static String[] GetTextTokens(String text)
-        {
-            String trimmedText = text.Trim();
-               String[] tokens = trimmedText.Split(splitChars, StringSplitOptions.RemoveEmptyEntries);
-               return tokens;
-        }
-
         /// <summary>
         /// Takes table of strings and count frequency of words in vector
         /// that are listed in <see cref="MapWordToColumn"/>
@@ -50,6 +43,13 @@
                 vectorRep[indice] += 1.0d;
             }
             return vectorRep;
+        }
+
+        public static String[] GetTextTokens(String text)
+        {
+            String trimmedText = text.Trim();
+               String[] tokens = trimmedText.Split(splitChars, StringSplitOptions.RemoveEmptyEntries);
+               return tokens;
         }
 
         #endregion Methods

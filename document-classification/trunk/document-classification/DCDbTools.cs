@@ -50,6 +50,38 @@
 
         #region Methods
 
+        public CasesTF getCasesTF()
+        {
+            string Query = @"SELECT * FROM dc.casestf
+                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
+            DbDataReader rdr = executeQuery(Query);
+            if (rdr.Read())
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                System.IO.MemoryStream mem =
+                new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
+                return (CasesTF)bf.Deserialize(mem);
+            }
+            rdr.Close();
+            return null;
+        }
+
+        public IDFcalculation getIDFcalculation()
+        {
+            string Query = @"SELECT * FROM dc.idfcalculation
+                           where versionhistory_idversionHistory = " + CurrentVersion + ";";
+            DbDataReader rdr = executeQuery(Query);
+            if (rdr.Read())
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                System.IO.MemoryStream mem =
+                new System.IO.MemoryStream(Convert.FromBase64String(rdr.GetString(1)));
+                return (IDFcalculation)bf.Deserialize(mem);
+            }
+            rdr.Close();
+            return null;
+        }
+
         public void loadData()
         {
             lock (Data.Instance)
@@ -77,6 +109,8 @@
                 sendAllDecisionsStatus();
                 sendAllProcedures();
                 sendDBRepresentation();
+                sendCasesTF();
+                sendIDFcalculation();
                 commit();
                 disconnect();
             }
@@ -258,6 +292,19 @@
             executeNonQuery(Query);
         }
 
+        private void sendCasesTF()
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            System.IO.MemoryStream mem = new System.IO.MemoryStream();
+            bf.Serialize(mem, Data.Instance);
+            String str = Convert.ToBase64String(mem.ToArray());
+
+            string Query = "INSERT INTO dc.casestf(base64BinaryData,versionhistory_idversionHistory) values" +
+             "('" + str + "'," + CurrentVersion + ");";
+
+            executeNonQuery(Query);
+        }
+
         private void sendDBRepresentation()
         {
             BinaryFormatter bf = new BinaryFormatter();
@@ -266,6 +313,19 @@
             String str = Convert.ToBase64String(mem.ToArray());
 
             string Query = "INSERT INTO dc.dbrepresentation(base64BinaryData,versionhistory_idversionHistory) values" +
+             "('" + str + "'," + CurrentVersion + ");";
+
+            executeNonQuery(Query);
+        }
+
+        private void sendIDFcalculation()
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            System.IO.MemoryStream mem = new System.IO.MemoryStream();
+            bf.Serialize(mem, Data.Instance);
+            String str = Convert.ToBase64String(mem.ToArray());
+
+            string Query = "INSERT INTO dc.idfcalculation(base64BinaryData,versionhistory_idversionHistory) values" +
              "('" + str + "'," + CurrentVersion + ");";
 
             executeNonQuery(Query);

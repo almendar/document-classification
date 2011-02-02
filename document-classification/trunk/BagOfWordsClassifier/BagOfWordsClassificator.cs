@@ -3,10 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Text;
+
     using DocumentClassification.BagOfWordsClassifier.Decisions;
     using DocumentClassification.BagOfWordsClassifier.Matrices;
     using DocumentClassification.Representation;
-
 
     /// <summary>
     /// Singleton instance of classificator based on bag-of-words paradigm
@@ -14,22 +14,28 @@
     public class BagOfWordsTextClassifier
     {
         #region Fields
+
         static readonly BagOfWordsTextClassifier instance = new BagOfWordsTextClassifier();
+
+        private Dictionary<string, int> mapWordToColumn = null;
         private int nrOfBestDecisionsReturned = 4;
-        private Dictionary<string, int> mapWordToColumn = null;    
+
         #endregion Fields
 
         #region Constructors
+
         static BagOfWordsTextClassifier()
         {
-
         }
+
         private BagOfWordsTextClassifier()
         {
         }
+
         #endregion Constructors
 
         #region Properties
+
         public static BagOfWordsTextClassifier Instance
         {
             get
@@ -37,19 +43,35 @@
                 return instance;
             }
         }
-        public int NrOfBestDecisionsReturned
-        {
-            get { return nrOfBestDecisionsReturned; }
-            set { nrOfBestDecisionsReturned = value; }
-        }
+
         public Dictionary<string, int> MapWordToColumn
         {
             get { return mapWordToColumn; }
             set { mapWordToColumn = value; }
         }
+
+        public int NrOfBestDecisionsReturned
+        {
+            get { return nrOfBestDecisionsReturned; }
+            set { nrOfBestDecisionsReturned = value; }
+        }
+
         #endregion Properties
 
         #region Methods
+
+        public ClassificationResult[] NextPersonPrediction(int procId, int phaseId, string p)
+        {
+            NextDecisionMatrices dataMatrices = null; //Z http contexu trzeba to wyciągnąć
+            return NextDecisionPrediciton(dataMatrices, procId, phaseId, p);
+        }
+
+        public ClassificationResult[] NextStagePrediciton(int procId, int phaseId, string p)
+        {
+            NextDecisionMatrices dataMatrices = null; //Z http contexu trzeba to wyciągnąć
+            return NextDecisionPrediciton(dataMatrices, procId, phaseId, p);
+        }
+
         /// <summary>
         /// Based on text tries to find right procedures for given text.
         /// Now returns only the best procedure ID.
@@ -66,8 +88,6 @@
             //Z attachmentsIdList wyciągną tekst, który mam sprawnie poszatkować.
             String text = null;
 
-
-
             BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned);
             double[] textVector = CreateVectorFromText(text);
             for (int i = 0; i < procedureMatrix.NrOfProcedures; i++)
@@ -83,26 +103,15 @@
             return BDR.BestResults();
         }
 
-        
-        public ClassificationResult[] NextPersonPrediction(int procId, int phaseId, string p)
-        {
-            NextDecisionMatrices dataMatrices = null; //Z http contexu trzeba to wyciągnąć
-            return NextDecisionPrediciton(dataMatrices, procId, phaseId, p);
-        }
-        public ClassificationResult[] NextStagePrediciton(int procId, int phaseId, string p)
-        {
-            NextDecisionMatrices dataMatrices = null; //Z http contexu trzeba to wyciągnąć
-            return NextDecisionPrediciton(dataMatrices, procId, phaseId, p);
-        }
         private double[] CreateVectorFromText(String text)
         {
             String[] textTokens = TextExtraction.GetTextTokens(text);
             double[] textVector = TextExtraction.CreateVectorFromText(textTokens, mapWordToColumn);
             return textVector;
         }
+
         private ClassificationResult[] NextDecisionPrediciton(NextDecisionMatrices nextDecisionsMatrices, int procedurId, int phaseId, string text)
         {
-
             NextDecisionMatrices decisionMatrices = nextDecisionsMatrices;
             BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned);
             double[] textVector = CreateVectorFromText(text);
@@ -127,10 +136,8 @@
                 BDR.addResult(result);
             }
             return BDR.BestResults();
-
-
         }
-        #endregion Methods
 
+        #endregion Methods
     }
 }
