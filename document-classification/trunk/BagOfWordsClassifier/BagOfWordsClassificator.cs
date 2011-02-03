@@ -97,6 +97,7 @@
                 double similarity = (1 - VectorOperations.VectorsConsine(checkedVector, textVector));
                 int bestProcedureId = procedureMatrix.MapRowToId[i];
                 ClassificationResult result = new ClassificationResult(bestProcedureId, similarity);
+
                 BDR.addResult(result);
             }
             return BDR.BestResults();
