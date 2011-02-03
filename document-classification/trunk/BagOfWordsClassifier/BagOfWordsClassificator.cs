@@ -7,6 +7,7 @@
     using DocumentClassification.BagOfWordsClassifier.Decisions;
     using DocumentClassification.BagOfWordsClassifier.Matrices;
     using DocumentClassification.Representation;
+    using DocumentClassification.DCUpdate;
 
     /// <summary>
     /// Singleton instance of classificator based on bag-of-words paradigm
@@ -16,7 +17,6 @@
         #region Fields
 
         static readonly BagOfWordsTextClassifier instance = new BagOfWordsTextClassifier();
-
         private Dictionary<string, int> mapWordToColumn = null;
         private int nrOfBestDecisionsReturned = 4;
 
@@ -60,16 +60,18 @@
 
         #region Methods
 
-        public ClassificationResult[] NextPersonPrediction(int procId, int phaseId, string p)
+        public ClassificationResult[] NextPersonPrediction(int caseId, int procId, int phaseId)
         {
-            NextDecisionMatrices dataMatrices = null; //Z http contexu trzeba to wyciągnąć
-            return NextDecisionPrediciton(dataMatrices, procId, phaseId, p);
+            //Z http contexu trzeba to wyciągnąć
+            NextDecisionMatrices dataMatrices = DataMatrices.Instance.NextPersonMatrices;
+            return NextDecisionPrediciton(dataMatrices,caseId, procId, phaseId);
         }
 
-        public ClassificationResult[] NextStagePrediciton(int procId, int phaseId, string p)
+        public ClassificationResult[] NextStagePrediciton(int caseId, int procId, int phaseId)
         {
-            NextDecisionMatrices dataMatrices = null; //Z http contexu trzeba to wyciągnąć
-            return NextDecisionPrediciton(dataMatrices, procId, phaseId, p);
+            //Z http contexu trzeba to wyciągnąć
+            NextDecisionMatrices dataMatrices = DataMatrices.Instance.NextStageMatrices;
+            return NextDecisionPrediciton(dataMatrices,caseId, procId, phaseId);
         }
 
         /// <summary>
@@ -78,18 +80,13 @@
         /// </summary>
         /// <param name="text">Text of document</param>
         /// <returns>Procedures IDs table</returns>
-        public ClassificationResult[] ProcedureRecognition(List<int> attachmentsIdList)
+        public ClassificationResult[] ProcedureRecognition(int caseId)
         {
             //jakims cudem mam to miec z cache przeglądarki
-            ProcedureMatrices procedureMatrix = new ProcedureMatrices(null, null);
-            //
-
-            //
-            //Z attachmentsIdList wyciągną tekst, który mam sprawnie poszatkować.
-            String text = null;
-
+            ProcedureMatrices procedureMatrix = DataMatrices.Instance.ProcedureMatrices;
+            double[] textVector = CreateVectorFromText(AmodDBTools.Instance.getData(caseId));
             BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned);
-            double[] textVector = CreateVectorFromText(text);
+            
             for (int i = 0; i < procedureMatrix.NrOfProcedures; i++)
             {
                 double[] checkedVector = procedureMatrix.DataMatrix[i];
@@ -103,17 +100,18 @@
             return BDR.BestResults();
         }
 
-        private double[] CreateVectorFromText(String text)
+        private double[] CreateVectorFromText(Dictionary<string, int> text)
         {
-            String[] textTokens = TextExtraction.GetTextTokens(text);
-            double[] textVector = TextExtraction.CreateVectorFromText(textTokens, mapWordToColumn);
+            double[] textVector = TextExtraction.CreateVectorFromText(text, mapWordToColumn);
             return textVector;
         }
 
-        private ClassificationResult[] NextDecisionPrediciton(NextDecisionMatrices nextDecisionsMatrices, int procedurId, int phaseId, string text)
+        private ClassificationResult[] NextDecisionPrediciton(NextDecisionMatrices nextDecisionsMatrices,int caseId, int procedurId, int phaseId)
         {
             NextDecisionMatrices decisionMatrices = nextDecisionsMatrices;
             BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned);
+
+            Dictionary<string, int> text = AmodDBTools.Instance.getData(caseId);
             double[] textVector = CreateVectorFromText(text);
             int nrOfDecisions = decisionMatrices.NumberOfDecisions;
             if (!decisionMatrices.MapProcIdPhasIdToRowsSet.ContainsKey(procedurId))
