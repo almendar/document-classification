@@ -111,6 +111,7 @@
         #endregion Methods
     }
 
+    [Serializable]
     public class NextDecisionMatrices
     {
         #region Fields
@@ -227,6 +228,7 @@
         #endregion Methods
     }
 
+    [Serializable]
     public class ProcedureMatrices
     {
         #region Fields
@@ -328,6 +330,7 @@
         #endregion Methods
     }
 
+    [Serializable]
     public class WordPicker
     {
         #region Fields

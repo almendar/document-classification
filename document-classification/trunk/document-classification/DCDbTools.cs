@@ -54,12 +54,18 @@
 
         public CasesTF getCasesTF()
         {
-            return (CasesTF)getObject("casestf");
+            connect();
+            CasesTF result = (CasesTF)getObject("casestf");
+            disconnect();
+            return result != null ? result : new CasesTF(); 
         }
 
         public IDFcalculation getIDFcalculation()
         {
-            return (IDFcalculation)getObject("idfcalculation");
+            connect();
+            IDFcalculation result = (IDFcalculation)getObject("idfcalculation");
+            disconnect();
+            return result != null ? result : new IDFcalculation(); 
         }
 
         public void loadData()
@@ -113,7 +119,7 @@
             startTransaction();
             sendNextPersonMatrices();
             sendNextStageMatrices();
-            sendProceduresMatrices();
+            sendProcedureMatrices();
             sendWordPicker();
             commit();
             disconnect();
@@ -204,7 +210,7 @@
         private object getObject(string tableName)
         {
             string Query = "SELECT * FROM dc." + tableName +
-                           "where versionhistory_idversionHistory = " + CurrentVersion + ";";
+                           " where versionhistory_idversionHistory = " + CurrentVersion + ";";
             DbDataReader rdr = executeQuery(Query);
             object result = null;
             if (rdr.Read())
@@ -287,9 +293,9 @@
             executeNonQuery(Query);
         }
 
-        private void sendProceduresMatrices()
+        private void sendProcedureMatrices()
         {
-            sendObject("proceduresmatrices", DataMatrices.Instance.ProcedureMatrices);
+            sendObject("procedurematrices", DataMatrices.Instance.ProcedureMatrices);
         }
 
         private void sendWordPicker()

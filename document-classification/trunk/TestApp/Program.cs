@@ -6,6 +6,7 @@
 
     using DocumentClassification.DCUpdate;
     using DocumentClassification.Representation;
+    using DocumentClassification.BagOfWordsClassifier.Matrices;
 
     class Program
     {
@@ -13,19 +14,9 @@
 
         static void Main(string[] args)
         {
-            AmodDBTools.Instance.rebuild();
-            AmodDBTools.Instance.update();
-            //DCDbTools.Instance.sendData();
             DCDbTools.Instance.loadData();
-            int i = Data.Instance.AllDecisionsStatus.Count;
-            //DCDbTools.Instance.sendData();
-            /*
-            DCDbTools.Instance.setCurrentVersion();
-            DCDbTools.Instance.getAllDecisionsStatus();
-            int i = Data.Instance.AllDecisionsStatus.Count;
-            DCDbTools.Instance.loadData();
-            int i = Data.Instance.AllCases.Count;
-            */
+            DCDbTools.Instance.loadMatricesFromDb();
+            int i =  Data.Instance.AllCases.Count;
         }
 
         #endregion Methods
