@@ -30,6 +30,7 @@
 
         private BagOfWordsTextClassifier()
         {
+            DataMatrices.Instance.loadDataMatricesFromDb();
             MapWordToColumn = DataMatrices.Instance.WordPicker.FetchMeaningfulWords();
         }
 
