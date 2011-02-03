@@ -101,6 +101,9 @@
             procedureMatrices = new ProcedureMatrices(Data.Instance.AllProcedures, mapWordToColumn);
             nextPersonMatrices = new NextDecisionMatrices(Data.Instance.AllDecisionsPeople, mapWordToColumn);
             nextStageMatrices = new NextDecisionMatrices(Data.Instance.AllDecisionsStatus, mapWordToColumn);
+            procedureMatrices.build();
+            nextPersonMatrices.build();
+            nextStageMatrices.build();
         }
 
         public void sendDataMatricesToDb()
