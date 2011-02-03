@@ -490,6 +490,22 @@
                 }
             }
         }
+        public Dictionary<string, int> getData(int caseId)
+        {
+            connect();
+            string ftsQueryData = @"select *
+                                from amod.ftsearchdata
+                                where ftsCaseId = " + caseId + ";";
+            DbDataReader rdr = executeQuery(ftsQueryData);
+            Dictionary<string, int> result = new Dictionary<string,int>();
+
+            while (rdr.Read())
+            {
+                extractDocument((string)rdr["ftsText"], result);
+            }
+            disconnect();
+            return result;
+        }
 
         #endregion Methods
     }
