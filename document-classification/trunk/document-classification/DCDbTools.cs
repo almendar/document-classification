@@ -15,7 +15,7 @@
         #region Fields
 
         private const string database = "dc";
-        private const string pwd = "1207pegazo";
+        private const string pwd = "riva87";
         private const string server = "localhost";
         private const string uid = "root";
 

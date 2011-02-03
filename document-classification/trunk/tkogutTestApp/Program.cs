@@ -36,7 +36,7 @@ public class TestApp
 
     static void Main()
     {
-        int CONST_CASE_ID = 45;
+        int CONST_CASE_ID = 66;
         ProcedureRecognitionTest(CONST_CASE_ID);
         NextStageRecognitionTest(CONST_CASE_ID, 4, 304);
         NextPersonRecognitionTest(CONST_CASE_ID, 4, 2); //Tutaj sa testy :)
@@ -67,6 +67,7 @@ public class TestApp
     {
         foreach (ClassificationResult a in resutl)
         {
+
             System.Console.WriteLine(classifiedType + "{0} similarity: {1}", a.Id, a.Similarity);
         }
         System.Console.ReadLine();
