@@ -30,6 +30,7 @@
 
         private BagOfWordsTextClassifier()
         {
+            MapWordToColumn = DataMatrices.Instance.WordPicker.FetchMeaningfulWords();
         }
 
         #endregion Constructors
