@@ -30,17 +30,16 @@
         /// </summary>
         /// <param name="textTokens">Tokens from text</param>
         /// <returns>Vector with document TF of words</returns>
-        public static double[] CreateVectorFromText(string[] textTokens, Dictionary<string, int> MapWordToColumn)
+        public static double[] CreateVectorFromText(Dictionary<string,int> textTokens, Dictionary<string, int> MapWordToColumn)
         {
             int numberOfMeaningfulWords = MapWordToColumn.Count;
             double[] vectorRep = new double[numberOfMeaningfulWords];
-            foreach (String word in textTokens)
+            foreach (String word in textTokens.Keys)
             {
                 if (!MapWordToColumn.ContainsKey(word))
                     continue;
-
                 int indice = MapWordToColumn[word];
-                vectorRep[indice] += 1.0d;
+                vectorRep[indice] = textTokens[word];
             }
             return vectorRep;
         }

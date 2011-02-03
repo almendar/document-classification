@@ -36,46 +36,31 @@ public class TestApp
 
     static void Main()
     {
-        ProcedureRecognitionTest(@"C:\Users\karol.galazka\Documents\test.txt");
-        NextStageRecognitionTest(@"C:\Users\karol.galazka\Documents\test.txt", 4, 304);
-        NextPersonRecognitionTest(@"C:\Users\karol.galazka\Documents\test.txt", 4, 2); //Tutaj sa testy :)
+        int CONST_CASE_ID = 45;
+        ProcedureRecognitionTest(CONST_CASE_ID);
+        NextStageRecognitionTest(CONST_CASE_ID, 4, 304);
+        NextPersonRecognitionTest(CONST_CASE_ID, 4, 2); //Tutaj sa testy :)
         Console.ReadKey();
     }
 
-    private static void NextPersonRecognitionTest(string filePath, int procId, int phaseId)
+    private static void NextPersonRecognitionTest(int caseIdToClassifie, int procId, int phaseId)
     {
-        TestApp app;
-        BagOfWordsTextClassifier classifier;
-        PrepareForClassification(filePath, out app, out classifier);
-        ClassificationResult[] result = classifier.NextPersonPrediction(procId, phaseId, app.TextFile);
+        ClassificationResult[] result = BagOfWordsTextClassifier.Instance.NextPersonPrediction(caseIdToClassifie,procId, phaseId);
         WriteResults(result, "Next person id");
     }
 
-    private static void NextStageRecognitionTest(string filePath, int procId, int phaseId)
+    private static void NextStageRecognitionTest(int caseIdToClassifie, int procId, int phaseId)
     {
-        TestApp app;
-        BagOfWordsTextClassifier classifier;
-        PrepareForClassification(filePath, out app, out classifier);
-        ClassificationResult [] result = classifier.NextStagePrediciton(procId, phaseId, filePath);
+        
+        ClassificationResult[] result = BagOfWordsTextClassifier.Instance.NextStagePrediciton(caseIdToClassifie,procId, phaseId);
         WriteResults(result, "Next stage id:");
     }
 
-    private static void PrepareForClassification(string filePath, out TestApp app, out BagOfWordsTextClassifier classifier)
+    private static void ProcedureRecognitionTest(int procedureID)
     {
-        app = new TestApp();
-        app.ReadTextFromFile(filePath);
-        classifier = BagOfWordsTextClassifier.Instance;
-    }
-
-    private static void ProcedureRecognitionTest(string filePath)
-    {
-        /*
-        TestApp app;
-        BagOfWordsTextClassifier classifier;
-        PrepareForClassification(filePath, out app, out classifier);
-        ClassificationResult[] result = classifier.ProcedureRecognition(app.TextFile);
-        WriteResults(result, "Procedure id:");
-        */
+     
+        ClassificationResult[] result = BagOfWordsTextClassifier.Instance.ProcedureRecognition(procedureID);
+        WriteResults(result, "Procedure id:");  
     }
 
     private static void WriteResults(ClassificationResult[] resutl, string classifiedType)
