@@ -254,7 +254,7 @@
             int nrOfProcedures = allProcedures.Count;
             int nrOfMeaningfulWords = mapWordToColumn.Count;
 
-            int[] MapRowToProcedureId = new int[nrOfProcedures];
+            mapRowToId = new int[nrOfProcedures];
             dataMatrix = new double[nrOfProcedures][];
             for (int i = 0; i < nrOfProcedures; i++)
             {
