@@ -181,7 +181,10 @@
         {
             foreach (string key in tr.Keys)
             {
-                this[key] += tr[key];
+                if (this.ContainsKey(key))
+                    this[key] += tr[key];
+                else
+                    this[key] = tr[key];
             }
         }
 

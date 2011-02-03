@@ -2,7 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Runtime.Serialization;
 
+    [Serializable]
     public class CasesTF : Dictionary<int, Dictionary<string, int>>
     {
         #region Constructors
@@ -10,6 +12,11 @@
         public CasesTF()
         {
         }
+        public CasesTF(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
 
         #endregion Constructors
 
@@ -26,6 +33,7 @@
         #endregion Methods
     }
 
+    [Serializable]
     public class IDFcalculation : Dictionary<string, IDFData>
     {
         #region Fields
@@ -37,9 +45,14 @@
 
         #region Constructors
 
-        private IDFcalculation()
+        public IDFcalculation()
         {
         }
+        public IDFcalculation(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
 
         #endregion Constructors
 
@@ -132,6 +145,7 @@
         #endregion Properties
     }
 
+    [Serializable]
     public class IDFData
     {
         #region Fields
@@ -154,6 +168,10 @@
             idf = 0;
             logdf = Math.Log10(df);
         }
+        public IDFData(SerializationInfo info, StreamingContext context)
+        {
+        }
+
 
         #endregion Constructors
 

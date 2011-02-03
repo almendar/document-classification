@@ -7,6 +7,7 @@
     using System.Data.SqlClient;
     using System.Text;
     using System.Web;
+    using DocumentClassification.BagOfWordsClassifier.Matrices;
 
     using DocumentClassification.Representation;
 
@@ -111,6 +112,7 @@
             }
             lastUpdateDate = currentUpdateDate;
             disconnect();
+            DataMatrices.Instance.rebuildDataMatrices();
         }
 
         private static void addStatusConnection(int caseId, int procedureId, Int32 currentStatus, Int32 nextStatus)
