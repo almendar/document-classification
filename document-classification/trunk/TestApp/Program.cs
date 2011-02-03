@@ -14,9 +14,12 @@
 
         static void Main(string[] args)
         {
+            /*
             DCDbTools.Instance.loadData();
             DCDbTools.Instance.loadMatricesFromDb();
             int i =  Data.Instance.AllCases.Count;
+            */
+            Dictionary<string, int> caseData = AmodDBTools.Instance.getData(64);
         }
 
         #endregion Methods
