@@ -62,7 +62,11 @@
             double dotProduct = DotProduct(v1, v2);
             double vec1Len = VectorLength(v1);
             double vec2Len = VectorLength(v2);
-            double ret = (dotProduct) / (vec1Len*vec2Len);
+            double ret = 0.0d; //no familiar at all
+            if (vec1Len * vec2Len != 0)
+            {
+                ret = (dotProduct) / (vec1Len * vec2Len);
+            }
             return ret;
         }
 

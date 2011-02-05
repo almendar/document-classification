@@ -36,10 +36,13 @@ public class TestApp
 
     static void Main()
     {
-        int CONST_CASE_ID = 66;
+        int CONST_CASE_ID = 34;
+        Console.WriteLine("Rozpoznanie procedury");
         ProcedureRecognitionTest(CONST_CASE_ID);
+        Console.WriteLine("Rozpoznanie nastęnego etapu");
         NextStageRecognitionTest(CONST_CASE_ID, 4, 304);
-        NextPersonRecognitionTest(CONST_CASE_ID, 4, 2); //Tutaj sa testy :)
+        Console.WriteLine("Rozpoznanie nastęnej osoby");
+        NextPersonRecognitionTest(CONST_CASE_ID, 4, 17); //Tutaj sa testy :)
         Console.ReadKey();
     }
 
@@ -53,6 +56,7 @@ public class TestApp
     {
         
         ClassificationResult[] result = BagOfWordsTextClassifier.Instance.NextStagePrediciton(caseIdToClassifie,procId, phaseId);
+
         WriteResults(result, "Next stage id:");
     }
 
@@ -65,12 +69,19 @@ public class TestApp
 
     private static void WriteResults(ClassificationResult[] resutl, string classifiedType)
     {
-        foreach (ClassificationResult a in resutl)
+        if (resutl != null)
         {
+            foreach (ClassificationResult a in resutl)
+            {
 
-            System.Console.WriteLine(classifiedType + "{0} similarity: {1}", a.Id, a.Similarity);
+                System.Console.WriteLine(classifiedType + "{0} similarity: {1}", a.Id, a.Similarity);
+            }
         }
-        System.Console.ReadLine();
+        else
+        {
+            System.Console.WriteLine("None of the textes is similar");
+        }
+
     }
 
     void ReadTextFromFile(string fileName)
