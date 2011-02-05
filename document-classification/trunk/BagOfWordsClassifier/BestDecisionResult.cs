@@ -94,6 +94,11 @@
         {
             bool ret = false;
 
+            if (!(resultToAdd.Similarity < 1.0))
+            {
+                return ret;
+            }
+
             LinkedListNode<ClassificationResult> bestListNode
                 = resultData.Last;
 
