@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Classifier\BagOfWordsClassificator.cs" />
     <Compile Include="Classifier\BestDecisionResult.cs" />
+    <Compile Include="httpcontextstuffExample\HttpContextExample.cs" />
     <Compile Include="main\Program.cs" />
     <Compile Include="main\Program1.cs" />
     <Compile Include="TextRepresentation\Data.cs" />
@@ -74,6 +75,7 @@
       <Name>AMODDecisionSupportClasses</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

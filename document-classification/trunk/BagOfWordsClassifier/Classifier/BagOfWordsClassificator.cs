@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Text;
-
+    using System.Web;
     using AMODDecisionSupportClasses;
     using DocumentClassification.BagOfWordsClassifier.Decisions;
     using DocumentClassification.BagOfWordsClassifier.Matrices;
@@ -20,6 +20,10 @@
         static readonly BagOfWordsTextClassifier instance = new BagOfWordsTextClassifier();
         private Dictionary<string, int> mapWordToColumn = null;
         private int nrOfBestDecisionsReturned = 4;
+
+        public const string NEXT_PERSON_MATRICES  = "NEXT_PERSON_MATRICES";
+        public const string NEXT_STAGE_MATRICES = "NEXT_STAGE_MATRICES";
+        public const string PROCEDURE_MATRICES = "PROCEDURE_MATRICES";
 
         #endregion Fields
 
@@ -65,15 +69,13 @@
 
         public List<AMODPrediction> NextPersonPrediction(int caseId, int procId, int personId)
         {
-            //Z http contexu trzeba to wyciągnąć
-            NextDecisionMatrices dataMatrices = DataMatrices.Instance.NextPersonMatrices;
+            NextDecisionMatrices dataMatrices = (NextDecisionMatrices) HttpContext.Current.Cache[NEXT_PERSON_MATRICES];//DataMatrices.Instance.NextPersonMatrices;
             return NextDecisionPrediciton(dataMatrices,caseId, procId, personId, ClassificatorType.Users);
         }
 
         public List<AMODPrediction> NextStagePrediciton(int caseId, int procId, int phaseId)
         {
-            //Z http contexu trzeba to wyciągnąć
-            NextDecisionMatrices dataMatrices = DataMatrices.Instance.NextStageMatrices;
+            NextDecisionMatrices dataMatrices = (NextDecisionMatrices) HttpContext.Current.Cache[NEXT_STAGE_MATRICES];//DataMatrices.Instance.NextStageMatrices;
             return NextDecisionPrediciton(dataMatrices,caseId, procId, phaseId, ClassificatorType.Stages);
         }
 
@@ -85,8 +87,7 @@
         /// <returns>Procedures IDs table</returns>
         public List<AMODPrediction> ProcedureRecognition(int caseId)
         {
-            //jakims cudem mam to miec z cache przeglądarki
-            ProcedureMatrices procedureMatrix = DataMatrices.Instance.ProcedureMatrices;
+            ProcedureMatrices procedureMatrix = (ProcedureMatrices) HttpContext.Current.Cache[PROCEDURE_MATRICES];//DataMatrices.Instance.ProcedureMatrices;
             double[] textVector = CreateVectorFromText(AmodDBTools.Instance.getData(caseId));
             BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned, ClassificatorType.Procedures);
             
@@ -114,7 +115,6 @@
         {
             NextDecisionMatrices decisionMatrices = nextDecisionsMatrices;
             BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned, type);
-
             Dictionary<string, int> text = AmodDBTools.Instance.getData(caseId);
             double[] textVector = CreateVectorFromText(text);
             int nrOfDecisions = decisionMatrices.NumberOfDecisions;
