@@ -50,23 +50,23 @@ namespace TestApp
 
         private static void NextPersonRecognitionTest(int caseIdToClassifie, int procId, int phaseId)
         {
-            ClassificationResult[] result = BagOfWordsTextClassifier.Instance.NextPersonPrediction(caseIdToClassifie, procId, phaseId);
-            WriteResults(result, "Next person id:");
+            //ClassificationResult[] result = BagOfWordsTextClassifier.Instance.NextPersonPrediction(caseIdToClassifie, procId, phaseId);
+            //WriteResults(result, "Next person id:");
         }
 
         private static void NextStageRecognitionTest(int caseIdToClassifie, int procId, int phaseId)
         {
 
-            ClassificationResult[] result = BagOfWordsTextClassifier.Instance.NextStagePrediciton(caseIdToClassifie, procId, phaseId);
+            //ClassificationResult[] result = BagOfWordsTextClassifier.Instance.NextStagePrediciton(caseIdToClassifie, procId, phaseId);
 
-            WriteResults(result, "Next stage id:");
+            //WriteResults(result, "Next stage id:");
         }
 
         private static void ProcedureRecognitionTest(int procedureID)
         {
 
-            ClassificationResult[] result = BagOfWordsTextClassifier.Instance.ProcedureRecognition(procedureID);
-            WriteResults(result, "Procedure id:");
+            //ClassificationResult[] result = BagOfWordsTextClassifier.Instance.ProcedureRecognition(procedureID);
+            //WriteResults(result, "Procedure id:");
         }
 
         private static void WriteResults(ClassificationResult[] resutl, string classifiedType)

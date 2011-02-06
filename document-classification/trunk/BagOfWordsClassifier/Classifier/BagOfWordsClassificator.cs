@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Text;
 
+    using AMODDecisionSupportClasses;
     using DocumentClassification.BagOfWordsClassifier.Decisions;
     using DocumentClassification.BagOfWordsClassifier.Matrices;
     using DocumentClassification.Representation;
@@ -62,18 +63,18 @@
 
         #region Methods
 
-        public ClassificationResult[] NextPersonPrediction(int caseId, int procId, int phaseId)
+        public List<AMODPrediction> NextPersonPrediction(int caseId, int procId, int phaseId)
         {
             //Z http contexu trzeba to wyciągnąć
             NextDecisionMatrices dataMatrices = DataMatrices.Instance.NextPersonMatrices;
-            return NextDecisionPrediciton(dataMatrices,caseId, procId, phaseId);
+            return NextDecisionPrediciton(dataMatrices,caseId, procId, phaseId, ClassificatorType.Users);
         }
 
-        public ClassificationResult[] NextStagePrediciton(int caseId, int procId, int phaseId)
+        public List<AMODPrediction> NextStagePrediciton(int caseId, int procId, int phaseId)
         {
             //Z http contexu trzeba to wyciągnąć
             NextDecisionMatrices dataMatrices = DataMatrices.Instance.NextStageMatrices;
-            return NextDecisionPrediciton(dataMatrices,caseId, procId, phaseId);
+            return NextDecisionPrediciton(dataMatrices,caseId, procId, phaseId, ClassificatorType.Stages);
         }
 
         /// <summary>
@@ -82,12 +83,12 @@
         /// </summary>
         /// <param name="text">Text of document</param>
         /// <returns>Procedures IDs table</returns>
-        public ClassificationResult[] ProcedureRecognition(int caseId)
+        public List<AMODPrediction> ProcedureRecognition(int caseId)
         {
             //jakims cudem mam to miec z cache przeglądarki
             ProcedureMatrices procedureMatrix = DataMatrices.Instance.ProcedureMatrices;
             double[] textVector = CreateVectorFromText(AmodDBTools.Instance.getData(caseId));
-            BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned);
+            BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned, ClassificatorType.Procedures);
             
             for (int i = 0; i < procedureMatrix.NrOfProcedures; i++)
             {
@@ -109,10 +110,10 @@
             return textVector;
         }
 
-        private ClassificationResult[] NextDecisionPrediciton(NextDecisionMatrices nextDecisionsMatrices,int caseId, int procedurId, int phaseId)
+        private List<AMODPrediction> NextDecisionPrediciton(NextDecisionMatrices nextDecisionsMatrices,int caseId, int procedurId, int phaseId, ClassificatorType type)
         {
             NextDecisionMatrices decisionMatrices = nextDecisionsMatrices;
-            BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned);
+            BestDecisionResult BDR = new BestDecisionResult(nrOfBestDecisionsReturned, type);
 
             Dictionary<string, int> text = AmodDBTools.Instance.getData(caseId);
             double[] textVector = CreateVectorFromText(text);
