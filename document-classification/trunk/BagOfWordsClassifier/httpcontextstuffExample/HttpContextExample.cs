@@ -22,7 +22,8 @@ namespace DocumentClassification.BagOfWordsClassifier.Decisions.httpcontextstuff
         // Spokojnie może być statyczna
         public static void RefreshMatricesCallback(string key, Object value, CacheItemRemovedReason reason)
         {
-            Object obj = null;
+            Object obj = null
+            const double EXPIRATION_TIME = 3.0;
             HttpContext context =  HttpContext.Current;
             switch(key)
             {
@@ -36,6 +37,9 @@ namespace DocumentClassification.BagOfWordsClassifier.Decisions.httpcontextstuff
                     obj = DataMatrices.Instance.NextStageMatrices;
                     break;
             }
+            
+            context.Cache.Add(key, obj,
+                null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
         }
 
 
