@@ -63,11 +63,11 @@
 
         #region Methods
 
-        public List<AMODPrediction> NextPersonPrediction(int caseId, int procId, int phaseId)
+        public List<AMODPrediction> NextPersonPrediction(int caseId, int procId, int personId)
         {
             //Z http contexu trzeba to wyciągnąć
             NextDecisionMatrices dataMatrices = DataMatrices.Instance.NextPersonMatrices;
-            return NextDecisionPrediciton(dataMatrices,caseId, procId, phaseId, ClassificatorType.Users);
+            return NextDecisionPrediciton(dataMatrices,caseId, procId, personId, ClassificatorType.Users);
         }
 
         public List<AMODPrediction> NextStagePrediciton(int caseId, int procId, int phaseId)
