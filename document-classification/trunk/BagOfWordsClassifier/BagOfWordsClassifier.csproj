@@ -64,6 +64,16 @@
   <ItemGroup>
     <None Include="DCUpdate\app.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\amod\AMODClasses\AMODClasses.csproj">
+      <Project>{D4071A0D-B2AC-4AA4-AFA9-D909F49893E7}</Project>
+      <Name>AMODClasses</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\amod\AMODDecisionSupportClasses\AMODDecisionSupportClasses.csproj">
+      <Project>{6C52E025-EE72-4B7D-881C-FA796797B0DE}</Project>
+      <Name>AMODDecisionSupportClasses</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

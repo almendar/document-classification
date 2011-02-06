@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Text;
+    using AMODDecisionSupportClasses;
+    using AMODClasses.Objects;
 
     /// <summary>
     /// Class stores best classification result.
@@ -31,10 +33,11 @@
         /// Creates this object
         /// </summary>
         /// <param name="nrOfBestDecisions">How many result will be stored</param>
-        public BestDecisionResult(int nrOfBestDecisions)
+        public BestDecisionResult(int nrOfBestDecisions, ClassificatorType type)
         {
             actualNrOfResultsAdded = 0;
             this.resultData = new LinkedList<ClassificationResult>();
+            this.type  = type;
             for (int i = 0; i < nrOfBestDecisions; i++)
             {
                 resultData.AddLast(new ClassificationResult(0, Double.MaxValue));
@@ -150,21 +153,37 @@
         /// if less number of result were checked.
         /// </summary>
         /// <returns>Table with all best results</returns>
-        public ClassificationResult[] BestResults()
+        public List<AMODPrediction> BestResults()
         {
+            List<AMODPrediction> retList = new List<AMODPrediction>();
             int nrOfResultToReturn = NrOfDecisionsClassified;
             if (nrOfResultToReturn == 0)
-                return null;
-            ClassificationResult[] ret = new ClassificationResult[nrOfResultToReturn];
+                return retList;
             LinkedListNode<ClassificationResult> node = resultData.First;
             for (int i = 0; i < nrOfResultToReturn; i++, node = node.Next)
             {
-                ret[i] = new ClassificationResult(node.Value);
+                Object obj = null;
+                switch(type)
+                {
+                    case ClassificatorType.Procedures:
+                        obj = AMODProcedure.CreateAMODProcedure(node.Value.Id);
+                        break;
+                    case ClassificatorType.Stages:
+                        obj = AMODProcedureStatus.CreateAMODProcedureStatus(node.Value.Id);
+                        break;
+                    case ClassificatorType.Users:
+                        obj = AMODWorkflowUser.CreateAMODWorkflowUser(node.Value.Id);
+                        break;
+                }
+                AMODPrediction prediction = new AMODPrediction(obj, 1.0d - node.Value.Similarity, type);
+                retList.Add(prediction);
             }
-            return ret;
+            return retList;
         }
 
         #endregion Methods
+
+        public ClassificatorType type { get; set; }
     }
 
     /// <summary>
