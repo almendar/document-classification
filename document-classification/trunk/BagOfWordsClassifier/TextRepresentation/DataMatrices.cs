@@ -108,22 +108,34 @@
 
             //context.Cache.Add(PROCEDURE_MATRICES, procedureMatrices,
                 //null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+
             context.Cache.Add(PROCEDURE_MATRICES, procedureMatrices,
-                null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+                null,Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes(0.5), System.Web.Caching.CacheItemPriority.High, new CacheItemRemovedCallback(RefreshMatricesCallback));
+
+                //null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
 
             //context.Cache.Add(NEXT_STAGE_MATRICES, nextStageMatrices,
                 //null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
             context.Cache.Add(NEXT_STAGE_MATRICES, nextStageMatrices,
-                null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+                null,Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes(0.5), System.Web.Caching.CacheItemPriority.High, new CacheItemRemovedCallback(RefreshMatricesCallback));
+
+                //null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
 
             //context.Cache.Add(NEXT_PERSON_MATRICES, nextPersonMatrices,
                 //null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
             context.Cache.Add(NEXT_PERSON_MATRICES, nextPersonMatrices,
-                null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+                null, Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes(0.5), System.Web.Caching.CacheItemPriority.High, new CacheItemRemovedCallback(RefreshMatricesCallback));
+
+                //null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
         }
 
         public static void RefreshMatricesCallback(string key, Object value, CacheItemRemovedReason reason)
         {
+            if (reason != CacheItemRemovedReason.Expired)
+            {
+                return;
+            }
+
             Object obj = null;
             const double EXPIRATION_TIME = 1.0;
             HttpContext context = HttpContext.Current;
@@ -143,7 +155,8 @@
             //context.Cache.Add(key, obj,
                 //null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
             context.Cache.Add(key, obj,
-                null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+                null, Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes(0.5), System.Web.Caching.CacheItemPriority.High, new CacheItemRemovedCallback(RefreshMatricesCallback));
+                //null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, new CacheItemRemovedCallback(RefreshMatricesCallback));
         }
 
 
