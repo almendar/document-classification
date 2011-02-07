@@ -104,16 +104,22 @@
         private void PutMatricesToHttpContext()
         {
             HttpContext context = HttpContext.Current;
-            const double EXPIRATION_TIME = 3.0;
+            const double EXPIRATION_TIME = 1.0;
 
+            //context.Cache.Add(PROCEDURE_MATRICES, procedureMatrices,
+                //null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
             context.Cache.Add(PROCEDURE_MATRICES, procedureMatrices,
-                null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+                null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
 
+            //context.Cache.Add(NEXT_STAGE_MATRICES, nextStageMatrices,
+                //null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
             context.Cache.Add(NEXT_STAGE_MATRICES, nextStageMatrices,
-                null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+                null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
 
+            //context.Cache.Add(NEXT_PERSON_MATRICES, nextPersonMatrices,
+                //null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
             context.Cache.Add(NEXT_PERSON_MATRICES, nextPersonMatrices,
-                null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+                null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
         }
 
         public static void RefreshMatricesCallback(string key, Object value, CacheItemRemovedReason reason)
