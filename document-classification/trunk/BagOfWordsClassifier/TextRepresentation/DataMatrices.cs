@@ -5,10 +5,16 @@
     using System.Text;
 
     using DocumentClassification.Representation;
+    using System.Web;
+    using System.Web.Caching;
 
     public class DataMatrices
     {
         #region Fields
+
+        public const string PROCEDURE_MATRICES = "PROCEDURE_MATRICES";
+        public const string NEXT_STAGE_MATRICES= "NEXT_STAGE_MATRICES";
+        public const string NEXT_PERSON_MATRICES= "NEXT_PERSON_MATRICES";
 
         private static DataMatrices instance = new DataMatrices();
 
@@ -92,7 +98,48 @@
         public void loadDataMatricesFromDb()
         {
             DCDbTools.Instance.loadMatricesFromDb();
+            PutMatricesToHttpContext();
         }
+
+        private void PutMatricesToHttpContext()
+        {
+            HttpContext context = HttpContext.Current;
+            const double EXPIRATION_TIME = 3.0;
+
+            context.Cache.Add(PROCEDURE_MATRICES, procedureMatrices,
+                null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+
+            context.Cache.Add(NEXT_STAGE_MATRICES, nextStageMatrices,
+                null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+
+            context.Cache.Add(NEXT_PERSON_MATRICES, nextPersonMatrices,
+                null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+        }
+
+        public static void RefreshMatricesCallback(string key, Object value, CacheItemRemovedReason reason)
+        {
+            Object obj = null;
+            const double EXPIRATION_TIME = 1.0;
+            HttpContext context = HttpContext.Current;
+            switch (key)
+            {
+                case PROCEDURE_MATRICES:
+                    obj = DCDbTools.Instance.getProcedureMatrices();
+                    break;
+                case NEXT_PERSON_MATRICES:
+                    obj = DCDbTools.Instance.getNextPersonMatrices();
+                    break;
+                case NEXT_STAGE_MATRICES:
+                    obj = DCDbTools.Instance.getNextStageMatrices();
+                    break;
+            }
+
+            //context.Cache.Add(key, obj,
+                //null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+            context.Cache.Add(key, obj,
+                null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
+        }
+
 
         public void rebuildDataMatrices()
         {
