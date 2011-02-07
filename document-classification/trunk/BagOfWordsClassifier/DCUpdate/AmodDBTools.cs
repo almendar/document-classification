@@ -8,6 +8,7 @@
     using System.Text;
     using System.Web;
     using DocumentClassification.BagOfWordsClassifier.Matrices;
+    using DB_AMODClasses.Tools;
 
     using DocumentClassification.Representation;
 
@@ -17,14 +18,15 @@
     {
         #region Fields
 
+        /*
         private const string database = "amod";
-        private const string pwd = "riva87";
+        private const string pwd = "1207pegazo";
         private const string server = "localhost";
         private const string uid = "root";
-
+        */
         static readonly AmodDBTools instance = new AmodDBTools();
 
-        private MySqlConnection conn;
+        //private MySqlConnection conn;
         private string currentUpdateDate;
         private string lastUpdateDate;
 
@@ -66,10 +68,12 @@
 
         public void update()
         {
-            connect();
+            DbConnection conn =  DatabaseTool.GetConnection();
 
             currentUpdateDate = System.DateTime.Now.ToString();
-            DbDataReader rdr = getFtsearchdata(lastUpdateDate, currentUpdateDate);
+            DbDataReader rdr = getFtsearchdata(lastUpdateDate, currentUpdateDate, conn);
+
+
             if (rdr.HasRows)
             {
                 lock (Data.Instance)
@@ -104,14 +108,14 @@
                     #endregion TF_IDF
                     rdr.Close();
 
-                    updateAllDecisionsStatus();
-                    updateAllDecisionsPeople();
+                    updateAllDecisionsStatus(conn);
+                    updateAllDecisionsPeople(conn);
                     Data.Instance.AllProcedures.rebuild(Data.Instance.AllCases);
 
                 }
             }
             lastUpdateDate = currentUpdateDate;
-            disconnect();
+            conn.Close();
             DataMatrices.Instance.rebuildDataMatrices();
         }
 
@@ -179,7 +183,7 @@
         {
             return (double)IDFcalculationHelper.Instance.CasesTF[caseId][word] * IDFcalculationHelper.Instance.IDFcalculation[word].IDF;
         }
-
+        /*
         private void connect()
         {
             if (conn == null)
@@ -192,15 +196,11 @@
         {
             conn.Close();
         }
+        */
 
-        private DbDataReader executeQuery(String query)
+        private DbDataReader executeQuery(string checkProcedureQuery, DbConnection connection)
         {
-            return executeQuery(query, conn);
-        }
-
-        private DbDataReader executeQuery(string checkProcedureQuery, MySqlConnection connection)
-        {
-            DbCommand cmd = new MySqlCommand(checkProcedureQuery, connection);
+            DbCommand cmd = new MySqlCommand(checkProcedureQuery, (MySqlConnection)connection);
             return (cmd.ExecuteReader());
         }
 
@@ -223,43 +223,41 @@
             }
             return extractedDoc;
         }
-
+        /*
         private string getConnectionString()
         {
             return "Server=" + server + ";Database=" + database + ";Uid=" + uid + ";Pwd=" + pwd + ";";
         }
-
-        private DbDataReader getFtsearchdata(String beginDate, String endDate)
+        */
+        private DbDataReader getFtsearchdata(String beginDate, String endDate, DbConnection conn)
         {
             string ftsQueryData = @"select *
                                 from amod.ftsearchdata
                                 where ftsModified > '" + beginDate +
                                 "' AND ftsModified < '" + endDate +
                                 "' order by ftsModified;";
-            return executeQuery(ftsQueryData);
+            return executeQuery(ftsQueryData, conn);
         }
 
-        private DbDataReader getFtsearchdata(String endDate)
+        private DbDataReader getFtsearchdata(String endDate, DbConnection conn)
         {
             string ftsQueryData = @"select *
                                 from amod.ftsearchdata
                                 where ftsModified < '" + endDate +
                                 "' order by ftsModified;";
-            return executeQuery(ftsQueryData);
+            return executeQuery(ftsQueryData, conn);
         }
 
         /** return procedure Id for particular case */
         private int getProcedureId(int caseId)
         {
-            MySqlConnection connection = new MySqlConnection();
-            connection.ConnectionString = getConnectionString();
-            connection.Open();
+            DbConnection conn = DatabaseTool.GetConnection();
 
             string checkProcedureQuery = @"select caseProcedureId
                                from amod.casedefinition
                                where caseId =" + caseId.ToString() +
                                   ";";
-            DbDataReader rdr = executeQuery(checkProcedureQuery, connection);
+            DbDataReader rdr = executeQuery(checkProcedureQuery, conn);
             int result = 0;
             if (rdr.Read())
             {
@@ -269,7 +267,7 @@
             {
                 //@TODO exception
             }
-            connection.Close();
+            conn.Close();
             return result;
         }
 
@@ -363,7 +361,7 @@
             }
         }
 
-        private void updateAllDecisionsPeople()
+        private void updateAllDecisionsPeople(DbConnection conn)
         {
             string Query = @"SELECT `caseId`, `caseVersion`, `caseOwnerId`, `caseModified`, `casePrevOwnerId`, `caseNextOwnerId`
                             FROM `amod`.`casehistory`
@@ -371,7 +369,7 @@
                             AND caseModified > '" + lastUpdateDate +
                            "' AND caseModified < '" + currentUpdateDate +
                            "' ORDER BY `caseOwnerId`, `caseVersion`;";
-            DbDataReader rdr = executeQuery(Query);
+            DbDataReader rdr = executeQuery(Query, conn);
 
             int caseId = -1;
             int procedureId = -1;
@@ -417,7 +415,7 @@
             rdr.Close();
         }
 
-        private void updateAllDecisionsStatus()
+        private void updateAllDecisionsStatus(DbConnection conn)
         {
             string Query = @"SELECT `caseId`, `caseVersion`, `caseStatusId`, `caseModified`, `casePrevStatusId`, `caseNextStatusId`
                             FROM `amod`.`casehistory`
@@ -425,7 +423,7 @@
                             AND caseModified > '" + lastUpdateDate +
                            "' AND caseModified < '" + currentUpdateDate +
                            "' ORDER BY `caseId`, `caseVersion`;";
-            DbDataReader rdr = executeQuery(Query);
+            DbDataReader rdr = executeQuery(Query, conn);
 
             int caseId = -1;
             int procedureId = -1;
@@ -492,18 +490,18 @@
         }
         public Dictionary<string, int> getData(int caseId)
         {
-            connect();
+            DbConnection conn = DatabaseTool.GetConnection();
             string ftsQueryData = @"select *
                                 from amod.ftsearchdata
                                 where ftsCaseId = " + caseId + ";";
-            DbDataReader rdr = executeQuery(ftsQueryData);
+            DbDataReader rdr = executeQuery(ftsQueryData, conn);
             Dictionary<string, int> result = new Dictionary<string,int>();
 
             while (rdr.Read())
             {
                 extractDocument((string)rdr["ftsText"], result);
             }
-            disconnect();
+            conn.Close();
             return result;
         }
 
