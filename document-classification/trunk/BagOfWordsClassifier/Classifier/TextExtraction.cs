@@ -1,9 +1,13 @@
-﻿namespace DocumentClassification.BagOfWords
+namespace DocumentClassification.BagOfWords
 {
     using System;
     using System.Collections.Generic;
     using System.Text;
 
+	/// <summary>
+	/// Class responsible for text extraction.
+	/// Is depreacted and not used anymore 
+	/// </summary>
     public class TextExtraction
     {
         #region Fields

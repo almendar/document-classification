@@ -1,9 +1,13 @@
-﻿namespace DocumentClassification.BagOfWords
+namespace DocumentClassification.BagOfWords
 {
     using System;
     using System.Collections.Generic;
     using System.Text;
 
+	/// <summary>
+	/// Exception thrown when vectors used for 
+	/// math operations were not equal length 
+	/// </summary>
     class VectorLenghtException : Exception
     {
         #region Fields
@@ -14,6 +18,12 @@
 
         #region Constructors
 
+		/// <summary>
+		/// Constructor of this exception
+		/// </summary>
+		/// <param name="p">
+		/// Msg of error
+		/// </param>
         public VectorLenghtException(string p)
             : base(p)
         {
@@ -27,10 +37,25 @@
         #endregion Constructors
     }
 
+	/// <summary>
+	/// Class is responsible for certain math operations 
+	/// </summary>
     class VectorOperations
     {
         #region Methods
 
+		/// <summary>
+		/// Dot product of two vectors
+		/// </summary>
+		/// <param name="v1">
+		/// First of the vectors
+		/// </param>
+		/// <param name="v2">
+		/// Second of the vectors
+		/// </param>
+		/// <returns>
+		/// Value of the dot product of vectors v1 and v2
+		/// </returns>
         public static double DotProduct(double[] v1, double[] v2)
         {
             if (v1.Length != v2.Length)
@@ -45,6 +70,15 @@
             return dotProductRet;
         }
 
+		/// <summary>
+		/// Returns and euclidean lenght of the vector
+		/// </summary>
+		/// <param name="v1">
+		/// Vector
+		/// </param>
+		/// <returns>
+		/// Length of the vector
+		/// </returns>
         public static double VectorLength(double[] v1)
         {
             double vectorLenRet = 0.0;
@@ -55,6 +89,18 @@
             return Math.Sqrt(vectorLenRet);
         }
 
+		/// <summary>
+		/// Computes cosine between two vectors 
+		/// </summary>
+		/// <param name="v1">
+		/// The first vector
+		/// </param>
+		/// <param name="v2">
+		/// The second vector
+		/// </param>
+		/// <returns>
+		/// Cosine value of the vectors
+		/// </returns>
         public static double VectorsConsine(double[] v1, double[] v2)
         {
             if (v1.Length != v2.Length)
