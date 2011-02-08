@@ -1,4 +1,4 @@
-﻿namespace DocumentClassification.Representation
+namespace DocumentClassification.Representation
 {
     using System;
     using System.Collections.Generic;
@@ -13,12 +13,16 @@
     public class AllCases : Dictionary<int, TextRepresentation>
     {
         #region Constructors
-
+		/// <summary>
+		/// Empty constructor 
+		/// </summary>
         public AllCases(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
-
+		/// <summary>
+		/// Empty constructor 
+		/// </summary>
         public AllCases()
             : base()
         {
@@ -28,6 +32,12 @@
 
         #region Methods
 
+		/// <summary>
+		/// Returns how many cases are in the db 
+		/// </summary>
+		/// <returns>
+		/// Count of cases
+		/// </returns>
         public int getNumberOfCasesInDB()
         {
             return this.Keys.Count;
@@ -44,11 +54,17 @@
     {
         #region Constructors
 
+		/// <summary>
+		/// Empty constructor 
+		/// </summary>
         public AllDecisions()
             : base()
         {
         }
 
+		/// <summary>
+		/// Serialization constructor 
+		/// </summary>		
         public AllDecisions(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -65,12 +81,17 @@
     public class AllProcedures : Dictionary<int, TextRepresentation>
     {
         #region Constructors
-
+		/// <summary>
+		/// Empty constructor 
+		/// </summary>
         public AllProcedures()
             : base()
         {
         }
-
+		
+		/// <summary>
+		/// Serialization constructor 
+		/// </summary>
         public AllProcedures(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -80,6 +101,12 @@
 
         #region Methods
 
+		/// <summary>
+		/// rebuidl representation 
+		/// </summary>
+		/// <param name="allCases">
+		/// A <see cref="AllCases"/>
+		/// </param>
         public void rebuild(AllCases allCases)
         {
             this.Clear();
@@ -96,16 +123,25 @@
         #endregion Methods
     }
 
+	/// <summary>
+	/// All words that appear in texts and their count
+	/// </summary>
     [Serializable]
     public class DBRepresentation : Dictionary<string, int>, ISerializable
     {
         #region Constructors
 
+		/// <summary>
+		/// Empty constructor 
+		/// </summary>
         public DBRepresentation()
             : base()
         {
         }
 
+		/// <summary>
+		/// Serialization constructor 
+		/// </summary>
         public DBRepresentation(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -135,18 +171,41 @@
         #endregion Fields
 
         #region Constructors
-
+		/// <summary>
+		/// Empty constructor 
+		/// </summary>
+		/// <param name="procedureId">
+		/// procedure id
+		/// </param>
+		/// <param name="caseId">
+		/// case id
+		/// </param>
         public TextRepresentation(int procedureId, int caseId)
         {
             this.procedureId = procedureId;
             this.caseId = caseId;
         }
 
+		/// <summary>
+		/// Serialization constructor 
+		/// </summary>
+		/// <param name="info">
+		/// A <see cref="SerializationInfo"/>
+		/// </param>
+		/// <param name="context">
+		/// A <see cref="StreamingContext"/>
+		/// </param>
         public TextRepresentation(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
+		/// <summary>
+		/// Copies reference 
+		/// </summary>
+		/// <param name="textRepresentation">
+		/// A <see cref="TextRepresentation"/>
+		/// </param>
         public TextRepresentation(TextRepresentation textRepresentation)
         {
             // TODO: Complete member initialization
@@ -157,6 +216,9 @@
 
         #region Properties
 
+		/// <summary>
+		/// Case id 
+		/// </summary>
         public int CaseId
         {
             get
@@ -165,6 +227,9 @@
             }
         }
 
+		/// <summary>
+		/// Procedure id 
+		/// </summary>
         public int ProcedureId
         {
             get
@@ -177,6 +242,13 @@
 
         #region Methods
 
+		/// <summary>
+		/// Adds to current text representation another text representation as simple set sum
+		//  and adds words frequencies
+		/// </summary>
+		/// <param name="tr">
+		/// A <see cref="TextRepresentation"/>
+		/// </param>
         public void add(TextRepresentation tr)
         {
             foreach (string key in tr.Keys)
