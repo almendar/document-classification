@@ -18,17 +18,12 @@
     {
         #region Fields
 
-        /*
-        private const string database = "amod";
-        private const string pwd = "1207pegazo";
-        private const string server = "localhost";
-        private const string uid = "root";
-        */
         static readonly AmodDBTools instance = new AmodDBTools();
 
-        //private MySqlConnection conn;
         private string currentUpdateDate;
         private string lastUpdateDate;
+
+        private bool hasNewData;
 
         #endregion Fields
 
@@ -42,6 +37,9 @@
 
         private AmodDBTools()
         {
+            hasNewData = false;
+            DCDbTools.Instance.loadData();
+            lastUpdateDate = DCDbTools.Instance.LastDbRecordDate;
         }
 
         #endregion Constructors
@@ -60,12 +58,45 @@
 
         #region Methods
 
+        public string LastUpdateDate
+        {
+            get
+            {
+                return lastUpdateDate;
+            }
+            set
+            {
+                lastUpdateDate = value;
+            }
+        }
+        /// <summary>
+        /// checks if new data occured
+        /// </summary>
+        public bool HasNewData
+        {
+            get
+            {
+                return hasNewData;
+            }
+            set
+            {
+                hasNewData = value;
+            }
+        }
+
+        /// <summary>
+        /// Rebuild all training data
+        /// </summary>
         public void rebuild()
         {
+            // change lastUpdateDate to some date in past
             lastUpdateDate = "1900-12-31 23:59:59";
             update();
         }
 
+        /// <summary>
+        /// Update TrainingData.
+        /// </summary>
         public void update()
         {
             DbConnection conn =  DatabaseTool.GetConnection();
@@ -76,6 +107,7 @@
 
             if (rdr.HasRows)
             {
+                hasNewData = true;
                 lock (Data.Instance)
                 {
                     Dictionary<int, Dictionary<string, int>> data = transformFtsearchDataToDictionary(rdr);
@@ -183,20 +215,6 @@
         {
             return (double)IDFcalculationHelper.Instance.CasesTF[caseId][word] * IDFcalculationHelper.Instance.IDFcalculation[word].IDF;
         }
-        /*
-        private void connect()
-        {
-            if (conn == null)
-                conn = new MySqlConnection();
-            conn.ConnectionString = getConnectionString();
-            conn.Open();
-        }
-
-        private void disconnect()
-        {
-            conn.Close();
-        }
-        */
 
         private DbDataReader executeQuery(string checkProcedureQuery, DbConnection connection)
         {
@@ -223,12 +241,7 @@
             }
             return extractedDoc;
         }
-        /*
-        private string getConnectionString()
-        {
-            return "Server=" + server + ";Database=" + database + ";Uid=" + uid + ";Pwd=" + pwd + ";";
-        }
-        */
+
         private DbDataReader getFtsearchdata(String beginDate, String endDate, DbConnection conn)
         {
             string ftsQueryData = @"select *
@@ -336,7 +349,7 @@
                         if (IDFcalculationHelper.Instance.CasesTF[caseId].ContainsKey(word))
                         {
                             oldCasesOldWords[caseId].Add(word, data[caseId][word]);
-                            IDFcalculationHelper.Instance.CasesTF[caseId].Add(word, oldCasesOldWords[caseId][word]);
+                            //IDFcalculationHelper.Instance.CasesTF[caseId][word].
                         }
                         else
                         {
@@ -488,6 +501,11 @@
                 }
             }
         }
+        /// <summary>
+        /// Get data (specified by caseId) from ftserachdata 
+        /// </summary>
+        /// <param name="caseId">caseId</param>
+        /// <returns>Dicitonary with words and corresponding quantity value in specified case</returns>
         public Dictionary<string, int> getData(int caseId)
         {
             DbConnection conn = DatabaseTool.GetConnection();
