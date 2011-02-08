@@ -8,6 +8,9 @@
     using System.Web;
     using System.Web.Caching;
 
+    /// <summary>
+    /// Represens an set of matrices used for <see cref="BagOfWordsTextClassifier"/> 
+    /// </summary>
     public class DataMatrices
     {
         #region Fields
@@ -95,12 +98,18 @@
 
         #region Methods
 
+        /// <summary>
+        /// calls loadsMatricesFromDb method in DCDbTools.Instance
+        /// </summary>
         public void loadDataMatricesFromDb()
         {
             DCDbTools.Instance.loadMatricesFromDb();
             PutMatricesToHttpContext();
         }
 
+        /// <summary>
+        /// puts matrices into cache
+        /// </summary>
         private void PutMatricesToHttpContext()
         {
             HttpContext context = HttpContext.Current;
@@ -129,6 +138,12 @@
                 //null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
         }
 
+        /// <summary>
+        /// refresh data when cache expire
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="reason"></param>
         public static void RefreshMatricesCallback(string key, Object value, CacheItemRemovedReason reason)
         {
             if (reason != CacheItemRemovedReason.Expired)
@@ -154,12 +169,15 @@
 
             //context.Cache.Add(key, obj,
                 //null, DateTime.Now.AddHours(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, RefreshMatricesCallback);
-            context.Cache.Add(key, obj,
-                null, Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes(0.5), System.Web.Caching.CacheItemPriority.High, new CacheItemRemovedCallback(RefreshMatricesCallback));
+            //context.Cache.Add(key, obj,
+                //null, Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes(0.5), System.Web.Caching.CacheItemPriority.High, new CacheItemRemovedCallback(RefreshMatricesCallback));
                 //null, DateTime.Now.AddMinutes(EXPIRATION_TIME), Cache.NoSlidingExpiration, System.Web.Caching.CacheItemPriority.High, new CacheItemRemovedCallback(RefreshMatricesCallback));
         }
 
 
+        /// <summary>
+        /// rebuild all data matrices
+        /// </summary>
         public void rebuildDataMatrices()
         {
             wordPicker = new WordPicker(Data.Instance.AllCases, Data.Instance.DBRepresentation, 0.9);
@@ -172,6 +190,9 @@
             nextStageMatrices.build();
         }
 
+        /// <summary>
+        /// calls method sendDataMatricesToDb in DCDbTools.Instance
+        /// </summary>
         public void sendDataMatricesToDb()
         {
             DCDbTools.Instance.sendDataMatricesToDb();
@@ -180,6 +201,9 @@
         #endregion Methods
     }
 
+    /// <summary>
+    /// Matrices for next person or phase 
+    /// </summary>
     [Serializable]
     public class NextDecisionMatrices
     {
@@ -195,6 +219,15 @@
 
         #region Constructors
 
+        /// <summary>
+        /// Creates this matrice 
+        /// </summary>
+        /// <param name="allDecisions">
+        /// A <see cref="AllDecisions"/>
+        /// </param>
+        /// <param name="mapWordToColumn">
+        /// Assigned word to column indice in text vector
+        /// </param>
         public NextDecisionMatrices(AllDecisions allDecisions,
             Dictionary<String, int> mapWordToColumn)
         {
@@ -215,24 +248,38 @@
 
         #region Properties
 
+        /// <summary>
+        /// Returns this data matrix 
+        /// </summary>
         public double[][] DataMatrix
         {
             get { return dataMatrix; }
             set { dataMatrix = value; }
         }
 
+
+        /// <summary>
+        /// Gets which rows are associated in data matrix with certain procid-phaseid pair 
+        /// </summary>
         public Dictionary<int, Dictionary<int, List<int>>> MapProcIdPhasIdToRowsSet
         {
             get { return mapProcIdPhasIdToRowsSet; }
             set { mapProcIdPhasIdToRowsSet = value; }
         }
 
+        /// <summary>
+        /// Gets id of the next person of phase based on the row choosen 
+        /// </summary>
         public int[] MapRowToNextId
         {
             get { return mapRowToNextId; }
             set { mapRowToNextId = value; }
         }
 
+        /// <summary>
+        /// All decisions that were made in the past.
+        /// That is: send to next person/phase decision from certain procid-phaseid 
+        /// </summary>
         public int NumberOfDecisions
         {
             get
@@ -245,6 +292,9 @@
 
         #region Methods
 
+        /// <summary>
+        /// Invokes building of the matrice 
+        /// </summary>
         public void build()
         {
             int indexer = 0;
@@ -297,6 +347,9 @@
         #endregion Methods
     }
 
+    /// <summary>
+    /// Represent of matrices needed to recognise procedure
+    /// </summary>
     [Serializable]
     public class ProcedureMatrices
     {
@@ -311,6 +364,15 @@
 
         #region Constructors
 
+        /// <summary>
+        /// Creates this matrice 
+        /// </summary>
+        /// <param name="allProcedures">
+        /// A <see cref="AllProcedures"/>
+        /// </param>
+        /// <param name="mapWordToColumn">
+        /// Assigned word to column indice in text vector
+        /// </param>
         public ProcedureMatrices(AllProcedures allProcedures,
             Dictionary<String, int> mapWordToColumn)
         {
@@ -332,18 +394,27 @@
 
         #region Properties
 
+        /// <summary>
+        /// Gets this data matrix 
+        /// </summary>
         public double[][] DataMatrix
         {
             get { return dataMatrix; }
             set { dataMatrix = value; }
         }
 
+        /// <summary>
+        /// Gets which row coresponds next id 
+        /// </summary>
         public int[] MapRowToId
         {
             get { return mapRowToId; }
             set { mapRowToId = value; }
         }
 
+        /// <summary>
+        /// How many procedures are stored in matrix 
+        /// </summary>
         public int NrOfProcedures
         {
             get
@@ -352,6 +423,9 @@
             }
         }
 
+        /// <summary>
+        /// How many words are used in text classification 
+        /// </summary>
         public int NumberOfMeaningfullWords
         {
             get
@@ -399,6 +473,10 @@
         #endregion Methods
     }
 
+    /// <summary>
+    /// Class picks from text representation 
+    /// words that are meaningful 
+    /// </summary>
     [Serializable]
     public class WordPicker
     {
@@ -412,6 +490,18 @@
 
         #region Constructors
 
+        /// <summary>
+        /// Creates this object 
+        /// </summary>
+        /// <param name="allCases">
+        /// A <see cref="AllCases"/>
+        /// </param>
+        /// <param name="dbRepresentation">
+        /// A <see cref="DBRepresentation"/>
+        /// </param>
+        /// <param name="maxFrequency">
+        /// Percentage of cases wors can occure in e.g. 0.9 means max 90% can have this word
+        /// </param>
         public WordPicker(AllCases allCases, DBRepresentation dbRepresentation, double maxFrequency)
         {
             this.allCases = allCases;
@@ -423,6 +513,12 @@
 
         #region Methods
 
+        /// <summary>
+        /// Creates dicionary of strings with assigned column indices in text vector 
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Dictionary<System.String, System.Int32>"/>
+        /// </returns>
         public Dictionary<string, int> FetchMeaningfulWords()
         {
             int numberOfCases = allCases.Count;

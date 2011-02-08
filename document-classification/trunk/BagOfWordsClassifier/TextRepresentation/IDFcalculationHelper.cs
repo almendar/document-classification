@@ -4,6 +4,9 @@
     using System.Collections.Generic;
     using System.Runtime.Serialization;
 
+    /// <summary>
+    /// CasesTF holds TF values for each word in each case.
+    /// </summary>
     [Serializable]
     public class CasesTF : Dictionary<int, Dictionary<string, int>>
     {
@@ -33,6 +36,9 @@
         #endregion Methods
     }
 
+    /// <summary>
+    /// IDFCalculation holds IDF values for each word
+    /// </summary>
     [Serializable]
     public class IDFcalculation : Dictionary<string, IDFData>
     {
@@ -87,6 +93,10 @@
         #endregion Methods
     }
 
+    /// <summary>
+    /// Class that helps in IDF calculation.
+    /// It holds CasesTF and IDFCalculation classes instances
+    /// </summary>
     public class IDFcalculationHelper
     {
         #region Fields
@@ -145,6 +155,9 @@
         #endregion Properties
     }
 
+    /// <summary>
+    /// IDFData holds IDF and LOG(DF) values
+    /// </summary>
     [Serializable]
     public class IDFData
     {
@@ -205,6 +218,11 @@
 
         #region Methods
 
+        /// <summary>
+        /// Calculate IDF using stored IDF and log(DF) values and given log(D) value 
+        /// </summary>
+        /// <param name="logD">log(D)</param>
+        /// <returns>IDF value</returns>
         public double calculateIDF(double logD)
         {
             return idf = logD - logdf;

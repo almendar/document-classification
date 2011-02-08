@@ -9,7 +9,11 @@
     using DocumentClassification.BagOfWordsClassifier.Matrices;
 
     using MySql.Data.MySqlClient;
+    using DocumentClassification.DCUpdate;
 
+    /// <summary>
+    /// DCDbTools holds all methods responsible for operations on DC database
+    /// </summary>
     public class DCDbTools
     {
         #region Fields
@@ -20,6 +24,8 @@
         private const string uid = "root";
 
         private static readonly DCDbTools instance = new DCDbTools();
+
+        private string lastDbRecordDate;
 
         //private MySqlConnection conn;
         private int CurrentVersion;
@@ -34,6 +40,8 @@
 
         private DCDbTools()
         {
+            lastDbRecordDate = "1900-12-31 23:59:59";
+            CurrentVersion = -1;
         }
 
         #endregion Constructors
@@ -52,6 +60,22 @@
 
         #region Methods
 
+        public string LastDbRecordDate
+        {
+            get
+            {
+                return lastDbRecordDate;
+            }
+            set
+            {
+                lastDbRecordDate = value;
+            }
+        }
+
+        /// <summary>
+        /// Get connection to db
+        /// </summary>
+        /// <returns>new open MySqlConnection connection</returns>
         public MySqlConnection GetConnection()
         {
             MySqlConnection conn = new MySqlConnection(GetConnectionString());
@@ -60,61 +84,100 @@
         }
 
 
+        /// <summary>
+        /// Get newest CasesTF from db
+        /// </summary>
+        /// <returns>CasesTF</returns>
         public CasesTF getCasesTF()
         {
             CasesTF result = (CasesTF)getObject("casestf");
             return result != null ? result : new CasesTF(); 
         }
 
+        /// <summary>
+        /// Get newest IDFcalculation from database
+        /// </summary>
+        /// <returns>IDFcalculation</returns>
         public IDFcalculation getIDFcalculation()
         {
             IDFcalculation result = (IDFcalculation)getObject("idfcalculation");
             return result != null ? result : new IDFcalculation(); 
         }
+        /// <summary>
+        /// Get ProcedureMatrices from database
+        /// </summary>
+        /// <returns>ProcedureMatrices</returns>
         public ProcedureMatrices getProcedureMatrices()
         {
             ProcedureMatrices result = (ProcedureMatrices)getObject("procedurematrices");
             return result;
         }
+        /// <summary>
+        /// Get NextStageMatrices from database 
+        /// </summary>
+        /// <returns></returns>
         public NextDecisionMatrices getNextStageMatrices()
         {
             NextDecisionMatrices result = (NextDecisionMatrices)getObject("nextstagematrices");
             return result;
         }
+        /// <summary>
+        /// Get NextDecisionMatrices from database
+        /// </summary>
+        /// <returns>NextDecisionMatrices</returns>
         public NextDecisionMatrices getNextPersonMatrices()
         {
             NextDecisionMatrices result = (NextDecisionMatrices)getObject("nextpersonmatrices");
             return result;
         }
 
+        /// <summary>
+        /// Load newest Data (DBRepresentation, AllCases, AllDecisionStatus, AllProcedures, AllDecisionPeople) from database to Data.Instance;
+        /// If database versionHistory is empty do nothing.
+        /// </summary>
         public void loadData()
         {
             lock (Data.Instance)
             {
                 setCurrentVersion();
-                loadDBRepresentation();
-                loadAllCases();
-                loadAllDecisionsStatus();
-                loadAllProcedures();
-                loadAllDecisionsPeople();
+                if (CurrentVersion != -1)
+                {
+                    setLastDbRecordDate();
+                    loadDBRepresentation();
+                    loadAllCases();
+                    loadAllDecisionsStatus();
+                    loadAllProcedures();
+                    loadAllDecisionsPeople();
+                }
             }
         }
 
+        /// <summary>
+        /// Load newest Matrices from database to DataMatrices.Instance
+        /// If database versionHistory is empty do nothing
+        /// </summary>
         public void loadMatricesFromDb()
         {
             setCurrentVersion();
-            loadNextPersonMatrices();
-            loadNextStageMatrices();
-            loadProcedureMatrices();
-            loadWordPicker();
+            if (CurrentVersion != -1)
+            {
+                setLastDbRecordDate();
+                loadNextPersonMatrices();
+                loadNextStageMatrices();
+                loadProcedureMatrices();
+                loadWordPicker();
+            }
         }
 
+        /// <summary>
+        /// Send current data from Data.Instance to database
+        /// </summary>
         public void sendData()
         {
             lock (Data.Instance)
             {
                 MySqlConnection conn = GetConnection();
-                createNewVersion(conn);
+                createNewVersion(conn,AmodDBTools.Instance.LastUpdateDate);
                 startTransaction(conn);
                 sendAllCases(conn);
                 sendAllDecisionsPeople(conn);
@@ -128,6 +191,9 @@
             }
         }
 
+        /// <summary>
+        /// Send current data from DataMatrices to database
+        /// </summary>
         public void sendDataMatricesToDb()
         {
             MySqlConnection conn = GetConnection();
@@ -147,32 +213,22 @@
             string Query = "COMMIT;";
             executeNonQuery(Query, conn);
         }
-        /*
-        private void connect()
-        {
-            if (conn == null)
-                conn = new MySqlConnection();
-            conn.ConnectionString = GetConnectionString();
-            conn.Open();
-        }
-        */
 
         private void createNewVersion(MySqlConnection conn)
         {
+            createNewVersion(conn, System.DateTime.Now.ToString());
+        }
+
+        private void createNewVersion(MySqlConnection conn, string lastUpdate)
+        {
             string Query = "INSERT INTO dc.versionHistory(imageDate) values" +
-             "('" + System.DateTime.Now + "');" +
+             "('" + lastUpdate + "');" +
              "select LAST_INSERT_ID();";
             DbDataReader rdr = executeQuery(Query, conn);
             rdr.Read();
             CurrentVersion = rdr.GetInt32(0);
             rdr.Close();
         }
-        /*
-        private void disconnect()
-        {
-            conn.Close();
-        }
-        */
 
         private void executeNonQuery(String nonQuery, MySqlConnection conn)
         {
@@ -328,8 +384,23 @@
             MySqlConnection conn = GetConnection();
             string Query = "SELECT MAX(idversionHistory) FROM versionhistory;";
             DbDataReader rdr = executeQuery(Query,conn);
+            if (rdr.Read() && !rdr.IsDBNull(0))
+            {
+                CurrentVersion = rdr.GetInt32(0);
+            }
+            else
+                CurrentVersion = -1;
+            conn.Close();
+        }
+
+        private void setLastDbRecordDate()
+        {
+            MySqlConnection conn = GetConnection();
+            string Query = @"SELECT imageDate FROM versionhistory
+                            WHERE idversionHistory = " + CurrentVersion + ";"; 
+            DbDataReader rdr = executeQuery(Query,conn);
             rdr.Read();
-            CurrentVersion = rdr.GetInt32(0);
+            lastDbRecordDate = rdr.GetString(0);
             conn.Close();
         }
 
