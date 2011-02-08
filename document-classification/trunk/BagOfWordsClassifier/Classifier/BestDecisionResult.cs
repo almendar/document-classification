@@ -1,4 +1,4 @@
-﻿namespace DocumentClassification.BagOfWordsClassifier.Decisions
+namespace DocumentClassification.BagOfWordsClassifier.Decisions
 {
     using System;
     using System.Collections.Generic;
@@ -147,12 +147,12 @@
             return ret;
         }
 
-        /// <summary>
-        /// Returns a table with best results. 
-        /// This table maybe smaller from the <see cref="MaximumNumberOfBestDecisions"/>
-        /// if less number of result were checked.
-        /// </summary>
-        /// <returns>Table with all best results</returns>
+       /// <summary>
+       /// Returns list of best results
+       /// </summary>
+       /// <returns>
+       /// List of best results
+       /// </returns>
         public List<AMODPrediction> BestResults()
         {
             List<AMODPrediction> retList = new List<AMODPrediction>();

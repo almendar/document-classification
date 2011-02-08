@@ -1,4 +1,4 @@
-﻿namespace DocumentClassification.BagOfWords
+namespace DocumentClassification.BagOfWords
 {
     using System;
     using System.Collections.Generic;
@@ -39,6 +39,9 @@
 
         #region Properties
 
+		/// <summary>
+		/// Singleton getter to this classifier 
+		/// </summary>
         public static BagOfWordsTextClassifier Instance
         {
             get
@@ -47,12 +50,19 @@
             }
         }
 
+		/// <summary>
+		/// Maps words do positioin in vector that is used when calulation cosine
+		/// Because vector is of doubles this is needed. 
+		/// </summary>
         public Dictionary<string, int> MapWordToColumn
         {
             get { return mapWordToColumn; }
             set { mapWordToColumn = value; }
         }
 
+		/// <summary>
+		/// How many decisions classifier will try to return
+		/// </summary>
         public int NrOfBestDecisionsReturned
         {
             get { return nrOfBestDecisionsReturned; }
@@ -63,12 +73,22 @@
 
         #region Methods
 
+		/// <summary>
+		/// Recognise next stage for a case.
+		/// For more info see generic method it is based on:
+		/// <see cref="NextDecisionPrediciton"/>
+		/// </summary>
         public List<AMODPrediction> NextPersonPrediction(int caseId, int procId, int personId)
         {
             NextDecisionMatrices dataMatrices = (NextDecisionMatrices) HttpContext.Current.Cache[DataMatrices.NEXT_PERSON_MATRICES];//DataMatrices.Instance.NextPersonMatrices;
             return NextDecisionPrediciton(dataMatrices,caseId, procId, personId, ClassificatorType.Users);
         }
 
+		/// <summary>
+		/// Recognise next stage for a case.
+		/// For more info see generic method it is based on:
+		/// <see cref="NextDecisionPrediciton"/>
+		/// </summary>
         public List<AMODPrediction> NextStagePrediciton(int caseId, int procId, int phaseId)
         {
             NextDecisionMatrices dataMatrices = (NextDecisionMatrices) HttpContext.Current.Cache[DataMatrices.NEXT_STAGE_MATRICES];//DataMatrices.Instance.NextStageMatrices;
@@ -76,11 +96,14 @@
         }
 
         /// <summary>
-        /// Based on text tries to find right procedures for given text.
-        /// Now returns only the best procedure ID.
+        /// Recognises the procedure based on text of case.
+        /// Case id taken from the database by its id.
         /// </summary>
-        /// <param name="text">Text of document</param>
-        /// <returns>Procedures IDs table</returns>
+        /// Case id to classify
+        /// </param>
+        /// <returns>
+        /// List of best result of classification
+        /// </returns>
         public List<AMODPrediction> ProcedureRecognition(int caseId)
         {
             ProcedureMatrices procedureMatrix = (ProcedureMatrices) HttpContext.Current.Cache[DataMatrices.PROCEDURE_MATRICES];//DataMatrices.Instance.ProcedureMatrices;
@@ -101,12 +124,42 @@
             return BDR.BestResults();
         }
 
-        private double[] CreateVectorFromText(Dictionary<string, int> text)
+		/// <summary>
+		/// Takes a map of strings with its TF and creates a vector of it.
+		/// </summary>
+		/// <param name="text">
+		/// Map of words with TFs
+		/// </param>
+		/// <returns>
+		/// Table of doubles for quick cosine calculation with other text vector.
+		/// </returns>
+		private double[] CreateVectorFromText(Dictionary<string, int> text)
         {
             double[] textVector = TextExtraction.CreateVectorFromText(text, mapWordToColumn);
             return textVector;
         }
 
+		/// <summary>
+		/// Generic prediction class for next person or stage 
+		/// </summary>
+		/// <param name="nextDecisionsMatrices">
+		/// A <see cref="NextDecisionMatrices"/>
+		/// </param>
+		/// <param name="caseId">
+		/// Id of the case to recognize
+		/// </param>
+		/// <param name="procedurId">
+		/// Id of the procedure id.
+		/// </param>
+		/// <param name="phaseId">
+		/// Phase id
+		/// </param>
+		/// <param name="type">
+		/// A <see cref="ClassificatorType"/>
+		/// </param>
+		/// <returns>
+		/// List of best predicted results
+		/// </returns>
         private List<AMODPrediction> NextDecisionPrediciton(NextDecisionMatrices nextDecisionsMatrices,int caseId, int procedurId, int phaseId, ClassificatorType type)
         {
             NextDecisionMatrices decisionMatrices = nextDecisionsMatrices;
